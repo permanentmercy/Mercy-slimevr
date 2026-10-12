@@ -1,0 +1,3 @@
+PATH-head: D:\software\VS\product\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64;C:\Program Files (x86)\Wi
+cl: D:\software\VS\product\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\cl.exe
+ninja: True

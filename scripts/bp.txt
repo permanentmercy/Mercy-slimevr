@@ -1,0 +1,14 @@
+cl    : D:\software\VS\product\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\cl.exe
+cmake : D:\software\VS\product\Common7\IDE\CommonExtensions\Microsoft\CMake\CMa
+ke\bin\cmake.exe
+--- configure ---
+-- OpenVR library search path: H:/program/slimevr/server/bindings-provider/openvr/lib/win64
+-- Found OpenVR library at: H:/program/slimevr/server/bindings-provider/openvr/lib/win64/openvr_api.lib
+-- Found OpenVR runtime library: H:/program/slimevr/server/bindings-provider/openvr/bin/win64/openvr_api.dll
+-- Configuring done (0.8s)
+-- Generating done (0.5s)
+-- Build files have been written to: H:/program/slimevr/server/bindings-provider/build/win-x64
+--- build ---
+ninja: no work to do.
+OK
+EXIT=0

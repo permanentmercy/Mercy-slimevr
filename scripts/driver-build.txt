@@ -1,0 +1,769 @@
+cl    : D:\software\VS\product\VC\Tools\MSVC\14.51.36231\bin\Hostx64\x64\cl.exe
+cmake : D:\software\VS\product\Common7\IDE\CommonExtensions\Microsoft\CMake\CMake\bin\cmake.exe
+--- configure ---
+-- CPM: Adding package protobuf@31.1 (v31.1)
+cmake.exe : CMake Deprecation Warning at build/_deps/protobuf-src/CMakeLists.txt:7 (cmake_policy):
+???? H:\program\slimevr\scripts\msvc-cmake.ps1:35 ??: 1
++ & $cmake @cmakeArgs
++ ~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (CMake Deprecati...(cmake_policy)::String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+  The OLD behavior for policy CMP0141 will be removed from a future version
+  of CMake.
+
+  The cmake-policies(7) manual explains that the OLD behaviors of all
+  policies are deprecated and that a policy should be set to OLD only under
+  specific short-term circumstances.  Projects should be ported to the NEW
+  behavior and not rely on setting a policy to OLD.
+
+
+-- protobuf version: 31.1.0
+-- Could NOT find ZLIB (missing: ZLIB_LIBRARY ZLIB_INCLUDE_DIR) 
+-- Could NOT find absl (missing: absl_DIR)
+-- Fallback to downloading Abseil 20250127.0 from GitHub
+-- CPM: Adding package simdjson@4.6.4 (v4.6.4)
+-- CPM: Adding package libuv@1.52.1 (v1.52.1)
+-- summary of build options:
+    Install prefix:  C:/Program Files (x86)/SlimeVR-OpenVR-Driver
+    Target system:   Windows
+    Compiler:
+      C compiler:    D:/software/VS/product/VC/Tools/MSVC/14.51.36231/bin/Hostx64/x64/cl.exe (MSVC)
+      CFLAGS:         /DWIN32 /D_WINDOWS
+
+-- clang-tidy not found: install clang-tidy or set -DCLANG_TIDY_EXE to run tidy analysis on this platform
+-- CPM: Adding package uvw@0 (bf9c298ea6598e78913c6cd186211412ddac04d6)
+-- Configuring done (69.7s)
+-- Generating done (15.0s)
+-- Build files have been written to: H:/program/slimevr/driver/build
+--- build ---
+[1/522] Building CXX object _deps\absl-build\absl\debugging\CMakeFiles\stacktrace.dir\stacktrace.cc.obj
+[2/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_platform.dir\internal\randen_round_keys.cc.obj
+[3/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\pthread_waiter.cc.obj
+[4/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\sem_waiter.cc.obj
+[5/522] Linking CXX static library _deps\absl-build\absl\crc\absl_crc_cpu_detect.lib
+[6/522] Linking CXX static library _deps\absl-build\absl\strings\absl_string_view.lib
+[7/522] Linking CXX static library _deps\absl-build\absl\base\absl_malloc_internal.lib
+[8/522] Linking CXX static library _deps\absl-build\absl\strings\absl_strings_internal.lib
+[9/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_debugging_internal.lib
+[10/522] Linking CXX static library _deps\absl-build\absl\base\absl_tracing_internal.lib
+[11/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_demangle_internal.lib
+[12/522] Building CXX object _deps\absl-build\absl\profiling\CMakeFiles\exponential_biased.dir\internal\exponential_biased.cc.obj
+[13/522] Building CXX object _deps\absl-build\absl\types\CMakeFiles\bad_variant_access.dir\bad_variant_access.cc.obj
+[14/522] Linking CXX static library _deps\absl-build\absl\crc\absl_crc_internal.lib
+[15/522] Linking CXX static library _deps\absl-build\absl\strings\absl_strings.lib
+[16/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_stacktrace.lib
+[17/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\graphcycles_internal.dir\internal\graphcycles.cc.obj
+[18/522] Building CXX object _deps\absl-build\absl\hash\CMakeFiles\low_level_hash.dir\internal\low_level_hash.cc.obj
+[19/522] Building CXX object _deps\absl-build\absl\hash\CMakeFiles\city.dir\internal\city.cc.obj
+[20/522] Linking CXX static library _deps\absl-build\absl\profiling\absl_exponential_biased.lib
+[21/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_platform.lib
+[22/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_fnmatch.dir\internal\fnmatch.cc.obj
+[23/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_randen_hwaes_impl.dir\internal\randen_hwaes.cc.obj
+[24/522] Linking CXX static library _deps\absl-build\absl\strings\absl_str_format_internal.lib
+[25/522] Linking CXX static library _deps\absl-build\absl\synchronization\absl_graphcycles_internal.lib
+[26/522] Building CXX object _deps\absl-build\absl\crc\CMakeFiles\crc32c.dir\internal\crc_non_temporal_memcpy.cc.obj
+[27/522] Linking CXX static library _deps\absl-build\absl\hash\absl_low_level_hash.lib
+[28/522] Building CXX object _deps\absl-build\absl\debugging\CMakeFiles\symbolize.dir\symbolize.cc.obj
+[29/522] Building CXX object _deps\absl-build\absl\crc\CMakeFiles\crc_cord_state.dir\internal\crc_cord_state.cc.obj
+[30/522] Linking CXX static library _deps\absl-build\absl\hash\absl_city.lib
+[31/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_fnmatch.lib
+[32/522] Linking CXX static library _deps\absl-build\absl\crc\absl_crc32c.lib
+[33/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_symbolize.lib
+[34/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_rep_consume.cc.obj
+[35/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\kernel_timeout_internal.dir\internal\kernel_timeout.cc.obj
+[36/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_commandlineflag_internal.dir\internal\commandlineflag.cc.obj
+[37/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_rep_btree_reader.cc.obj
+[38/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_rep_btree_navigator.cc.obj
+[39/522] Linking CXX static library _deps\absl-build\absl\types\absl_bad_variant_access.lib
+[40/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cordz_functions.dir\internal\cordz_functions.cc.obj
+[41/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_rep_crc.cc.obj
+[42/522] Linking CXX static library _deps\absl-build\absl\crc\absl_crc_cord_state.lib
+[43/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_entry.dir\log_entry.cc.obj
+[44/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\waiter_base.cc.obj
+[45/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_internal.cc.obj
+[46/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\notification.cc.obj
+[47/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord_internal.dir\internal\cord_rep_btree.cc.obj
+[48/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\stdcpp_waiter.cc.obj
+[49/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_randen_hwaes_impl.lib
+[50/522] Linking CXX static library _deps\absl-build\absl\strings\absl_cordz_functions.lib
+[51/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_randen_hwaes.dir\internal\randen_detect.cc.obj
+[52/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\win32_waiter.cc.obj
+[53/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\create_thread_identity.cc.obj
+[54/522] Building CXX object _deps\absl-build\absl\debugging\CMakeFiles\leak_check.dir\leak_check.cc.obj
+[55/522] Building CXX object _deps\absl-build\absl\base\CMakeFiles\strerror.dir\internal\strerror.cc.obj
+[56/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\blocking_counter.cc.obj
+[57/522] Building CXX object _deps\absl-build\absl\hash\CMakeFiles\hash.dir\internal\hash.cc.obj
+[58/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\mutex.cc.obj
+[59/522] Linking CXX static library _deps\absl-build\absl\strings\absl_cord_internal.lib
+[60/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\futex_waiter.cc.obj
+[61/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_proto.dir\internal\proto.cc.obj
+[62/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\barrier.cc.obj
+[63/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_commandlineflag_internal.lib
+[64/522] Building CXX object _deps\absl-build\absl\synchronization\CMakeFiles\synchronization.dir\internal\per_thread_sem.cc.obj
+[65/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_nullguard.dir\internal\nullguard.cc.obj
+[66/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\vlog_config_internal.dir\internal\vlog_config.cc.obj
+[67/522] Linking CXX static library _deps\absl-build\absl\hash\absl_hash.lib
+[68/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_randen_slow.dir\internal\randen_slow.cc.obj
+[69/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_proto.lib
+[70/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_randen_hwaes.lib
+[71/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_randen.dir\internal\randen.cc.obj
+[72/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_commandlineflag.dir\commandlineflag.cc.obj
+[73/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_seed_gen_exception.dir\seed_gen_exception.cc.obj
+[74/522] Linking CXX static library _deps\absl-build\absl\base\absl_strerror.lib
+[75/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_randen_slow.lib
+[76/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord.dir\cord_buffer.cc.obj
+[77/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cordz_handle.dir\internal\cordz_handle.cc.obj
+[78/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_leak_check.lib
+[79/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_conditions.dir\internal\conditions.cc.obj
+[80/522] Building CXX object _deps\absl-build\absl\debugging\CMakeFiles\examine_stack.dir\internal\examine_stack.cc.obj
+[81/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_structured_proto.dir\internal\structured_proto.cc.obj
+[82/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_commandlineflag.lib
+[83/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_private_handle_accessor.dir\internal\private_handle_accessor.cc.obj
+[84/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_nullguard.lib
+[85/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_seed_gen_exception.lib
+[86/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_randen.lib
+[87/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_structured_proto.lib
+[88/522] Linking CXX static library _deps\absl-build\absl\debugging\absl_examine_stack.lib
+[89/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_private_handle_accessor.lib
+[90/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_sink.dir\log_sink.cc.obj
+[91/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_globals.dir\internal\globals.cc.obj
+[92/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_seed_material.dir\internal\seed_material.cc.obj
+[93/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord.dir\cord_analysis.cc.obj
+[94/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_conditions.lib
+[95/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_internal_pool_urbg.dir\internal\pool_urbg.cc.obj
+[96/522] Building CXX object _deps\absl-build\absl\container\CMakeFiles\hashtablez_sampler.dir\internal\hashtablez_sampler.cc.obj
+[97/522] Building C object _deps\protobuf-build\third_party\utf8_range\CMakeFiles\utf8_range.dir\utf8_range.c.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(32): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(39): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(43): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(178): warning C4141: ?inline?: ?????
+[98/522] Building CXX object _deps\absl-build\absl\container\CMakeFiles\hashtablez_sampler.dir\internal\hashtablez_sampler_force_weak_definition.cc.obj
+[99/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_seed_material.lib
+[100/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_program_name.dir\internal\program_name.cc.obj
+[101/522] Building C object _deps\protobuf-build\third_party\utf8_range\CMakeFiles\utf8_validity.dir\utf8_range.c.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(32): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(39): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(43): warning C4141: ?inline?: ?????
+H:\program\slimevr\driver\build\_deps\protobuf-src\third_party\utf8_range\utf8_range.c(178): warning C4141: ?inline?: ?????
+[102/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_distributions.dir\gaussian_distribution.cc.obj
+[103/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_marshalling.dir\marshalling.cc.obj
+[104/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cordz_info.dir\internal\cordz_info.cc.obj
+[105/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_internal_pool_urbg.lib
+[106/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_distributions.dir\discrete_distribution.cc.obj
+[107/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_globals.dir\globals.cc.obj
+[108/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_marshalling.lib
+[109/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_log_sink_set.dir\internal\log_sink_set.cc.obj
+[110/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_format.dir\internal\log_format.cc.obj
+[111/522] Building CXX object _deps\absl-build\absl\random\CMakeFiles\random_seed_sequences.dir\seed_sequences.cc.obj
+[112/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_config.dir\usage_config.cc.obj
+[113/522] Building CXX object _deps\absl-build\absl\status\CMakeFiles\status.dir\status_payload_printer.cc.obj
+[114/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_internal.dir\internal\flag.cc.obj
+[115/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_message.dir\internal\log_message.cc.obj
+[116/522] Building CXX object _deps\absl-build\absl\strings\CMakeFiles\cord.dir\cord.cc.obj
+[117/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_initialize.dir\initialize.cc.obj
+[118/522] Building CXX object _deps\absl-build\absl\container\CMakeFiles\raw_hash_set.dir\internal\raw_hash_set.cc.obj
+[119/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\log_internal_check_op.dir\internal\check_op.cc.obj
+[120/522] Building CXX object _deps\absl-build\absl\status\CMakeFiles\status.dir\status.cc.obj
+[121/522] Building CXX object _deps\absl-build\absl\status\CMakeFiles\status.dir\internal\status_internal.cc.obj
+[122/522] Building CXX object _deps\absl-build\absl\time\CMakeFiles\time_zone.dir\internal\cctz\src\time_zone_lookup.cc.obj
+[123/522] Building CXX object _deps\absl-build\absl\log\CMakeFiles\die_if_null.dir\die_if_null.cc.obj
+[124/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\arenaz_sampler.cc.obj
+[125/522] Linking CXX static library _deps\absl-build\absl\time\absl_time_zone.lib
+[126/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\arena.cc.obj
+[127/522] Linking CXX static library _deps\absl-build\absl\time\absl_time.lib
+[128/522] Linking CXX static library _deps\absl-build\absl\synchronization\absl_kernel_timeout_internal.lib
+[129/522] Building CXX object _deps\absl-build\absl\status\CMakeFiles\statusor.dir\statusor.cc.obj
+[130/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\any_lite.cc.obj
+[131/522] Linking CXX static library _deps\absl-build\absl\synchronization\absl_synchronization.lib
+[132/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_entry.lib
+[133/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_globals.lib
+[134/522] Linking CXX static library _deps\absl-build\absl\log\absl_vlog_config_internal.lib
+[135/522] Linking CXX static library _deps\absl-build\absl\strings\absl_cordz_handle.lib
+[136/522] Building CXX object _deps\absl-build\absl\flags\CMakeFiles\flags_reflection.dir\reflection.cc.obj
+[137/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_sink.lib
+[138/522] Linking CXX static library _deps\absl-build\absl\strings\absl_cordz_info.lib
+[139/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_globals.lib
+[140/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\any.cc.obj
+[141/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\arena_align.cc.obj
+[142/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_program_name.lib
+[143/522] Linking CXX static library _deps\absl-build\absl\container\absl_hashtablez_sampler.lib
+[144/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_format.lib
+[145/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\empty.pb.cc.obj
+[146/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_log_sink_set.lib
+[147/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\wrappers.pb.cc.obj
+[148/522] Linking CXX static library _deps\absl-build\absl\strings\absl_cord.lib
+[149/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\any.pb.cc.obj
+[150/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_config.lib
+[151/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_message.lib
+[152/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\timestamp.pb.cc.obj
+[153/522] Linking CXX static library _deps\absl-build\absl\container\absl_raw_hash_set.lib
+[154/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\field_mask.pb.cc.obj
+[155/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\duration.pb.cc.obj
+[156/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\api.pb.cc.obj
+[157/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\type.pb.cc.obj
+[158/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\source_context.pb.cc.obj
+[159/522] Linking CXX static library _deps\absl-build\absl\status\absl_status.lib
+[160/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\gzip_stream.cc.obj
+[161/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\arenastring.cc.obj
+[162/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\struct.pb.cc.obj
+[163/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\io_win32.cc.obj
+[164/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\zero_copy_sink.cc.obj
+[165/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\cpp_features.pb.cc.obj
+[166/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\strtod.cc.obj
+[167/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\extension_set_heavy.cc.obj
+[168/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\zero_copy_stream_impl.cc.obj
+[169/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\zero_copy_stream.cc.obj
+[170/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\tokenizer.cc.obj
+[171/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\compiler\importer.cc.obj
+[172/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\dynamic_message.cc.obj
+[173/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\coded_stream.cc.obj
+[174/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\extension_set.cc.obj
+[175/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_util.cc.obj
+[176/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\implicit_weak_message.cc.obj
+[177/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\inlined_string_field.cc.obj
+[178/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\zero_copy_stream_impl_lite.cc.obj
+[179/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_enum_util.cc.obj
+[180/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_bases.cc.obj
+[181/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\descriptor.pb.cc.obj
+[182/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\raw_ptr.cc.obj
+[183/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_tctable_full.cc.obj
+[184/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\reflection_mode.cc.obj
+[185/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\message_path.cc.obj
+[186/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\port.cc.obj
+[187/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\service.cc.obj
+[188/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\internal_feature_helper.cc.obj
+[189/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\micro_string.cc.obj
+[190/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\compiler\parser.cc.obj
+[191/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\feature_resolver.cc.obj
+[192/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\io\printer.cc.obj
+[193/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\repeated_ptr_field.cc.obj
+[194/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_tctable_lite.cc.obj
+[195/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_tctable_gen.cc.obj
+[196/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\descriptor_database.cc.obj
+[197/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\repeated_field.cc.obj
+[198/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\parse_context.cc.obj
+[199/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\lexer.cc.obj
+[200/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\base\status.c.obj
+[201/522] Building RC object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\version.rc.res
+[202/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\generated_message_reflection.cc.obj
+[203/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\unparser.cc.obj
+[204/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\hash\common.c.obj
+[205/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\parser.cc.obj
+[206/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\lex\round_trip.c.obj
+[207/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\lex\atoi.c.obj
+[208/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\json\encode.c.obj
+[209/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\lex\strtod.c.obj
+[210/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\json\decode.c.obj
+[211/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\untyped_message.cc.obj
+[212/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\message_lite.cc.obj
+[213/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\map_field.cc.obj
+[214/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mem\alloc.c.obj
+[215/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\lex\unicode.c.obj
+[216/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\accessors.c.obj
+[217/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\array.c.obj
+[218/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mem\arena.c.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(226): warning C4047: ?=?:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(231): warning C4047: ?=?:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(216): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(271): warning C4047: ?=?:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(257): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(268): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(281): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(333): warning C4047: ?????:?size_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(381): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(512): warning C4047: ?=?:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(507): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(549): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(600): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(609): warning C4047: ?????:?uintptr_t???void *????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mem\arena.c(732): warning C4047: ?????:?uintptr_t???void *????????
+[219/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\compare.c.obj
+[220/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\compat.c.obj
+[221/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\internal\extension.c.obj
+[222/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\map.c.obj
+[223/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\copy.c.obj
+[224/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\internal\compare_unknown.c.obj
+[225/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\internal\iterator.c.obj
+[226/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\internal\message.c.obj
+[227/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\map_sorter.c.obj
+[228/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_descriptor\build_enum.c.obj
+[229/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\message.c.obj
+[230/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_descriptor\internal\base92.c.obj
+[231/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\message\merge.c.obj
+[232/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\zero_copy_buffered_stream.cc.obj
+[233/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_descriptor\internal\encode.c.obj
+[234/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_descriptor\decode.c.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\upb\mini_descriptor\decode.c(311): warning C4116: ???????????
+[235/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_table\internal\message.c.obj
+[236/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_descriptor\link.c.obj
+[237/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_table\message.c.obj
+[238/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\mini_table\extension_registry.c.obj
+[239/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\def_type.c.obj
+[240/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\desc_state.c.obj
+[241/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\def_pool.c.obj
+[242/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\enum_reserved_range.c.obj
+[243/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\enum_value_def.c.obj
+[244/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\extension_range.c.obj
+[245/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\enum_def.c.obj
+[246/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\reflection_ops.cc.obj
+[247/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\internal\strdup2.c.obj
+[248/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\field_def.c.obj
+[249/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\internal\def_builder.c.obj
+[250/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\message.c.obj
+[251/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\file_def.c.obj
+[252/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\message_reserved_range.c.obj
+[253/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\oneof_def.c.obj
+[254/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\method_def.c.obj
+[255/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\text\debug_string.c.obj
+[256/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\message_def.c.obj
+[257/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\internal\writer.cc.obj
+[258/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\service_def.c.obj
+[259/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\byte_size.c.obj
+[260/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\text\encode.c.obj
+[261/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\reader.c.obj
+[262/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\eps_copy_input_stream.c.obj
+[263/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\text\internal\encode.c.obj
+[264/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\internal\decode_fast.c.obj
+[265/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\util\required_fields.c.obj
+[266/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\decode.c.obj
+[267/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\wire\encode.c.obj
+[268/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\util\def_to_proto.c.obj
+[269/522] Building RC object _deps\protobuf-build\CMakeFiles\libupb.dir\version.rc.res
+[270/522] Building C object _deps\protobuf-build\CMakeFiles\libupb.dir\upb\reflection\cmake\google\protobuf\descriptor.upb_minitable.c.obj
+[271/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_reflection.lib
+[272/522] Linking CXX static library _deps\absl-build\absl\flags\absl_flags_internal.lib
+[273/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_internal_check_op.lib
+[274/522] Linking CXX static library _deps\absl-build\absl\log\absl_die_if_null.lib
+[275/522] Linking CXX static library _deps\absl-build\absl\log\absl_log_initialize.lib
+[276/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_distributions.lib
+[277/522] Linking CXX static library _deps\absl-build\absl\random\absl_random_seed_sequences.lib
+[278/522] Linking CXX static library _deps\absl-build\absl\status\absl_statusor.lib
+[279/522] Linking C static library _deps\protobuf-build\third_party\utf8_range\libutf8_range.lib
+[280/522] Linking CXX static library _deps\protobuf-build\third_party\utf8_range\libutf8_validity.lib
+[281/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\message.cc.obj
+[282/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\map.cc.obj
+[283/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\wire_format_lite.cc.obj
+[284/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\delimited_message_util.cc.obj
+[285/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\code_generator_lite.cc.obj
+[286/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\json\json.cc.obj
+[287/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\stubs\common.cc.obj
+[288/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\descriptor.cc.obj
+[289/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\time_util.cc.obj
+[290/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\unknown_field_set.cc.obj
+[291/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\field_comparator.cc.obj
+[292/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\type_resolver_util.cc.obj
+[293/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\field_mask_util.cc.obj
+[294/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\ifndef_guard.cc.obj
+[295/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\wire_format.cc.obj
+[296/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\code_generator.cc.obj
+[297/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\namespace_printer.cc.obj
+[298/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_chunk.cc.obj
+[299/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\util\message_differencer.cc.obj
+[300/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\primitive_field.cc.obj
+[301/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf.dir\src\google\protobuf\text_format.cc.obj
+[302/522] Linking CXX static library _deps\protobuf-build\libprotobuf.lib
+[303/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field.cc.obj
+[304/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\message_layout_helper.cc.obj
+[305/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\cord_field.cc.obj
+[306/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\enum_field.cc.obj
+[307/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\string_field.cc.obj
+[308/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\string_view_field.cc.obj
+[309/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\generator.cc.obj
+[310/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\map_field.cc.obj
+[311/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_doc_comment.cc.obj
+[312/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\field_generators\message_field.cc.obj
+[313/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\extension.cc.obj
+[314/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\tracker.cc.obj
+[315/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\service.cc.obj
+[316/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_enum.cc.obj
+[317/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\parse_function_generator.cc.obj
+[318/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\enum.cc.obj
+[319/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_enum_field.cc.obj
+[320/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_generator.cc.obj
+[321/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_field_base.cc.obj
+[322/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_helpers.cc.obj
+[323/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\helpers.cc.obj
+[324/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_map_field.cc.obj
+[325/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\command_line_interface.cc.obj
+[326/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\file.cc.obj
+[327/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_message.cc.obj
+[328/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\doc_comment.cc.obj
+[329/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_message_field.cc.obj
+[330/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\names.cc.obj
+[331/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\file.cc.obj
+[332/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\generator_factory.cc.obj
+[333/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\extension.cc.obj
+[334/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\field_common.cc.obj
+[335/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\cpp\message.cc.obj
+[336/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_source_generator_base.cc.obj
+[337/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_repeated_enum_field.cc.obj
+[338/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_primitive_field.cc.obj
+[339/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\context.cc.obj
+[340/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_repeated_primitive_field.cc.obj
+[341/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\enum.cc.obj
+[342/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_wrapper_field.cc.obj
+[343/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_repeated_message_field.cc.obj
+[344/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\csharp\csharp_reflection_class.cc.obj
+[345/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\enum_field.cc.obj
+[346/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\make_field_gens.cc.obj
+[347/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\java_features.pb.cc.obj
+[348/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\message_builder.cc.obj
+[349/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\message.cc.obj
+[350/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\map_field.cc.obj
+[351/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\internal_helpers.cc.obj
+[352/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\generator.cc.obj
+[353/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\enum.cc.obj
+[354/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\helpers.cc.obj
+[355/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\string_field.cc.obj
+[356/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\message_field.cc.obj
+[357/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\service.cc.obj
+[358/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\kotlin\file.cc.obj
+[359/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\full\primitive_field.cc.obj
+[360/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\line_consumer.cc.obj
+[361/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\generator_factory.cc.obj
+[362/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\make_field_gens.cc.obj
+[363/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\extension.cc.obj
+[364/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\kotlin\generator.cc.obj
+[365/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\kotlin\message.cc.obj
+[366/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\message_serialization.cc.obj
+[367/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\extension.cc.obj
+[368/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\names.cc.obj
+[369/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\name_resolver.cc.obj
+[370/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\enum_field.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[371/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\enum.cc.obj
+[372/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\enum_field.cc.obj
+[373/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\message_builder.cc.obj
+[374/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\map_field.cc.obj
+[375/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\shared_code_generator.cc.obj
+[376/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\tf_decode_data.cc.obj
+[377/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\message_field.cc.obj
+[378/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\accessor_case.cc.obj
+[379/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\kotlin\field.cc.obj
+[380/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\string_field.cc.obj
+[381/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\primitive_field.cc.obj
+[382/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\import_writer.cc.obj
+[383/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\field.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[384/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\java\lite\message.cc.obj
+[385/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\helpers.cc.obj
+[386/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\generator.cc.obj
+[387/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\php\names.cc.obj
+[388/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\plugin.cc.obj
+[389/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\file.cc.obj
+[390/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\primitive_field.cc.obj
+[391/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\plugin.pb.cc.obj
+[392/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\names.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\names.cc(951) : warning C4715: ?google::protobuf::compiler::objectivec::`anonymous namespace'::FragmentName?: ?????????????
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\names.cc(1080) : warning C4715: ?google::protobuf::compiler::objectivec::`anonymous namespace'::FieldObjCTypeInternal?: ?????????????
+[393/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\oneof.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[394/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\message_field.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[395/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\python\helpers.cc.obj
+[396/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\map_field.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[397/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\relative_path.cc.obj
+[398/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\retention.cc.obj
+[399/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\accessors.cc.obj
+[400/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\objectivec\message.cc.obj
+H:\program\slimevr\driver\build\_deps\protobuf-src\src\google\protobuf\compiler\objectivec\helpers.h(182) : warning C4715: ?google::protobuf::compiler::objectivec::SubstitutionMap::Value?: ?????????????
+[401/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\default_value.cc.obj
+[402/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\unsupported_field.cc.obj
+[403/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\common\names.cc.obj
+[404/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\common.cc.obj
+[405/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\ruby\ruby_generator.cc.obj
+[406/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\map.cc.obj
+[407/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\python\pyi_generator.cc.obj
+[408/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\rust_keywords.cc.obj
+[409/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\with_presence.cc.obj
+[410/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\zip_writer.cc.obj
+[411/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\singular_message.cc.obj
+[412/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\php\php_generator.cc.obj
+[413/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\singular_string.cc.obj
+[414/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\singular_scalar.cc.obj
+[415/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\repeated_field.cc.obj
+[416/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\file_layout.cc.obj
+[417/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\rust_field_type.cc.obj
+[418/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\accessors\singular_cord.cc.obj
+[419/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\crate_mapping.cc.obj
+[420/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\context.cc.obj
+[421/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\enum.cc.obj
+[422/522] Building RC object _deps\protobuf-build\CMakeFiles\libprotoc.dir\version.rc.res
+[423/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\upb_helpers.cc.obj
+[424/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\minitable\fasttable.cc.obj
+[425/522] Building CXX object _deps\simdjson-build\CMakeFiles\simdjson.dir\cmake_pch.cxx.obj
+D:\software\VS\product\VC\Tools\MSVC\14.51.36231\include\bit(11): warning STL4038: The contents of <bit> are available only with C++20 or later.
+[426/522] Linking C static library _deps\protobuf-build\libupb.lib
+[427/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\subprocess.cc.obj
+[428/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\arenaz_sampler.cc.obj
+[429/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\minitable\names.cc.obj
+[430/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\oneof.cc.obj
+[431/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\minitable\names_internal.cc.obj
+[432/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\versions.cc.obj
+[433/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\port.cc.obj
+[434/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\micro_string.cc.obj
+[435/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\raw_ptr.cc.obj
+[436/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\python\generator.cc.obj
+[437/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\repeated_field.cc.obj
+[438/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\naming.cc.obj
+[439/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\generator.cc.obj
+[440/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\io\io_win32.cc.obj
+[441/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\repeated_ptr_field.cc.obj
+[442/522] Building RC object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\version.rc.res
+[443/522] Building RC object _deps\protobuf-build\CMakeFiles\protoc.dir\version.rc.res
+[444/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\io\zero_copy_stream_impl.cc.obj
+[445/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\parse_context.cc.obj
+[446/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\idna.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(80): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(114): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(118): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(126): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(129): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(132): warning C4245: ?return?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(208): warning C4244: ?=?: ??unsigned int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(228): warning C4245: ?=?: ??int?????unsigned int?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(398): warning C4244: ?=?: ??int?????uint16_t????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(402): warning C4244: ?=?: ??int32_t?????uint16_t????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(505): warning C4244: ?=?: ??int32_t?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(507): warning C4244: ?=?: ??int32_t?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(512): warning C4244: ?=?: ??int32_t?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\idna.c(520): warning C4244: ?=?: ??int32_t?????char????????
+[447/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\inet.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\inet.c(159): warning C4244: ?=?: ??__int64?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\inet.c(193): warning C4244: ?=?: ??unsigned int?????unsigned char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\inet.c(187): warning C4244: ?????: ??__int64?????unsigned int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\inet.c(283): warning C4244: ?????: ??__int64?????const int????????
+[448/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\fs-poll.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\fs-poll.c(203): warning C4244: ????: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\fs-poll.c(206): warning C4244: ?=?: ??ssize_t?????int????????
+[449/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\io\zero_copy_stream_impl_lite.cc.obj
+[450/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\io\zero_copy_stream.cc.obj
+[451/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\random.c.obj
+[452/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\strtok.c.obj
+[453/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\src\google\protobuf\compiler\rust\message.cc.obj
+[454/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\arena_align.cc.obj
+[455/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\strscpy.c.obj
+[456/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\thread-common.c.obj
+[457/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\threadpool.c.obj
+[458/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\timer.c.obj
+[459/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\io\coded_stream.cc.obj
+[460/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\uv-data-getter-setters.c.obj
+[461/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\uv-common.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(170): warning C4245: ?return?: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(178): warning C4245: ?return?: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(257): warning C4244: ????: ??int?????u_short????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(272): warning C4244: ????: ??int?????u_short????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(745): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\uv-common.c(960): warning C4090: ????: ????const????
+[462/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\implicit_weak_message.cc.obj
+[463/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\inlined_string_field.cc.obj
+[464/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\version.c.obj
+[465/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\async.c.obj
+[466/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\core.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\core.c(474): warning C4244: ?=?: ??uint64_t?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\core.c(474) : warning C4701: ???????????????user_timeout?
+[467/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\detect-wakeup.c.obj
+[468/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\dl.c.obj
+[469/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\error.c.obj
+[470/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\fs-event.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs-event.c(485): warning C4267: ?=?: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs-event.c(590): warning C4245: ????: ??int?????size_t?????/??????
+[471/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\message_lite.cc.obj
+[472/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\getnameinfo.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getnameinfo.c(62): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getnameinfo.c(69): warning C4245: ????: ??int?????size_t?????/??????
+[473/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\arena.cc.obj
+[474/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\snprintf.c.obj
+[475/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\generated_message_util.cc.obj
+[476/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\handle.c.obj
+[477/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\fs.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(69): warning C4267: ?=?: ??size_t?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(130): warning C4244: ?=?: ??int64_t?????long????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(134): warning C4244: ?+=?: ??double?????long????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(323): warning C4267: ?=?: ??size_t?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(1402): warning C4245: ?=?: ??int?????DWORD?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(1726): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2502): warning C4267: ????: ??size_t?????unsigned int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2548): warning C4245: ?=?: ??int?????DWORD?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2662): warning C4244: ?????: ??double?????int64_t????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2669): warning C4244: ?????: ??double?????int64_t????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2787): warning C4267: ?=?: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2848): warning C4267: ?=?: ??size_t?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2849): warning C4267: ?=?: ??size_t?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2877): warning C4267: ?=?: ??size_t?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2878): warning C4267: ?=?: ??size_t?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2888): warning C4244: ?=?: ??int?????USHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3269): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3274): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3281): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3314): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3347): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3359): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3362): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3374): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3378): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3392): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3395): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3409): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3412): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3423): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3426): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3438): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3442): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3455): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3457): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3474): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3487): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3498): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3501): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3513): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3517): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3529): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3532): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3550): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3553): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3565): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3568): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3575): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3587): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3590): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3601): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3604): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3615): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3618): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3625): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3637): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3640): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3647): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3654): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3663): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3687): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3691): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3701): warning C4267: ?=?: ??size_t?????ULONG????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3702): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3717): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3721): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3733): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3737): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3746): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3758): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3763): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3773): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3784): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3789): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3803): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(3806): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(2191) : warning C4701: ???????????????splitchar?
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(909) : warning C4701: ???????????????original_position?
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\fs.c(1114) : warning C4701: ???????????????original_position?
+[478/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\getaddrinfo.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(134): warning C4244: ?=?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(181): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(180): warning C4189: ?r?: ????????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(276): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(285): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\getaddrinfo.c(372): warning C4245: ????: ??int?????size_t?????/??????
+[479/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\loop-watcher.c.obj
+[480/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\poll.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\poll.c(491): warning C4244: ?=?: ??int?????unsigned char????????
+[481/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\thread.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(197): warning C4334: ?<<?: 32 ???????????? 64 ?(?????? 64 ????)
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(198): warning C4334: ?<<?: 32 ???????????? 64 ?(?????? 64 ????)
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(289): warning C4152: ?????????????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(290): warning C4152: ?????????????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(356): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\thread.c(497) : warning C4702: ???????
+[482/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\process-stdio.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process-stdio.c(261) : warning C4701: ???????????????fdopt?
+[483/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\signal.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\signal.c(212): warning C4189: ?r?: ????????????
+[484/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\stream.c.obj
+[485/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\tcp.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tcp.c(436): warning C4244: ????: ??ULONG_PTR?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tcp.c(455): warning C4244: ????: ??ULONG_PTR?????DWORD????????
+[486/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\udp.c.obj
+[487/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\winapi.c.obj
+[488/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\tty.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1003): warning C4244: ?????: ??ULONG_PTR?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1144): warning C4244: ?=?: ??UINT?????WORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1384): warning C4244: ????: ??int?????unsigned char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1384): warning C4244: ????: ??int?????unsigned char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1385): warning C4244: ????: ??int?????unsigned char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1385): warning C4244: ????: ??int?????unsigned char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1481): warning C4244: ?=?: ??int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1490): warning C4244: ?=?: ??int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1500): warning C4244: ?=?: ??int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1505): warning C4244: ?=?: ??int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1592): warning C4244: ?=?: ??int?????SHORT????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(1914): warning C4244: ?=?: ??unsigned int?????unsigned short????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(2241): warning C4267: ?return?: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\tty.c(2424) : warning C4702: ???????
+[489/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\pipe.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\pipe.c(1352): warning C4244: ????: ??ULONG_PTR?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\pipe.c(1371): warning C4244: ????: ??ULONG_PTR?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\pipe.c(2520): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\pipe.c(844) : warning C4701: ???????????????duplex_flags?
+[490/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\winsock.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\winsock.c(518) : warning C4701: ???????????????iosb?
+[491/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\util.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(119): warning C4267: ????: ??size_t?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(328): warning C4244: ?return?: ??ULONG_PTR?????uv_pid_t????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(356): warning C4267: ?=?: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(644): warning C4090: ????: ????const????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(759): warning C4267: ?=?: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(800): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1037): warning C4267: ????: ??size_t?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1087): warning C4244: ?=?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1181): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1188): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1196): warning C4245: ?=?: ??int?????unsigned long?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1197): warning C4245: ?=?: ??int?????unsigned long?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1246): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1324): warning C4267: ?=?: ??size_t?????DWORD????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1418): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1627): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1642): warning C4245: ????: ??int?????size_t?????/??????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1687): warning C4244: ?=?: ??int?????char????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\util.c(1752): warning C4267: ????: ??size_t?????ULONG????????
+[492/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\generated_enum_util.cc.obj
+[493/522] Building C object _deps\libuv-build\CMakeFiles\uv_a.dir\src\win\process.c.obj
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(537): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(615): warning C4244: ?=?: ??__int64?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(666): warning C4244: ?return?: ??ssize_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(707): warning C4267: ????: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(743): warning C4267: ????: ??size_t?????int????????
+H:\program\slimevr\driver\build\_deps\libuv-src\src\win\process.c(950): warning C4267: ?=?: ??size_t?????DWORD????????
+[494/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\any_lite.cc.obj
+[495/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\map.cc.obj
+[496/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\arenastring.cc.obj
+[497/522] Linking C static library _deps\libuv-build\libuv.lib
+[498/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\stubs\common.cc.obj
+[499/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\wire_format_lite.cc.obj
+[500/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\generated_message_tctable_lite.cc.obj
+[501/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\plugin.cc.obj
+[502/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotobuf-lite.dir\src\google\protobuf\extension_set.cc.obj
+[503/522] Building CXX object _deps\protobuf-build\CMakeFiles\libprotoc.dir\upb_generator\minitable\generator.cc.obj
+[504/522] Linking CXX static library _deps\protobuf-build\libprotobuf-lite.lib
+[505/522] Building CXX object _deps\protobuf-build\CMakeFiles\protoc.dir\src\google\protobuf\compiler\main.cc.obj
+[506/522] Building CXX object _deps\simdjson-build\CMakeFiles\simdjson.dir\src\simdjson.cpp.obj
+[507/522] Linking CXX static library _deps\protobuf-build\libprotoc.lib
+[508/522] Linking CXX static library _deps\simdjson-build\simdjson.lib
+[509/522] Linking CXX executable Release\protoc.exe
+[510/522] Running cpp protocol buffer compiler on H:/program/slimevr/driver/src/bridge/ProtobufMessages.proto
+[511/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\TrackerRole.cpp.obj
+H:\program\slimevr\driver\src\TrackerRole.cpp(72) : warning C4715: ?GetRoleName?: ?????????????
+[512/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\bridge\CircularBuffer.cpp.obj
+[513/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\VRPaths_openvr.cpp.obj
+[514/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\ProtobufMessages.pb.cc.obj
+[515/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\TrackerDevice.cpp.obj
+[516/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\bridge\BridgeTransport.cpp.obj
+[517/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\bridge\BridgeClient.cpp.obj
+[518/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver.dir\src\DriverFactory.cpp.obj
+[519/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\DriverFactory.cpp.obj
+[520/522] Building CXX object CMakeFiles\SlimeVR-OpenVR-Driver_static.dir\src\VRDriver.cpp.obj
+[521/522] Linking CXX static library SlimeVR-OpenVR-Driver_static.lib
+[522/522] Linking CXX shared library Release\SlimeVR-OpenVR-Driver.dll
+OK
+EXIT=0
