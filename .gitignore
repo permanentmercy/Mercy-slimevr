@@ -1,0 +1,139 @@
+# ============================================================
+# SlimeVR DIY 项目 —— 顶层 .gitignore
+# ------------------------------------------------------------
+# 本仓库是“元仓库（meta-repo）”：只跟踪本项目自有的源码与文档
+# （latex/ 单一源文档、scripts/、根目录设计文档）。
+# 下列目录为外部独立仓库 / 下载缓存，不纳入本仓库跟踪，
+# 需要时可用 `git submodule add <remote> <path>` 引入：
+#   /server/    SlimeVR-Server（Kotlin/Java，独立 git 仓库）
+#   /driver/    SlimeVR-OpenVR-Driver（C++，独立 git 仓库）
+#   /firmware/  nRF 固件源码 + 构建产物（west 工作区，独立 git 仓库）
+#   /external_repos/  第三方依赖克隆缓存（如 solarxr-protocol 等）
+# ============================================================
+
+# ===================== 操作系统 / 文件系统 =====================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
+.AppleDouble
+.LSOverride
+.Spotlight-V100
+.Trashes
+.fuse_hidden*
+.directory
+.idea/
+
+# ===================== 编辑器 / IDE =====================
+*.swp
+*.swo
+*.swn
+*~
+.vs/
+
+# ===================== WorkBuddy 本地运行态 =====================
+# 含 agent 记忆与本地缓存，非项目源码；如需随仓库分发记忆可自行 force-add。
+.workbuddy/
+
+# ===================== 构建/编译产物（通用） =====================
+build/
+build-*/
+out/
+dist/
+bin/
+obj/
+Release/
+Debug/
+cmake-build-*/
+compile_commands.json
+*.user
+
+# ===================== Java / Kotlin（Gradle） =====================
+.gradle/
+**/build/
+*.class
+*.jar
+# 保留 Gradle Wrapper（若项目自带）
+!gradle/wrapper/gradle-wrapper.jar
+
+# ===================== Node / Electron / pnpm =====================
+node_modules/
+.pnpm-store/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===================== C / C++（CMake / MSVC） =====================
+*.obj
+*.o
+*.lib
+*.dll
+*.exe
+*.pdb
+*.ilk
+*.exp
+*.res
+*.manifest
+*.so
+*.dylib
+*.a
+
+# ===================== nRF / Zephyr / west 固件 =====================
+# /firmware/ 整体已忽略；此处额外捕获常见的固件产物扩展名
+*.elf
+*.hex
+*.bin
+*.map
+*.lst
+
+# ===================== Python =====================
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+envs/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+
+# ===================== LaTeX 构建产物 =====================
+# 仅忽略辅助文件；源码 .tex 与生成的 .pdf 默认保留（按需可加 *.pdf 忽略）。
+*.aux
+*.lof
+*.lot
+*.toc
+*.out
+*.log
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.bbl
+*.blg
+*.nav
+*.snm
+*.vrb
+
+# ===================== 日志 / 临时 / 备份 =====================
+*.tmp
+*.bak*
+.cache/
+
+# ===================== 一次性文档处理脚本（本地草稿） =====================
+# 早期 docx 整合尝试遗留的脚本，非项目源码。
+.fill_proposal.py
+.fix_docx_xml.py
+.fix_proposal.py
+.integrate_docx.py
+
+# ===================== 外部独立仓库 / 依赖缓存（不跟踪其内容） =====================
+/server/
+/driver/
+/firmware/
+/external_repos/
