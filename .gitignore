@@ -54,12 +54,16 @@ compile_commands.json
 **/build/
 *.class
 *.jar
+*.war
+*.ear
 # 保留 Gradle Wrapper（若项目自带）
 !gradle/wrapper/gradle-wrapper.jar
 
 # ===================== Node / Electron / pnpm =====================
 node_modules/
 .pnpm-store/
+.vite/
+.parcel-cache/
 *.tsbuildinfo
 npm-debug.log*
 yarn-debug.log*
@@ -80,6 +84,14 @@ pnpm-debug.log*
 *.so
 *.dylib
 *.a
+
+# CMake / Ninja 生成物
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+build.ninja
+.ninja_deps
+.ninja_log
 
 # ===================== nRF / Zephyr / west 固件 =====================
 # /firmware/ 整体已忽略；此处额外捕获常见的固件产物扩展名
@@ -104,7 +116,8 @@ envs/
 .tox/
 
 # ===================== LaTeX 构建产物 =====================
-# 仅忽略辅助文件；源码 .tex 与生成的 .pdf 默认保留（按需可加 *.pdf 忽略）。
+# 辅助文件与生成的 PDF 全部忽略：PDF 属编译产物，不纳入版本控制；
+# 仓库只跟踪源码 .tex（PDF 由 xelatex 随时可重新生成）。
 *.aux
 *.lof
 *.lot
@@ -119,11 +132,26 @@ envs/
 *.nav
 *.snm
 *.vrb
+*.xdv
+*.bcf
+*.run.xml
+*.glg
+*.glo
+*.gls
+*.pdf
 
-# ===================== 日志 / 临时 / 备份 =====================
+# ===================== 日志 / 临时 / 备份 / 本机敏感配置 =====================
 *.tmp
 *.bak*
 .cache/
+.env
+*.local
+*.orig
+*.rej
+.coverage
+htmlcov/
+.eggs/
+*.egg
 
 # ===================== 一次性文档处理脚本（本地草稿） =====================
 # 早期 docx 整合尝试遗留的脚本，非项目源码。

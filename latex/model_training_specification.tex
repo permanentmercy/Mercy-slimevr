@@ -1,0 +1,308 @@
+% !Mode:: "TeX:UTF-8"
+% !TEX program  = xelatex
+%
+% SlimeVR 神经网络残差校正器 —— 模型训练、数据集与技术路线实施规范
+% 涵盖开源基准选型、离线动捕数据集、加噪训练流水线、系统补偿方案、执行流程与量化技术指标。
+
+\documentclass[UTF8,11pt,a4paper]{ctexart}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{makecell}
+\usepackage{graphicx}
+\usepackage{float}
+
+% 架构框图绘图包（单色规范，与主文档保持一致）
+\usepackage{tikz}
+\usetikzlibrary{shapes.geometric, arrows.meta, positioning, calc, fit, backgrounds}
+\tikzstyle{boxmain}    = [rectangle, draw=black, thick, rounded corners, fill=gray!12, minimum height=1.0cm, align=center, font=\small]
+\tikzstyle{boxsub}     = [rectangle, draw=black, thick, rounded corners, fill=white, minimum height=0.9cm, align=center, font=\small]
+\tikzstyle{boxsensor}  = [rectangle, draw=black, thick, rounded corners, fill=gray!6,  minimum height=0.85cm, align=center, font=\small]
+\tikzstyle{arrow}      = [-{Stealth}, thick, draw=black]
+
+\usepackage[hidelinks]{hyperref}
+
+\title{\LARGE\bfseries SlimeVR 神经网络残差校正器\\模型训练、开源技术选型与实施规范}
+
+\author{%
+    SlimeVR 研发团队 \\
+    文档性质：算法训练与工程实施技术规范
+}
+
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+针对基于 SlimeVR 的 6 轴惯性测量单元（IMU，LSM6DSV）全身动作捕捉中偏航角（yaw）积分漂移、传统几何求解器缺乏时空统计先验以及下半身运动估计中的足部滑步（foot skating）与悬空穿模等问题，本文档确立了服务器端神经网络残差校正器的模型训练、开源基准选型、数据集流水线与技术指标体系。为解耦算法研发与物理硬件制作周期，技术路线采用离线数据驱动与仿真加噪方案：以 AMASS 高精度光学动捕数据为基准真值，结合传感器物理特性注入陀螺仪零偏游走与高频噪声，构建全合成配对训练集；整合 HMD-Poser（CVPR 2024）的因果时空网络、PIP（CVPR 2022）的物理足部触地判别机制与 AvatarPoser（ECCV 2022）的数据工程管线，构建紧凑型多任务因果时空网络模型。该架构将单帧推理时延约束于 2.0\,ms 以内，以平均关节位置误差（MPJPE）$< 45$\,mm、偏航漂移抑制率 $> 88\%$、足部触地判别 F1 分数 $> 93\%$ 作为离线训练收敛与验证指标。
+\end{abstract}
+
+\newpage
+\tableofcontents
+\newpage
+
+% ==================== 一、开源仓库选型与技术分工 ====================
+\section{开源基准选型与技术分工}
+\label{sec:repos}
+
+为保证算法架构的可靠性并规范开发路径，本项目调研并选定以下 4 个开源基准项目作为参考与实现基础（均已通过代理拉取至 \texttt{external\_repos/} 目录）。
+
+\subsection{核心代码库矩阵与定位}
+
+\begin{table}[H]
+\centering
+\small
+\caption{核心参考开源项目与技术功能映射}
+\label{tab:repos}
+\begin{tabular}{p{2.6cm}p{2.6cm}p{3.2cm}p{5.4cm}}
+\toprule
+\textbf{仓库名称} & \textbf{发表出处} & \textbf{核心源码模块} & \textbf{在本项目中的具体复用与参考职责} \\
+\midrule
+\textbf{HMD-Poser} & CVPR 2024 \newline (Pico AI Team) & \texttt{model/network.py} \newline \texttt{hmd\_imu\_model.py} & \textbf{【时空特征提取与门控基线】} 参考其 8 路身体流单向因果 LSTM 与 Spatial Transformer 结构，构建无未来帧依赖的时序特征提取与传感器可靠性门控模块。 \\
+\midrule
+\textbf{PIP} & CVPR 2022 \newline (清华 / ETH) & \texttt{net.py} (L35--39) \newline \texttt{dynamics.py} & \textbf{【足部触地检测与运动学约束】} 借鉴其触地检测网络（ContactNet）与零速更新（ZUPT）状态机设计，抑制足底在支撑相的假性平移滑移。 \\
+\midrule
+\textbf{AvatarPoser} & ECCV 2022 \newline (ETH Zurich) & \texttt{prepare\_data.py} \newline \texttt{model\_avatarposer.py} & \textbf{【动捕数据预处理与坐标系对齐】} 复用其 AMASS 动捕数据切片、时序滑动窗口提取及 SMPL-H 骨骼四元数规范化流程，统一数据输入管线。 \\
+\midrule
+\textbf{SparsePoser} & SIGGRAPH 2023 \newline (UPC-ViRVIG) & \texttt{src/autoencoder.py} \newline \texttt{src/skeleton.py} & \textbf{【解剖学生理旋转约束参考】} 借鉴其解剖学关节极限损失（Joint Limit Loss）构建方式，约束非生理性关节过伸与反向弯曲。 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{配套辅助工具}
+
+除核心深度学习模型外，工程链路还依赖以下 3 个开源组件实现环境适配与数据流打通：
+\begin{enumerate}
+    \item \textbf{Virtual Desktop Body Tracking Configurator (VDBTC)}：由 DenTechs 开发的开源 SteamVR 配置工具。用于关闭 Virtual Desktop 算法推测的下半身虚拟追踪点（Generative Legs），仅保留头显摄像机直接追踪的胸部和双肘（Top Body Only），避免下半身绑定冲突。
+    \item \textbf{RoNIN / RIO}：基于深度学习的惯性导航研究基准。提供基于真实 MEMS 传感器特性的随机游走与零偏漂移统计模型，用于离线加噪仿真。
+    \item \textbf{SlimeVR Feeder App 与 OpenVR 驱动}：随 SlimeVR 官方安装包附带的桥接组件，通过命名管道获取 SteamVR 虚拟追踪器位姿，将 Quest 3 视觉估计数据输入 SlimeVR 服务端求解器。
+\end{enumerate}
+
+% ==================== 二、离线训练与评测数据集方案 ====================
+\section{离线训练与评测数据集方案}
+\label{sec:datasets}
+
+为确保在物理硬件采购、焊接及固件调试期间能够独立推进算法开发，模型训练与性能验证基于离线动捕数据集与物理仿真管线开展。
+
+\subsection{数据集选型}
+
+\begin{enumerate}
+    \item \textbf{AMASS (Archive of Motion Capture as Surface Shapes)} —— \textbf{基础动作训练集}
+    \begin{itemize}
+        \item \textbf{数据说明与格式}：Max Planck Institute（MPI）发布的标准化人体动捕数据库（\url{https://amass.is.tue.mpg.de/}），数据为统一的 \texttt{.npz} 文件，包含 60\,Hz/120\,Hz 的 SMPL-H 关节旋转矩阵、全局平移量与人体体型参数（$\beta$）。
+        \item \textbf{代表性子集选取}（总数据量约 2.9\,GB，避免全量下载的存储与解析开销）：
+        \begin{itemize}
+            \item \texttt{CMU}（约 1.5\,GB）：涵盖日常步态、下蹲、转身、起坐等多种动作序列；
+            \item \texttt{HDM05}（约 800\,MB）：包含高精度标准化动作采样，动作分类结构规范；
+            \item \texttt{BMLrub}（约 600\,MB）：包含较多平地足底周期性支撑与摆动数据，适用于训练足部触地判别。
+        \end{itemize}
+    \end{itemize}
+
+    \item \textbf{DIP-IMU Dataset} —— \textbf{实测传感器泛化评估集}
+    \begin{itemize}
+        \item \textbf{数据说明与规模}：MPI 随 SIGGRAPH 2018 论文开源（\url{https://dip.is.tue.mpg.de/}），约 1.5\,GB。
+        \item \textbf{评估价值}：该数据集记录了 10 名受试者佩戴 17 颗 Xsens 工业级 IMU 传感器的原始数据，并同步记录了毫米级 Vicon 光学真值。用于在无实体硬件条件下，评估模型对真实传感器噪声与软组织运动伪影的泛化能力。
+    \end{itemize}
+\end{enumerate}
+
+\subsection{人体模型参数包依赖}
+动捕数据正向运动学（FK）计算依赖 SMPL-H 基础网格参数文件：
+\begin{itemize}
+    \item 前往 MANO 官方网站（\url{https://mano.is.tue.mpg.de/}）下载 \texttt{SMPL+H model (with DMPLs)}；
+    \item 解压得到 \texttt{smplh/male/model.npz} 与 \texttt{smplh/female/model.npz}，放入数据处理脚本对应的 \texttt{support\_data/body\_models/} 路径下。
+\end{itemize}
+
+\subsection{离线合成加噪训练样本生成流程}
+通过前向运动学仿真，从 AMASS 纯净骨架序列生成模拟 Quest 3 上半身锚、6 轴带漂移 IMU 下半身以及足部触地标签的配对样本。完整生成步骤定义如下：
+
+\begin{enumerate}
+    \item \textbf{参考基准提取}：提取头部关节世界位姿作为虚拟头显观测基准：
+    \[
+    T_{\text{head}} = (q^*_{\text{head}}, x^*_{\text{head}})
+    \]
+    该观测作为全局刚体参考，具备无偏航漂移特性。
+    \item \textbf{足部触地标签标注}：根据左右脚踝位移变化率计算线速度 $v_{\text{foot}, t} = \|x^*_{\text{foot}, t} - x^*_{\text{foot}, t-1}\| / \Delta t$，并结合脚底离地高度 $z_{\text{foot}, t}$，设定触地状态标签准则：
+    \[
+    C^*_t = \begin{cases} 
+    1, & \text{if } v_{\text{foot}, t} < 0.1\,\text{m/s} \quad \text{且} \quad z_{\text{foot}, t} < 0.03\,\text{m} \\ 
+    0, & \text{otherwise} 
+    \end{cases}
+    \]
+    \item \textbf{传感器偏航积分游走注入}：针对下半身关节点（骨盆、大腿、小腿），根据 MEMS 陀螺仪的角随机游走系数 $\sigma_{\text{arw}}$ 与零偏漂移项 $b_{\text{gyro}}$，按步长 $\Delta t$ 累积偏航漂移角：
+    \[
+    \psi_t = \psi_{t-1} + b_{\text{gyro}} \Delta t + \sigma_{\text{arw}} \sqrt{\Delta t} \cdot \epsilon_t, \quad \epsilon_t \sim \mathcal{N}(0, 1)
+    \]
+    将漂移扰动叠加至纯净局部四元数 $q^*_i$：
+    \[
+    q^{\text{corrupt}}_{i, t} = \text{Rot}_z(\psi_t) \otimes q^*_{i, t}
+    \]
+    同时向线加速度引入高斯白噪声与动态离心扰动：$a^{\text{corrupt}}_{i, t} = a^*_{i, t} + \delta a_{\text{dyn}}$。
+    \item \textbf{四元数残差回归目标构建}：监督目标定义为纯净旋转四元数相对于扰动旋转四元数的增量残差：
+    \[
+    \Delta q^*_{i, t} = q^*_{i, t} \otimes (q^{\text{corrupt}}_{i, t})^{-1}
+    \]
+    \item \textbf{时序滑动窗口封装}：以时间步长截取长度为 $N$ 帧的时序窗口，组合 8 路身体流的相对旋转与速度参数，形成输入特征张量 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{N \times 135}$，输出配对训练样本 $(\mathbf{X}_{\text{in}}, \Delta q^*, C^*)$。
+\end{enumerate}
+
+% ==================== 三、模型网络架构与系统性增强设计 ====================
+\section{模型网络架构与系统性补偿设计}
+\label{sec:architecture}
+
+\subsection{主架构：多任务因果时空网络 (Unified Multi-Task Network)}
+为降低多模型级联带来的系统延迟与接口开销，本系统采用多任务联合预测架构，以因果时空网络为主干，单次前向推理并行输出姿态残差、传感器置信度与触地概率。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=1.2cm and 1.5cm, auto]
+    % 输入层
+    \node[boxsensor] (in_hmd) {Quest 3 / VD 参考锚\\(胸/手肘绝对位姿)};
+    \node[boxsensor, right=0.8cm of in_hmd] (in_imu) {6 点 LSM6DSV\\(下半身角速度/加速度)};
+    
+    % 时钟缓冲
+    \node[boxsub, below=0.8cm of $(in_hmd)!0.5!(in_imu)$, text width=7.2cm] (slerp_buf) {
+        \textbf{时间戳 Slerp 环形插值缓冲池 (50\,ms)}\\
+        补偿视觉传输时延（约 20\,ms）与射频传输时延（约 5\,ms）之间的动态相位差
+    };
+
+    % 主干网
+    \node[boxmain, below=0.8cm of slerp_buf, text width=7.6cm] (backbone) {
+        \textbf{因果时空骨干网络 (Causal Spatio-Temporal Backbone)}\\
+        8 路独立单向因果 LSTM ($256d$, 严格无未来帧依赖) \\
+        + Spatial Transformer Encoder (跨关节解剖关联自注意力)
+    };
+
+    % 多任务头
+    \node[boxsub, below left=1.0cm and -0.8cm of backbone, text width=3.4cm] (head_q) {
+        \textbf{分支 1：姿态残差头 $\Delta q$}\\
+        输出局部四元数残差\\
+        限幅单帧角 $\le 8^\circ$
+    };
+    \node[boxsub, below=1.0cm of backbone, text width=3.4cm] (head_w) {
+        \textbf{分支 2：可靠性门控头 $W$}\\
+        预测传感器置信度\\
+        低置信度退避回原值
+    };
+    \node[boxsub, below right=1.0cm and -0.8cm of backbone, text width=3.4cm] (head_c) {
+        \textbf{分支 3：PIP 触地判别头 $C$}\\
+        预测双脚触地概率\\
+        $P_L, P_R \in [0, 1]$
+    };
+
+    % 物理与仲裁层
+    \node[boxmain, below=1.0cm of head_w, text width=8.5cm] (arbitrator) {
+        \textbf{物理与运动学后处理层 (耗时 $< 0.3$\,ms)}\\
+        残差加权融合：$q^{\text{final}} = \text{SLERP}(q^{\text{raw}}, q^{\text{raw}} \otimes \Delta q, \alpha \cdot W)$\\
+        ZUPT 零速锁脚状态机（单足支撑锁定位移，双足支撑闭链高度均摊）
+    };
+
+    % 输出
+    \node[boxsensor, below=0.8cm of arbitrator] (out_vrchat) {输出至目标应用 (算法处理延迟 $< 3.5$\,ms)};
+
+    % 连线
+    \draw[arrow] (in_hmd) -- (slerp_buf);
+    \draw[arrow] (in_imu) -- (slerp_buf);
+    \draw[arrow] (slerp_buf) -- (backbone);
+    \draw[arrow] (backbone) -- (head_q);
+    \draw[arrow] (backbone) -- (head_w);
+    \draw[arrow] (backbone) -- (head_c);
+    \draw[arrow] (head_q) -- (arbitrator);
+    \draw[arrow] (head_w) -- (arbitrator);
+    \draw[arrow] (head_c) -- (arbitrator);
+    \draw[arrow] (arbitrator) -- (out_vrchat);
+\end{tikzpicture}
+\caption{神经网络残差校正器单模型多任务全系统数据流图}
+\label{fig:pipeline}
+\end{figure}
+
+\subsection{传感器级与系统级补偿机制}
+
+为抑制传感器动态噪声与异构数据源时钟不同步导致的姿态失真，系统引入以下 4 项补偿与约束机制：
+\begin{enumerate}
+    \item \textbf{动态线加速度污染抑制}：特征输入中追加加速度模长误差 $e_a = \big|\|\mathbf{a}\| - 1.0g\big|$。当剧烈运动导致 $e_a > 0.3g$ 时，降低重力倾角置信度，增加陀螺仪时序积分权重。
+    \item \textbf{STA 软组织晃动自适应滤波}：针对肌肉颤振引起的 $15\sim30$\,Hz 假动作，前置截止频率为 $12$\,Hz 的数字低通滤波器。
+    \item \textbf{多模态时钟对齐环形缓冲池（Slerp Buffer）}：PC 服务端维护 $50$\,ms 队列，依照时间戳对高频 IMU 数据进行球面线性插值，对齐至同一时间基准，抑制高动态运动下的骨骼扭曲畸变。
+    \item \textbf{双足闭链支撑相几何仲裁}：双脚同时踩地（$P_L > 0.8, P_R > 0.8$）时，以两脚连线中点为地面支撑参考，将垂向高度闭环误差平均回摊至骨盆与双膝，避免开链正向运动学计算在双足支撑阶段产生的几何过约束与单足悬空。
+\end{enumerate}
+
+\subsection{备选技术路线对比}
+除上述主架构外，保留以下两套技术路线用于消融实验与对比分析：
+\begin{itemize}
+    \item \textbf{备选方案 A（因果膨胀卷积 TCN）}：将主干网中的 LSTM 替换为 Causal Dilated TCN。优势在于无循环递归计算，便于在 ONNX Runtime 中做 INT8 定点量化与算子融合，CPU 推理耗时可压至 $0.8$\,ms 以内。
+    \item \textbf{备选方案 B（基于姿态流形先验的后处理去噪）}：在残差输出后级引入轻量自编码器潜空间投影。当关节旋转超出生理范围时投影回自然姿态空间；为防止流形先验对非典型动作过度抑制，需引入大残差衰减与退避机制。
+\end{itemize}
+
+% ==================== 四、全流程执行指南 ====================
+\section{全流程执行指南}
+\label{sec:execution}
+
+\subsection{阶段一：数据准备与离线切片 (Week 1--2)}
+\begin{enumerate}
+    \item 下载 AMASS 子库（\texttt{CMU.tar.bz2}、\texttt{HDM05.tar.bz2}、\texttt{BMLrub.tar.bz2}）及 SMPL-H 基础模型参数文件；
+    \item 配置 Python 环境并安装科学计算依赖（\texttt{torch}, \texttt{numpy}, \texttt{scipy}, \texttt{human\_body\_prior}）；
+    \item 运行数据预处理脚本，指定原始动捕输入路径与目标张量存储路径，配置滑动窗口长度 $N=20$ 帧（在 60\,Hz 下对应约 333\,ms 历史时序上下文）及步长 $\text{stride}=5$ 帧，输出切片后的序列张量文件。
+\end{enumerate}
+
+\subsection{阶段二：离线多任务训练 (Week 5--6)}
+\begin{enumerate}
+    \item 构建综合损失函数，联合优化四元数残差、触地分类交叉熵与关节角度极限约束：
+    \[
+    \mathcal{L} = \text{SmoothL1}(\Delta q, \Delta q^*) + \lambda_1 \text{BCE}(P_{\text{contact}}, C^*) + \lambda_2 \mathcal{L}_{\text{joint\_limit}}
+    \]
+    其中设置权重超参数 $\lambda_1 = 0.5, \lambda_2 = 0.1$；
+    \item 使用 AdamW 优化器（初始学习率 $10^{-3}$，Cosine 退火衰减），Batch Size 设置为 256，在消费级 GPU（如 RTX 3060/4060）上训练约 80 个 Epoch。
+\end{enumerate}
+
+\subsection{阶段三：模型导出与推理优化 (Week 6--7)}
+训练收敛后，将 PyTorch 计算图导出为 ONNX 格式（算子集版本 Opset 14）。指定输入张量形状为 $(B, 20, 135)$，输出节点分别命名为姿态残差 \texttt{dq}、置信度门控 \texttt{gate} 与触地概率 \texttt{contact}，并将其权重量化转换为 FP16 半精度浮点格式，生成独立的计算图模型文件 \texttt{corrector.onnx}。
+
+\subsection{阶段四：离线基准评测与量化验证 (Week 7)}
+在离线环境中载入 \texttt{DIP-IMU} 与 AMASS 验证集，运行评测脚本计算 MPJPE 误差分布、偏航漂移恢复率与触地 F1 分数，验证指标收敛性。
+
+\subsection{阶段五：OSC/VMC 中继联调 (Week 8)}
+编写 Python 中继客户端，监听 SlimeVR Server 的 OSC 默认输出端口（39539），使用 \texttt{onnxruntime} 进行实时推理，并将校正后的骨骼四元数转发至 VRChat（端口 9000），实现与上游服务端的解耦交互。
+
+% ==================== 五、目标技术指标与量化验收规范 ====================
+\section{目标技术指标与量化验收规范}
+\label{sec:kpi}
+
+模型与系统实现须满足表~\ref{tab:kpi} 所列的技术指标要求。
+
+\begin{table}[H]
+\centering
+\small
+\caption{神经网络残差校正器技术指标与量化验收标准}
+\label{tab:kpi}
+\begin{tabular}{p{3.2cm}p{3.8cm}p{3.5cm}p{3.5cm}}
+\toprule
+\textbf{指标类别} & \textbf{关键参数项} & \textbf{验收门槛值} & \textbf{测量/评估方式} \\
+\midrule
+\multirow{2}{*}{\textbf{实时性与算力开销}} 
+& 单帧模型前向推理时延 & $\le 2.0$\,ms (GPU FP16) \newline $\le 4.5$\,ms (CPU ONNX) & ONNX Runtime 运行 1000 帧统计均值 \\
+\cmidrule{2-4}
+& 端到端全链路数据时延 & $\le 20.0$\,ms & 从 IMU 采样到 VRChat 接收骨骼 \\
+\midrule
+\multirow{3}{*}{\textbf{姿态跟踪精度}} 
+& 平均关节位置误差 (MPJPE) & $\le 45.0$\,mm & DIP-IMU / AMASS 测试集 \\
+\cmidrule{2-4}
+& 关节角度均方根误差 (RMSE) & $\le 7.5^\circ$ & 对比光学 Vicon 真实关节旋转 \\
+\cmidrule{2-4}
+& 偏航漂移消除率 (Yaw Recovery) & $\ge 88\%$ & 注入 $10^\circ$/min 漂移时输出残差压制 \\
+\midrule
+\multirow{2}{*}{\textbf{物理接触与稳定性}} 
+& 足部触地判别 F1 分数 & $\ge 93.0\%$ & 对比动捕真实踩地标签 \\
+\cmidrule{2-4}
+& 足部滑步距离削减比例 & $\ge 80\%$ (相较开环基准) & 静态站立时脚踝世界坐标漂移量 \\
+\midrule
+\multirow{2}{*}{\textbf{模型轻量化指标}} 
+& 模型网络总参数量 & $\le 1.2 \times 10^6$ ($1.2$\,M) & \texttt{sum(p.numel())} \\
+\cmidrule{2-4}
+& 导出的 ONNX 权重体积 & $\le 8.0$\,MB & 磁盘文件大小 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\end{document}
