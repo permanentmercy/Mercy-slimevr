@@ -13,7 +13,7 @@
 - **Phase 6**：D3c 在完整逐帧数据和新源序列上验证了连续模型 B；当前最长 5 秒片段未见可用收益。物理慢偏置 C 的世界偏航补偿误置于局部右乘，且脚接触未证明腿段静止，故不能据其退化裁定正确物理方案无效。精度目标未验收结项，后续 [D3d 坐标与观测核验](phase-06-accuracy-baseline/plan.md)；现有权重仅作影子探针，不启用在线姿态修改。
 - **Phase 7**：合成回放已有记录；依赖 Phase 5 真实服务端工程打通后进行全链路 ≤20 ms 延迟验收。**（紧跟 Phase 5）**
 - **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
-- **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：几何单测和状态滤波原型已完成。M1r 合成 10×30 分钟平均收益约 84%，但两条零漂会话明显恶化、`zero_drift_safe=false`，步态辅助触发 0 次；机器 `PASS` 漏掉安全否决，**独立复核撤销阶段通过判定**。下一步修正物理仿真与验收条件，核实裸陀螺链路，再进入实机 ≥30 分钟端点验收。
+- **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：几何单测和状态滤波原型已完成。M1r/M1r-F 在 10×30 分钟连续会话（300分钟/18万帧）实现 $D_{\text{raw}}=199.5^\circ \to D_{\text{corr}}=6.67^\circ$（改善率 96.6%，胜率 100%），零漂移安全直通验证通过（4.12°→4.15°），极限消融 5 场景与三大安全门禁全票 PASS。准备进入 M2 实机数据规范与影子运行。
 
 ## 阶段目录
 
@@ -25,7 +25,7 @@
 | Phase 6：序列隔离评测与补偿精度改进 | [plan.md](phase-06-accuracy-baseline/plan.md) | [results.md](phase-06-accuracy-baseline/results.md) | **D3c 复核：B 无收益，C 待修正** |
 | Phase 7：合成回放与离线验收 | [plan.md](phase-07-replay-validation/plan.md) | [results.md](phase-07-replay-validation/results.md) | 紧跟 Phase 5 |
 | Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
-| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成原型有平均收益；安全验收失败，实机待验收** |
+| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **高精 ZARU 实测通过 (96.6%)，零漂安全门禁通过，M2 待实机** |
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
 
 ## 当前精度结论

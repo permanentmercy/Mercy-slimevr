@@ -59,11 +59,12 @@ def bootstrap_mean_ci(data: list[float], num_resamples: int = 2000, alpha: float
     return mean_val, low, high
 
 
-def load_real_cstn_model(device: torch.device) -> Optional[Corrector]:
+def load_real_cstn_model(device: torch.device, verbose: bool = False) -> Optional[Corrector]:
     """真实加载 Phase 6 最佳 CSTN 权重"""
     weight_path = BASE_DIR / "ai_corrector" / "artifacts" / "cstn_v2_d1_smooth_geodesic_s123_best.pt"
     if not weight_path.exists():
-        print(f"Warning: CSTN weights not found at {weight_path}", flush=True)
+        if verbose:
+            print(f"Warning: CSTN weights not found at {weight_path}", flush=True)
         return None
     try:
         ckpt = torch.load(weight_path, map_location=device, weights_only=False)
@@ -75,10 +76,12 @@ def load_real_cstn_model(device: torch.device) -> Optional[Corrector]:
         state_dict = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
         model.load_state_dict(state_dict)
         model.eval()
-        print(f"Successfully loaded real CSTN model from {weight_path}", flush=True)
+        if verbose:
+            print(f"Successfully loaded real CSTN model from {weight_path}", flush=True)
         return model
     except Exception as e:
-        print(f"Failed to load CSTN model: {e}", flush=True)
+        if verbose:
+            print(f"Failed to load CSTN model: {e}", flush=True)
         return None
 
 
@@ -201,24 +204,45 @@ def evaluate_session_m1r(session: ContinuousSessionStream,
     }
 
 
+def _evaluate_single_session_worker(args: Tuple[str, float, int]) -> Tuple[str, float, int, dict]:
+    """单条 30 分钟长会话的多进程独立评估工作线程"""
+    s_id, tier, seed = args
+    t0 = time.time()
+    synth = ContinuousSessionSynthesizer(duration_sec=1800.0, sample_rate_hz=10.0, drift_tier_deg_min=tier, seed=seed)
+    stream = synth.generate(session_id=s_id)
+    device = torch.device("cpu")
+    cstn_model = load_real_cstn_model(device, verbose=False)
+    res = evaluate_session_m1r(stream, cstn_model, device)
+    dt = time.time() - t0
+    zaru_gain = res["m1r_zaru"]["G_deg"]
+    zaru_d = res["m1r_zaru"]["D_corr_deg"]
+    raw_d = res["raw"]["D_raw_deg"]
+    ratio = res["m1r_zaru"]["improvement_ratio"] * 100.0
+    print(f"  [CPU Worker] Finished {s_id:14s} (Tier {tier:4.1f}°/m) in {dt:4.1f}s | Raw={raw_d:6.2f}°, ZARU={zaru_d:6.2f}°, Gain={zaru_gain:+6.2f}° ({ratio:5.1f}%)", flush=True)
+    return s_id, tier, seed, res
+
+
 def main():
-    print("=" * 70)
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
+    print("=" * 80)
     print("Executing Phase 9 Task M1r: Deployable Frequency & ZARU Bias Estimator Evaluation")
-    print("=" * 70)
+    print("=" * 80)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Compute device: {device}")
+    print(f"Compute device: {device} | Total CPU Cores Available: {os.cpu_count()}")
 
-    # 1. 加载真实 CSTN 模型权重
-    print("\n[Step 1] Loading real Phase 6 CSTN checkpoint (cstn_v2_d1_smooth_geodesic_s123_best.pt)...")
-    cstn_model = load_real_cstn_model(device)
+    # 1. 验证 CSTN 模型权重
+    print("\n[Step 1] Verifying Phase 6 CSTN checkpoint (cstn_v2_d1_smooth_geodesic_s123_best.pt)...")
+    cstn_model = load_real_cstn_model(device, verbose=True)
     if cstn_model is not None:
-        print("  Real CSTN model successfully loaded and verified.")
+        print("  Real CSTN model successfully verified.")
     else:
         print("  CSTN model failed to load; using Raw baseline for comparison.")
 
     # 2. 构建代表性 30 分钟连续会话矩阵 (涵盖 0°, 1°, 3°, 10°/min)
-    print("\n[Step 2] Synthesizing continuous 30-minute evaluation sessions across drift tiers...")
+    print("\n[Step 2] Defining continuous 30-minute evaluation sessions across drift tiers...")
     test_configs = [
         ("sess_zero_00", 0.0, 42),
         ("sess_zero_01", 0.0, 43),
@@ -241,17 +265,17 @@ def main():
     }
 
     session_records = []
-    print("\n[Step 3] Running continuous online inference across all 10 sessions (300 minutes total)...", flush=True)
+    max_workers = min(os.cpu_count() or 4, 10)
+    print(f"\n[Step 3] Running continuous online inference across all 10 sessions in parallel ({max_workers} CPU cores)...", flush=True)
     
     t0_eval = time.time()
-    for s_id, tier, seed in test_configs:
-        print(f"  --> Simulating & evaluating session: {s_id} (Tier: {tier}°/min, Seed: {seed})...", flush=True)
-        synth = ContinuousSessionSynthesizer(duration_sec=1800.0, sample_rate_hz=10.0, drift_tier_deg_min=tier, seed=seed)
-        stream = synth.generate(session_id=s_id)
-        
-        # 评测
-        res = evaluate_session_m1r(stream, cstn_model, device)
-        
+    with ProcessPoolExecutor(max_workers=max_workers) as executor:
+        worker_results = list(executor.map(_evaluate_single_session_worker, test_configs))
+
+    # 按原始配置顺序整理结果
+    result_map = {r[0]: r for r in worker_results}
+    for cfg in test_configs:
+        s_id, tier, seed, res = result_map[cfg[0]]
         for k in all_metrics.keys():
             all_metrics[k]["D_raw"].append(res[k]["D_raw_deg"])
             all_metrics[k]["D_corr"].append(res[k]["D_corr_deg"])
@@ -274,7 +298,7 @@ def main():
         })
 
     elapsed_sec = time.time() - t0_eval
-    print(f"\nCompleted evaluation in {elapsed_sec:.1f}s ({elapsed_sec/10.0:.2f}s per 30-min session).")
+    print(f"\nCompleted parallel evaluation in {elapsed_sec:.1f}s total ({elapsed_sec/10.0:.2f}s per 30-min session throughput).", flush=True)
 
     # 3. 统计汇总与 Bootstrap 置信区间计算
     summary_table = {}
@@ -317,15 +341,17 @@ def main():
     print(f"  M1r-ZARU D_corr: {np.mean(zero_zaru_D):.2f}°")
 
     # 4. 动态成功状态判定
-    # 成功判定依据: M1r-ZARU 在 30 分钟连续会话上净收益 G > 0 且 95% CI 下界 > 0, 零漂移无严重退化
+    # 成功判定依据: M1r-ZARU 在 30 分钟连续会话上净收益 G > 0 且 95% CI 下界 > 0, 且零漂移无损伤 (mean D_corr <= mean D_raw + 1.0° 且 < 5.0°)
     is_zaru_positive = bool(summary_table["m1r_zaru"]["gain_95_ci"][0] > 0.0)
-    final_status = "PASS" if is_zaru_positive else "FAIL"
+    is_zero_drift_safe = bool(np.mean(zero_zaru_D) <= np.mean(zero_raw_D) + 1.0 and np.mean(zero_zaru_D) < 5.0)
+    final_status = "PASS" if (is_zaru_positive and is_zero_drift_safe) else "FAIL"
 
     report = {
         "task": "Phase 9 Task M1r: Deployable Frequency & ZARU Bias Estimator Evaluation",
         "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
         "status": final_status,
         "is_ci_lower_positive": is_zaru_positive,
+        "is_zero_drift_safe": is_zero_drift_safe,
         "summary_table": summary_table,
         "session_records": session_records,
         "conclusions": {
@@ -333,7 +359,7 @@ def main():
             "zaru_30min_gain": summary_table["m1r_zaru"]["mean_gain_deg"],
             "zaru_improvement_ratio": summary_table["m1r_zaru"]["improvement_ratio"],
             "zaru_ci_lower": summary_table["m1r_zaru"]["gain_95_ci"][0],
-            "zero_drift_safe": bool(np.mean(zero_zaru_D) < 5.0)
+            "zero_drift_safe": is_zero_drift_safe
         }
     }
 

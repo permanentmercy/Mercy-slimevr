@@ -205,3 +205,5 @@ pelican_seaside_cycling.html
 *.log
 page_*.png
 test_*.png
+ai_corrector/scratch/
+/scratch/

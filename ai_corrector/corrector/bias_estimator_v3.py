@@ -25,78 +25,112 @@ from ai_corrector.corrector.oracle_v3_geometry import wrap_angle
 
 
 class StationaryZARUDetector:
-    """单颗 IMU 独立静止检测与零偏观测器"""
+    """单颗 IMU 独立静止检测与高精零偏观测器"""
     def __init__(self,
                  imu_id: str,
-                 window_sec: float = 1.0,
+                 window_sec: float = 1.5,
                  sample_rate_hz: float = 10.0,
-                 omega_thresh_rad_s: float = 0.04,   # 约 2.3°/s
+                 omega_thresh_rad_s: float = 0.08,   # 约 4.5°/s
                  accel_var_thresh: float = 0.15,     # (m/s^2)^2
-                 min_still_duration_sec: float = 1.5):
+                 min_still_duration_sec: float = 2.5):
         self.imu_id = imu_id
-        self.window_size = int(max(window_sec * sample_rate_hz, 5))
-        self.min_still_frames = int(min_still_duration_sec * sample_rate_hz)
+        self.sample_rate_hz = sample_rate_hz
+        self.window_size = int(max(window_sec * sample_rate_hz, 10))
+        self.min_still_sec = float(min_still_duration_sec)
         self.omega_thresh = float(omega_thresh_rad_s)
         self.accel_var_thresh = float(accel_var_thresh)
         
         self.omega_history = collections.deque(maxlen=self.window_size)
-        self.accel_history = collections.deque(maxlen=self.window_size)
         self.consecutive_still_count = 0
-        self.still_rate_accumulator: List[float] = []
+        
+        self.still_start_R: Optional[np.ndarray] = None
+        self.still_start_t: Optional[float] = None
+        self.still_start_e: Optional[float] = None
+        self.last_R: Optional[np.ndarray] = None
 
     def update(self,
                ang_vel: np.ndarray,
                rot_mat: np.ndarray,
-               ang_acc: Optional[np.ndarray] = None) -> Optional[Tuple[float, float]]:
+               t: float,
+               current_e: float,
+               ang_acc: Optional[np.ndarray] = None) -> Optional[Tuple[float, float, float, float]]:
         """
         输入当前帧该颗 IMU 的角速度 [wx, wy, wz] 与旋转矩阵 R_raw。
-        若满足连续静止条件，返回世界竖直轴偏航漂移率测量值: (b_meas_rad_s, var_rad2_s2)。
+        若满足连续静止条件，返回:
+          (filtered_rate_rad_s, var_rate, target_e_rad, elapsed_sec)
         """
-        omega_norm = float(np.linalg.norm(ang_vel))
-        self.omega_history.append(omega_norm)
+        w_norm = float(np.linalg.norm(ang_vel))
         
-        # 简单加速度平稳性（若有角加速度或合力）
-        acc_metric = float(np.linalg.norm(ang_acc)) if ang_acc is not None else 0.0
-        self.accel_history.append(acc_metric)
+        # 1. 物理 3D 姿态单步突变检查 (单帧 0.1s 旋转超过 1.5° 属于人体主动动作或坐立转换)
+        is_posture_jump = False
+        if self.last_R is not None:
+            trace_val = max(-1.0, min(3.0, float(np.trace(rot_mat @ self.last_R.T))))
+            cos_step = 0.5 * (trace_val - 1.0)
+            if cos_step < math.cos(math.radians(1.5)):
+                is_posture_jump = True
+        self.last_R = np.copy(rot_mat)
         
+        # 2. 瞬时动作与突跳快速切断门禁: 任何突发动作立刻打断静止状态
+        if w_norm >= self.omega_thresh or is_posture_jump:
+            self.consecutive_still_count = 0
+            self.omega_history.clear()
+            self.still_start_R = None
+            self.still_start_t = None
+            self.still_start_e = None
+            return None
+            
+        self.omega_history.append(w_norm)
         if len(self.omega_history) < self.window_size:
             return None
             
         mean_omega = float(np.mean(self.omega_history))
         var_omega = float(np.var(self.omega_history))
         
-        # 判定是否处于静止状态: 角速度低且方差极小 (处于白噪声水平)
+        # 2. 滑动窗口统计平稳性判定 (角速度均值与方差均处于基底噪声水平)
         is_still = (mean_omega < self.omega_thresh) and (var_omega < (self.omega_thresh * 0.5) ** 2)
         
         if is_still:
+            if self.consecutive_still_count == 0:
+                self.still_start_R = np.copy(rot_mat)
+                self.still_start_t = t
+                self.still_start_e = current_e
+                
             self.consecutive_still_count += 1
-            # 将传感器机体角速度转换到世界坐标系: omega_world = R_raw @ omega_local
-            omega_world = rot_mat @ ang_vel
-            yaw_rate_world = float(omega_world[1])  # Y 轴 (世界竖直轴)
-            self.still_rate_accumulator.append(yaw_rate_world)
+            elapsed = t - self.still_start_t
             
-            # 只有在持续静止超过门限时长 (>= 3.0s)，且间隔一定帧数 (如每 1.0s / 10 帧) 才触发一次更新
-            if self.consecutive_still_count >= self.min_still_frames:
-                # 每 10 帧更新一次，避免 10 Hz 相关噪声过度驱动卡尔曼滤波器
-                if (self.consecutive_still_count % 10) == 0:
-                    N_still = min(len(self.still_rate_accumulator), 150)
-                    recent_rates = list(self.still_rate_accumulator)[-N_still:]
-                    b_meas = float(np.mean(recent_rates))
+            # 3. 达到最小连续静止时长门槛 (>= 2.5s)
+            if elapsed >= self.min_still_sec:
+                # 每 5 帧 (0.5s) 输出一次平滑测量
+                if (self.consecutive_still_count % 5) == 0:
+                    diff_R = rot_mat @ self.still_start_R.T
+                    delta_yaw = math.atan2(float(diff_R[0, 2]), float(diff_R[2, 2]))
+                    raw_rate = delta_yaw / elapsed  # rad/s
                     
-                    # 动态白噪声标准误估计
-                    noise_std = float(np.std(recent_rates)) if len(recent_rates) > 10 else 0.005
-                    stderr = noise_std / math.sqrt(N_still)
+                    # 4. 最大物理陀螺零偏保护 (25°/min): 超出该速率必然属于人体动作而非漂移
+                    if abs(math.degrees(raw_rate) * 60.0) > 25.0:
+                        self.consecutive_still_count = 0
+                        self.still_start_R = None
+                        return None
                     
-                    # 3-sigma 统计死区门限 (至少 1.5°/min，防止零漂时白噪声均值泄漏)
-                    deadband_rad_s = max(math.radians(1.5 / 60.0), 2.5 * stderr)
-                    if abs(b_meas) < deadband_rad_s:
-                        b_meas = 0.0
+                    # 5. 自适应时间不确定度死区门限 (防止零漂白噪声发散)
+                    rate_uncertainty = 0.008 / elapsed
+                    deadband_rad_s = max(math.radians(0.6 / 60.0), 1.8 * rate_uncertainty)
                     
-                    var_b = max(stderr ** 2, 2.5e-7)
-                    return (b_meas, var_b)
+                    if abs(raw_rate) < deadband_rad_s:
+                        filtered_rate = 0.0
+                    else:
+                        filtered_rate = raw_rate
+                        
+                    var_b = max(rate_uncertainty ** 2, 1e-8)
+                    target_e = float((self.still_start_e + delta_yaw + math.pi) % (2.0 * math.pi) - math.pi)
+                    
+                    return (filtered_rate, var_b, target_e, elapsed)
         else:
             self.consecutive_still_count = 0
-            self.still_rate_accumulator.clear()
+            self.omega_history.clear()
+            self.still_start_R = None
+            self.still_start_t = None
+            self.still_start_e = None
             
         return None
 
@@ -213,23 +247,25 @@ class DeployableBiasEstimatorV3:
                 tracker = frame.trackers[j]
                 if not tracker.valid:
                     continue
+                ch = self.kalman_filter.channels[j]
                 zaru_res = self.zaru_detectors[j].update(
                     ang_vel=tracker.ang_vel,
                     rot_mat=tracker.rot_raw,
+                    t=t,
+                    current_e=ch.e,
                     ang_acc=tracker.ang_acc
                 )
                 if zaru_res is not None:
-                    b_meas, var_b = zaru_res
-                    # 直接更新单通道零偏率状态
-                    ch = self.kalman_filter.channels[j]
-                    # 卡尔曼测量更新零偏率 b
-                    S_b = float(ch.P[1, 1] + var_b)
-                    if S_b > 1e-12:
-                        K_b = ch.P[1, 1] / S_b
-                        innov_b = b_meas - ch.b
-                        ch.b = float(ch.b + K_b * innov_b)
-                        ch.P[1, 1] = max(float((1.0 - K_b) * ch.P[1, 1]), 1e-10)
-                        self.zaru_event_counts[j] += 1
+                    b_meas, var_b, target_e, elapsed = zaru_res
+                    # 更新单通道零偏率与姿态对齐状态
+                    ch.update_stationary_observation(
+                        b_meas_rad_s=b_meas,
+                        var_rate=var_b,
+                        target_e_rad=target_e,
+                        elapsed_sec=elapsed,
+                        timestamp=t
+                    )
+                    self.zaru_event_counts[j] += 1
 
         # 2. 运行辅助分支: 直线步态摆动面检测
         if self.enable_gait:

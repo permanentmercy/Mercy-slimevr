@@ -87,41 +87,49 @@ class SingleChannelYawFilter:
         self.P = F @ self.P @ F.T + Q_dt
         self._ensure_covariance_stability()
 
+    def update_stationary_observation(self,
+                                      b_meas_rad_s: float,
+                                      var_rate: float,
+                                      target_e_rad: float,
+                                      elapsed_sec: float,
+                                      timestamp: float):
+        """
+        ZARU 静止段高精测量更新:
+        1. 漂移率状态 b 的动态测量平滑更新;
+        2. 静止姿态几何对齐与初始启动补偿 (带严格零漂保护).
+        """
+        # 1. 零偏率更新
+        alpha_b = min(0.15, 2.0 / (elapsed_sec + 10.0))
+        self.b = float((1.0 - alpha_b) * self.b + alpha_b * b_meas_rad_s)
+        self.b = float(np.clip(self.b, -self.max_b, self.max_b))
+        self.P[1, 1] = max(float(var_rate), 1e-10)
+
+        # 2. 真实物理漂移检测 (b_meas != 0.0) 下对齐 e，消除前续自由运动期间由于积分累积的残余微小误差
+        if b_meas_rad_s != 0.0 and elapsed_sec > 5.0:
+            diff_e = float((target_e_rad - self.e + math.pi) % (2.0 * math.pi) - math.pi)
+            self.e = float((self.e + 0.05 * diff_e + math.pi) % (2.0 * math.pi) - math.pi)
+            self.P[0, 0] = max(self.P[0, 0] * 0.95, 1e-6)
+
+        self._ensure_covariance_stability()
+        self.total_updates += 1
+
     def update_observation(self, z_rad: float, var_rad2: float):
         """
-        锚点观测更新步:
-          测量值 z_rad (直接观测到的当前累计偏航误差候选值)
-          测量方差 var_rad2 = sigma^2
+        步态航向观测更新步 (解耦模式: 仅更新偏航角 e，严禁交叉污染漂移率 b)
         """
         if var_rad2 <= 0.0:
-            var_rad2 = 1e-4
+            var_rad2 = 1e-2
 
-        # 观测矩阵 H = [1, 0]
-        H = np.array([[1.0, 0.0]], dtype=np.float64)
-        
-        # 观测残差（创新量）y = wrap(z - e)
+        # 观测残差 y = wrap(z - e)
         y = float((z_rad - self.e + math.pi) % (2.0 * math.pi) - math.pi)
         
-        # 创新量协方差 S = H P H^T + R
-        S = float(self.P[0, 0] + var_rad2)
-        if S <= 1e-12:
-            return
-
-        # 卡尔曼增益 K = P H^T / S  (2x1)
-        K = np.array([
-            [self.P[0, 0] / S],
-            [self.P[1, 0] / S]
-        ], dtype=np.float64)
-
-        # 状态更新
-        self.e = float((self.e + K[0, 0] * y + math.pi) % (2.0 * math.pi) - math.pi)
-        self.b = float(self.b + K[1, 0] * y)
-        self.b = np.clip(self.b, -self.max_b, self.max_b)
-
-        # Joseph 稳定协方差更新: P = (I - K H) P (I - K H)^T + K R K^T
-        I = np.eye(2, dtype=np.float64)
-        IKH = I - K @ H
-        self.P = IKH @ self.P @ IKH.T + (K * var_rad2) @ K.T
+        # 仅更新角度 e, 拒绝向漂移率 b 交叉耦合
+        S_e = float(self.P[0, 0] + var_rad2)
+        if S_e > 1e-12:
+            K_e = min(0.1, self.P[0, 0] / S_e)  # 保守增益限制
+            self.e = float((self.e + K_e * y + math.pi) % (2.0 * math.pi) - math.pi)
+            self.P[0, 0] = max(float((1.0 - K_e) * self.P[0, 0]), 1e-6)
+            
         self._ensure_covariance_stability()
         self.total_updates += 1
 

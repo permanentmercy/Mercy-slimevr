@@ -74,7 +74,74 @@ def run_strategy(session: ContinuousSessionStream,
     return metrics, tot_zaru, tot_gait
 
 
+def _evaluate_stress_scenario_worker(s_info: dict) -> dict:
+    s_id = s_info["id"]
+    tier = s_info["drift_tier"]
+    scen = s_info["scenario"]
+    seed = s_info["seed"]
+    t0 = time.time()
+    synth = ContinuousSessionSynthesizer(
+        duration_sec=1800.0,
+        sample_rate_hz=10.0,
+        drift_tier_deg_min=tier,
+        seed=seed,
+        scenario=scen
+    )
+    stream = synth.generate(session_id=s_id)
+    
+    gt = stream.ground_truth_eval
+    e_raw_t0 = gt["e_true_t0_rad"]
+    e_raw_t1 = gt["e_true_t1_rad"]
+    e_zero = {j: 0.0 for j in LOWER_BODY_JOINTS}
+    
+    # 1. Raw
+    m_raw = compute_endpoint_session_metrics(e_raw_t0, e_raw_t1, dict(e_raw_t0), dict(e_raw_t1))
+    # 2. Oracle
+    m_oracle = compute_endpoint_session_metrics(e_raw_t0, e_raw_t1, e_zero, e_zero)
+    # 3. ZARU Only
+    m_zaru, zaru_ev, _ = run_strategy(stream, enable_zaru=True, enable_gait=False)
+    # 4. Gait Only
+    m_gait, _, gait_ev = run_strategy(stream, enable_zaru=False, enable_gait=True)
+    # 5. Full
+    m_full, full_zaru_ev, full_gait_ev = run_strategy(stream, enable_zaru=True, enable_gait=True)
+    dt = time.time() - t0
+    print(f"  [CPU Worker] Finished {s_id:26s} in {dt:4.1f}s | Raw={m_raw['D_raw_deg']:5.1f}°, ZARU={m_zaru['D_corr_deg']:5.1f}°, Full={m_full['D_corr_deg']:5.1f}° (Gait Ev: {full_gait_ev})", flush=True)
+
+    return {
+        "session_id": s_id,
+        "name": s_info["name"],
+        "drift_tier": tier,
+        "D_raw": m_raw["D_raw_deg"],
+        "zaru_only": {
+            "D_corr": m_zaru["D_corr_deg"],
+            "gain": m_zaru["G_deg"],
+            "ratio": m_zaru["improvement_ratio"],
+            "events": zaru_ev
+        },
+        "gait_only": {
+            "D_corr": m_gait["D_corr_deg"],
+            "gain": m_gait["G_deg"],
+            "ratio": m_gait["improvement_ratio"],
+            "events": gait_ev
+        },
+        "full_fusion": {
+            "D_corr": m_full["D_corr_deg"],
+            "gain": m_full["G_deg"],
+            "ratio": m_full["improvement_ratio"],
+            "zaru_events": full_zaru_ev,
+            "gait_events": full_gait_ev
+        },
+        "oracle": {
+            "D_corr": m_oracle["D_corr_deg"],
+            "gain": m_oracle["G_deg"]
+        }
+    }
+
+
 def main():
+    import os
+    from concurrent.futures import ProcessPoolExecutor
+
     print("=" * 80)
     print("PHASE 9 M1r-F ABLATION & STRESS BENCHMARK SUITE")
     print("=" * 80)
@@ -128,78 +195,13 @@ def main():
         }
     ]
 
-    all_results = []
-    print("\nExecuting stress sessions across 5 ablation configurations (Raw, ZARU, Gait, Full, Oracle)...")
-
-    for s_info in stress_scenarios:
-        s_id = s_info["id"]
-        tier = s_info["drift_tier"]
-        scen = s_info["scenario"]
-        seed = s_info["seed"]
-        print(f"\n[Running Scenario] {s_info['name']} (Tier: {tier}°/min, Seed: {seed})...")
-        
-        synth = ContinuousSessionSynthesizer(
-            duration_sec=1800.0,
-            sample_rate_hz=10.0,
-            drift_tier_deg_min=tier,
-            seed=seed,
-            scenario=scen
-        )
-        stream = synth.generate(session_id=s_id)
-        
-        gt = stream.ground_truth_eval
-        e_raw_t0 = gt["e_true_t0_rad"]
-        e_raw_t1 = gt["e_true_t1_rad"]
-        e_zero = {j: 0.0 for j in LOWER_BODY_JOINTS}
-        
-        # 1. Raw
-        m_raw = compute_endpoint_session_metrics(e_raw_t0, e_raw_t1, dict(e_raw_t0), dict(e_raw_t1))
-        # 2. Oracle
-        m_oracle = compute_endpoint_session_metrics(e_raw_t0, e_raw_t1, e_zero, e_zero)
-        # 3. ZARU Only
-        m_zaru, zaru_ev, _ = run_strategy(stream, enable_zaru=True, enable_gait=False)
-        # 4. Gait Only
-        m_gait, _, gait_ev = run_strategy(stream, enable_zaru=False, enable_gait=True)
-        # 5. Full
-        m_full, full_zaru_ev, full_gait_ev = run_strategy(stream, enable_zaru=True, enable_gait=True)
-
-        res_entry = {
-            "session_id": s_id,
-            "name": s_info["name"],
-            "drift_tier": tier,
-            "D_raw": m_raw["D_raw_deg"],
-            "zaru_only": {
-                "D_corr": m_zaru["D_corr_deg"],
-                "gain": m_zaru["G_deg"],
-                "ratio": m_zaru["improvement_ratio"],
-                "events": zaru_ev
-            },
-            "gait_only": {
-                "D_corr": m_gait["D_corr_deg"],
-                "gain": m_gait["G_deg"],
-                "ratio": m_gait["improvement_ratio"],
-                "events": gait_ev
-            },
-            "full_fusion": {
-                "D_corr": m_full["D_corr_deg"],
-                "gain": m_full["G_deg"],
-                "ratio": m_full["improvement_ratio"],
-                "zaru_events": full_zaru_ev,
-                "gait_events": full_gait_ev
-            },
-            "oracle": {
-                "D_corr": m_oracle["D_corr_deg"],
-                "gain": m_oracle["G_deg"]
-            }
-        }
-        all_results.append(res_entry)
-
-        # 打印单场景对照
-        print(f"  Raw D_raw       : {m_raw['D_raw_deg']:.1f}°")
-        print(f"  Oracle          : {m_oracle['D_corr_deg']:.1f}° (Gain: {m_oracle['G_deg']:+.1f}°)")
-        print(f"  ZARU Only       : {m_zaru['D_corr_deg']:.1f}° (Gain: {m_zaru['G_deg']:+.1f}°, {m_zaru['improvement_ratio']*100:+.1f}%, Events: {zaru_ev})")
-        print(f"  Gait Only       : {m_gait['D_corr_deg']:.1f}° (Gain: {m_gait['G_deg']:+.1f}°, {m_gait['improvement_ratio']*100:+.1f}%, Events: {gait_ev})")
-        print(f"  Full (ZARU+Gait): {m_full['D_corr_deg']:.1f}° (Gain: {m_full['G_deg']:+.1f}°, {m_full['improvement_ratio']*100:+.1f}%, ZARU: {full_zaru_ev}, Gait: {full_gait_ev})")
+    print(f"\nExecuting 5 stress sessions in parallel (5 CPU workers across {os.cpu_count()} cores)...", flush=True)
+    t0_stress = time.time()
+    with ProcessPoolExecutor(max_workers=min(os.cpu_count() or 4, 5)) as executor:
+        all_results = list(executor.map(_evaluate_stress_scenario_worker, stress_scenarios))
+    
+    elapsed_stress = time.time() - t0_stress
+    print(f"\nCompleted all stress tests in {elapsed_stress:.1f}s total.", flush=True)
 
     # 打印消融对比总表
     print("\n" + "=" * 90)
