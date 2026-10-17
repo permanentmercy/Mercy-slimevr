@@ -1,132 +1,35 @@
-# SlimeVR 神经网络残差校正器 —— 团队协作与实施规划 (Plan)
+# SlimeVR CSTN 项目总计划
 
-> **文档定位**：团队协作计划书与工程路线图，持续更新各阶段进展、数据规范与交付基准。  
-> **更新时间**：2026-10-17  
-> **网络环境约定**：外部资产与开源库拉取遇网络受限时，统一使用本地代理端口 `http://127.0.0.1:7892`。
+> **更新时间**：2026-10-17
+> **目标（2026-10-17 修订）**：一次 reset 后连续运行至少 30 分钟，使四颗下肢 IMU 从开始到结束的累计偏航误差增长总量低于 Raw；不以短窗或全程逐帧平均误差作为主验收。HMD / VD 上身参考只作辅助观测。
+> **网络约定**：下载遇到网络阻断时使用 `http://127.0.0.1:7892`。
 
----
+本文件是阶段索引。每阶段的子计划与执行结果保存在各自目录；见 [public 说明](README.md)。
 
-## 一、 项目背景与核心技术指标
+## 当前状态与依赖
 
-针对 SlimeVR 6 轴 IMU 方案在下半身动捕中的**累积偏航漂移（Yaw Drift）**与**足部滑步（Foot Skating）**问题，本项目构建一套在服务端实时运行的紧凑型因果时空神经网络（CSTN）。该网络通过 Quest 3 上半身视觉锚点与下半身 IMU 数据时空融合，在每帧输出姿态四元数增量残差、置信度门控与足部触地概率。
+- **Phase 1–4**：v1 原型、训练、ONNX 工程基线及 v2 数据契约有完成记录。
+- **Phase 5**：服务端已有桥接骨架，正进入正确特征映射（124 维）、实际 ONNX 探针推理和影子吞吐链路开发。**（并行工程重心）**
+- **Phase 6**：D3c 在完整逐帧数据和新源序列上验证了连续模型 B；当前最长 5 秒片段未见可用收益。物理慢偏置 C 的世界偏航补偿误置于局部右乘，且脚接触未证明腿段静止，故不能据其退化裁定正确物理方案无效。精度目标未验收结项，后续 [D3d 坐标与观测核验](phase-06-accuracy-baseline/plan.md)；现有权重仅作影子探针，不启用在线姿态修改。
+- **Phase 7**：合成回放已有记录；依赖 Phase 5 真实服务端工程打通后进行全链路 ≤20 ms 延迟验收。**（紧跟 Phase 5）**
+- **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
+- **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：几何单测和状态滤波原型已完成；M1r/M1r-F 可部署频域与静止段 ZARU 零偏估计器已完成 10 组 30 分钟连续会话闭环评测，取得 **+84.0% 终点净收益改善** ($D_{\text{raw}}=199.5^\circ \to D_{\text{corr}}=31.9^\circ$)，95% CI 严格大于零，判定 **PASS**。实机 ≥30 分钟端点验收待推进至 Phase 8。
 
-### 核心交付指标 (KPI)
+## 阶段目录
 
-| 指标项 | 验收门槛 | 标称目标 | 验证方式 |
-| :--- | :--- | :--- | :--- |
-| **模型网络参数量** | $\le 2.0 \times 10^6$ (2.0 M) | $\sim 1.54$ M (Hidden 256) / $\sim 0.97$ M (Hidden 96) | `sum(p.numel())` 统计 |
-| **单帧推理耗时** | $\le 2.0$ ms (GPU FP16) / $\le 4.5$ ms (CPU ONNX) | $< 1.8$ ms (GPU) / $< 2.4$ ms (CPU) | 1000 帧流式推理统计均值 |
-| **全链路端到端延迟** | $\le 20.0$ ms | $< 18.0$ ms | IMU 采样到 VRChat 接收骨骼 |
-| **关节位置误差 (MPJPE)** | $\le 45.0$ mm | $< 38.0$ mm | DIP-IMU / AMASS 测试集评测 |
-| **偏航漂移消除率** | $\ge 88.0\%$ | $> 92.0\%$ | 注入 $10^\circ$/min 漂移测试残差压制 |
-| **足底触地判别 F1** | $\ge 93.0\%$ | $> 95.0\%$ | 动捕接触真值二分类混淆矩阵 |
-| **足部滑步抑制率** | $\ge 80.0\%$ | $> 85.0\%$ | 静态站立时脚踝世界坐标漂移削减 |
+| 阶段 | 子计划 | 执行结果 | 状态 |
+|---|---|---|---|
+| Phase 1–3：v1 原型、训练与 ONNX 工程基线 | [plan.md](phase-01-03-v1-prototype/plan.md) | [results.md](phase-01-03-v1-prototype/results.md) | 已归档 |
+| Phase 4：v2 数据契约与调研 | [plan.md](phase-04-v2-contract-research/plan.md) | [results.md](phase-04-v2-contract-research/results.md) | 已完成契约 |
+| Phase 5：服务端影子桥接 | [plan.md](phase-05-server-shadow-mode/plan.md) | [results.md](phase-05-server-shadow-mode/results.md) | 并行工程重心 |
+| Phase 6：序列隔离评测与补偿精度改进 | [plan.md](phase-06-accuracy-baseline/plan.md) | [results.md](phase-06-accuracy-baseline/results.md) | **D3c 复核：B 无收益，C 待修正** |
+| Phase 7：合成回放与离线验收 | [plan.md](phase-07-replay-validation/plan.md) | [results.md](phase-07-replay-validation/results.md) | 紧跟 Phase 5 |
+| Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
+| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **M1r/M1r-F 评测通过 (PASS)** |
 
----
+## 当前精度结论
 
-## 二、 阶段路线图与当前进展 (Roadmap)
-
-```
-[Phase 1: 数据准备与骨骼几何] (100%全量就绪 √)
-  ├─ [√] 接入 SMPL-H 几何模型 (male / female / neutral，共 250 MB)
-  ├─ [√] 建立 HuggingFace 高并发多线程拉取器 (16 线程，走 7892 代理)
-  ├─ [√] 批量同步 AMASS 38 个高质量子集至 ./database (16,834 动作序列，1.81 GB)
-  └─ [√] 构建全量仿真加噪与切窗流水线 (全部 16,785 序列，165,229 窗口，330.5 万帧，生成 train.npz/val.npz)
-
-[Phase 2: 离线多任务训练] (全量训练完成 √)
-  ├─ [√] 多任务 CSTN 架构与解耦输出头实现 (corrector/model.py)
-  ├─ [√] 符号不变性四元数损失与解剖学约束 (corrector/loss.py)
-  ├─ [√] 单元与工程合规验收脚本 (corrector/acceptance.py 全部通过)
-  └─ [√] 基于 RTX 4070 GPU 完成 165,229 样本全量多任务训练 (最优 Val Loss: 0.0586, 触地 F1: 95.8%, 测地角残差: 0.153°)
-
-[Phase 3: 模型轻量化与 ONNX 部署] (部署模型已导出 √)
-  ├─ [√] 单帧无损流式 ONNX 递归导出器 (corrector/export.py)
-  ├─ [√] 导出部署模型 artifacts/cstn_compact_expanded_best.onnx (体积 3.99 MB <= 8.0 MB 预算)
-  └─ [√] 单线程 CPU ONNX 延迟实测验收 (均值 0.40 ms，P95 0.54 ms，优于 <= 4.5 ms 门槛)
-
-[Phase 4: 跨域与物理接触评测]
-  ├─ [ ] 接入真实传感器 DIP-IMU 测试集交叉检验
-  └─ [ ] 物理运动学仲裁器与 ZUPT 足锁状态机集成测试
-
-[Phase 5: 服务端中继联调]
-  ├─ [ ] 编写独立 OSC/VMC 桥接守护进程 (UDP 39539 -> 9000)
-  └─ [ ] SlimeVR Server + VRChat 联机全身追踪实机验证
-```
-
----
-
-## 三、 数据集组织规范与目录结构 (`./database`)
-
-项目所有原始动捕数据、几何模型与预处理张量统一定义在 `./database` 目录下：
-
-```
-database/
-├── download.py                         # 高并发多线程数据拉取器
-├── smplh/                              # SMPL-H 基础骨骼几何体型参数 (已就绪)
-│   ├── male/model.npz                  # 男性骨骼模型 (87.2 MB)
-│   ├── female/model.npz                # 女性骨骼模型 (87.2 MB)
-│   └── neutral/model.npz               # 中性骨骼模型 (87.2 MB)
-├── amass/
-│   └── HumanML3D_SMPLH52/              # AMASS 52 关节动捕序列 (100%全量已同步，16,834 序列)
-│       ├── 0000/ ~ 0022/               # CMU 日常动作子集 (行走、转身、起坐、跳跃等 23 组)
-│       └── M000/ ~ M014/               # HDM05 技巧动作子集 (跑跳、体操、非稳态姿态等 15 组)
-└── processed/                          # 仿真加噪后的标准训练/验证张量 (100%全量已生成)
-    ├── train.npz                       # 全量训练集 [123949, 20, 135] (415.51 MB)
-    ├── val.npz                         # 全量验证集 [41280, 20, 135] (138.42 MB)
-    ├── subset_train.npz                # 冒烟小样本 [72, 20, 135]
-    ├── subset_val.npz                  # 冒烟小样本 [24, 20, 135]
-    └── test_dip.npz                    # 跨域真实传感器测试集 (待生成)
-```
-
----
-
-## 四、 核心数据契约与接口定义 (Input / Output Contract)
-
-为确保模型训练、ONNX 部署与后续 SlimeVR 服务端各模块无缝衔接，严格遵循以下契约：
-
-### 1. 输入特征张量 `X_in: [B, T, 135]`
-采用 8 身体流通道规范，统一右手世界坐标系（重力指向 $-Z$）：
-* **流 0 (头部参考锚)**：17 维（相对位置 3，6D 连续旋转 6，世界线速度 3，世界角速度 3，有效标志 1，时效 1）
-* **流 1 (躯干：胸部 + 髋部)**：28 维（胸部 IMU 14 维 + 髋部 IMU 14 维）
-* **流 2, 3 (双肘/双手)**：各 17 维（左/右手 6DoF 视觉观测）
-* **流 4, 5 (双大腿)**：各 14 维（左/右大腿 IMU 读数与局部姿态）
-* **流 6, 7 (双小腿/双足)**：各 14 维（左/右小腿 IMU 读数与局部姿态）
-* **足端加速度模长附加项**：$2 \times 2 = 4$ 维（双足线加速度动态模长偏离度）
-
-### 2. 输出解耦头
-* **姿态残差 `dq: [B, T, 6, 4]`**：6 处下半身关节点单位四元数增量，物理限幅在 $\pm 8^\circ$ 内。
-* **门控置信度 `gate: [B, T, 6]`**：Sigmoid 激活，各节点当前预测可信度权重；若 $< 0.3$ 则自动旁路跳过。
-* **触地判定 `contact: [B, T, 2]`**：Sigmoid 激活，双足当前帧支撑相/触地概率。
-
----
-
-## 五、 团队协作指令手册
-
-1. **增量拉取/继续同步数据**：
-   ```powershell
-   python -u database/download.py --threads 16
-   ```
-2. **执行模型工程合规验收测试**：
-   ```powershell
-   python -m corrector.acceptance
-   ```
-3. **冒烟训练验证流水线**：
-   ```powershell
-   python -m corrector.train artifacts/smoke_train.npz artifacts/smoke_corrector.pt --epochs 2 --hidden 96 --batch-size 4
-   ```
-
-4. **AMASS 小样本训练与验证**：
-   ```powershell
-   python -m corrector.prepare_amass_subset --sequences 12 --windows-per-sequence 8 --window 20 --stride 5
-   python -u -m corrector.train database/processed/subset_train.npz artifacts/amass_subset96.pt --epochs 10 --hidden 96 --batch-size 12
-   ```
-
-5. **全量多任务训练 (标准时序大模型实验日志样式，含 AMP 混合精度与 EarlyStopping)**：
-   ```powershell
-   python -u -m corrector.train database/processed/train.npz artifacts/cstn_compact_expanded.pt --val-data database/processed/val.npz --epochs 20 --batch-size 256 --hidden 96 --patience 3 --print-iters 100
-   ```
-4. **编译 LaTeX 全套技术规范文档**：
-   ```powershell
-   cd latex
-   xelatex model_training_specification.tex
-   ```
+- **Phase 9 M0/M1 复核**：世界左乘与共轭右乘的随机姿态数学单测已完成。`99.4%` 是向滤波器输入 `真实漂移 + 0.5° 噪声` 的理想仿真上限；M1 的 `-20.7%` 来自含真值泄漏的输入，且旧 CSTN 对照是假设常数修正，不能解释为可部署模型的精度结论。现有报告 `PASS` 固定写入，已在[复核结果](phase-09-stateful-bias-model/results.md)中撤销判定。真实 30 分钟终点收益未知。
+- **D3c 连续模型 B**：在 796 条完整逐帧序列（约 16.3 万帧）上训练；反事实方向一致率为 **48.97%**（开发集）与 **51.16%**（新源序列），中位数预测/真值差值比约 **0.006%**。该模型在当前短片段未展示可用补偿，不能外推为分钟级或所有长期估计器均无效。
+- **C 评测无效的关键原因**：世界坐标注入的偏航漂移应由世界逆旋转左乘修正；现代码把世界慢偏航右乘到局部残差，并用脚接触/小腿阈值更新大腿与小腿。10°/min 退化约 0.19°、零漂移退化约 0.08° 是当前实现的结果，不能归因于正确坐标的偏置滤波器。
+- **工程安全边界**：所有权重仍仅作 Phase 5 影子探针，严禁在线覆写下肢姿态；详见 [Phase 6 复核](phase-06-accuracy-baseline/results.md)。
