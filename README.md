@@ -1,67 +1,87 @@
-# SlimeVR 神经网络时空残差校正器 (AI Kinematics Residual Corrector)
+# SlimeVR 神经运动学与偏航状态估计原型
 
-> **基于因果时空网络（CSTN）的 SlimeVR 6DoF 偏航累积漂移抑制与足部零速锁足（ZUPT）系统**  
-> **适用硬件场景**：Meta Quest 3（上半身 6DoF 视觉零漂移锚点） + SlimeVR 下半身 6 轴 IMU（无磁力计方案）  
-> **状态**：Phase 1 ~ Phase 3 全部完成交付（全量 16,785 条 AMASS 动捕序列训练收敛，流式 ONNX 单核 CPU 推理耗时 0.40 ms）
-
----
-
-## 一、 项目背景与解决的行业痛点
-
-SlimeVR 在 VR 社区被广泛使用，其核心优势是采用低成本 6 轴 IMU 传感器（如 BMI160 / BMI270 / LSM6DSV）。为了避免室内复杂电磁环境对磁力计的严重干扰，SlimeVR 普遍禁用地磁计。
-
-然而，**禁用磁力计意味着缺乏绝对物理航向真北，下半身 IMU 的偏航角（Yaw）必然会随时间产生积分发散漂移**。
-* **传统体验痛点**：玩家在 VRChat 中游玩 10~15 分钟，双腿和膝盖朝向便会明显扭曲变形（甚至出现扭麻花），脚底在站立和行走时严重滑步（Foot Skating），必须频繁长按手柄进行“快速重置校准（Quick Reset）”。
-* **本方案解决方案**：
-  利用 Quest 3 头显和双手手柄**绝对不会漂移的 6DoF 空间位姿作为几何锚点**，构建极轻量因果时空神经网络（CSTN）。模型以 60Hz/100Hz 逐帧捕获下半身 IMU 读数与上半身视觉锚点的动力学差异，在后台全自动推算微小四元数残差与足底触地状态，**实现无需人工干预的后台隐式自适应纠偏与物理锁足**。
+> **项目定位**：面向 SlimeVR 6DoF 下肢 IMU 的偏航漂移研究、离线评测与服务端影子接入原型。
+> **当前状态**：v1 CSTN 的合成训练与 ONNX 工程基线已完成；Phase 9 的 M1r 在 10 组 × 30 分钟合成会话上有平均正收益，但零漂安全测试失败、步态辅助未触发，阶段通过判定已撤销。真实硬件、服务端端到端和在线姿态修正仍未验收，所有模型继续保持影子模式。
+> **协作记录**：阶段计划与结果统一归档在 [`public/`](public/README.md)。
 
 ---
 
-## 二、 核心性能指标与交付成绩单 (KPI Benchmarks)
+## 一、 项目背景与研究范围
 
-基于本地 NVIDIA GeForce RTX 4070 Laptop GPU 并在 100% AMASS 全量数据集（16,785 条序列，165,229 个时空窗口，330.5 万帧动作流）上完成训练收敛，实测交付指标如下：
+SlimeVR 使用低成本 6 轴 IMU 传感器（如 BMI160、BMI270 和 LSM6DSV）。为减少室内电磁环境对磁力计的影响，常见配置不使用地磁计。
 
-| 评估维度 | 核心物理指标 | 标称验收门槛 | **本项目实测交付值** | 体验提升分析 |
-| :--- | :--- | :---: | :---: | :--- |
-| **偏航漂移消除** | 关节测地角误差 (`angle_err`) | $\le 0.50^\circ$ | **$0.1533^\circ$** (约 9 弧分) | 处于肉眼完全不可感知的亚度级精度，彻底告别下半身偏转扭曲。 |
-| **足底抗滑步** | 触地判别 F1 (`contact_f1`) | $\ge 93.0\%$ | **$95.80\%$** | 越过 95% 标称线，为后续零速更新（ZUPT）状态机提供极高可靠性。 |
-| **单帧推理耗时** | 单线程 CPU ONNX 延迟 | $\le 4.50$ ms | **$0.40$ ms** (P95: 0.54 ms) | 仅占 60Hz 帧周期的 2.4%，完全不挤占 SteamVR 和大型游戏 CPU 资源。 |
-| **网络参数规模** | 模型可学习参数量 | $\le 2.00$ M | **$0.97$ M** (Hidden 96) | 架构高度精简，内存占用极低。 |
-| **部署模型体积** | 流式 ONNX 文件体积 | $\le 8.00$ MB | **$3.99$ MB** | 轻量化独立部署，可直接被 C++/Rust/Java 服务端调用。 |
-| **数值一致性** | ONNX vs PyTorch 8帧递归误差 | $\le 10^{-4}$ | $\text{atol} \le 2\times 10^{-5}$ | 严格保证长时递归滚动下计算图数学等价性。 |
+然而，**缺少磁力计会使绝对航向约束变弱，下肢 IMU 的偏航误差可能随时间累积**。具体漂移速度取决于传感器、融合器、安装和动作，不能仅凭短窗或合成数据外推到真实使用。
+
+* **研究问题**：能否利用 HMD/VD 上身观测、四路腿部 IMU 的运动上下文，以及可检测的静止窗口，估计四颗传感器的慢变偏航偏置。
+* **当前路线**：保留 v1 CSTN 作为短窗残差与工程基线；新主线采用四路显式慢偏移状态、静止段陀螺零偏估计（ZARU）和带条件的步态辅助观测。
+* **安全边界**：HMD/VD 只作为带质量标记的辅助观测，不被假设为绝对无漂移锚点；模型输出在实机独立真值和服务端链路验收前不得直接覆写 Avatar 姿态。
 
 ---
 
-## 三、 全局工程架构与目录规范
+## 二、 已有证据与当前验收状态
 
-本项目采用高内聚、模块化架构设计。官方前后端与驱动、固件维持独立子系统隔离，**所有与神经网络模型相关的算法代码、数据集、检查点与技术文档统一定义并封装在 `ai_corrector/` 专属目录中**：
+### v1 CSTN 工程基线（合成数据 / 工程验收）
+
+基于本地 NVIDIA GeForce RTX 4070 Laptop GPU，v1 记录处理了 16,785 条有效 AMASS 序列、165,229 个窗口和约 330.5 万帧动作流。以下指标证明训练与部署工程链路可运行，**不证明真实 IMU 长期偏航、脚滑或 VRChat 体验已经改善**：
+
+| 指标 | 结果 | 证据边界 |
+| :--- | :---: | :--- |
+| 合成残差角误差 (`angle_err`) | **$0.1533^\circ$** | 合成标签拟合；不是实机漂移误差 |
+| 合成触地分类 F1 (`contact_f1`) | **95.80%** | 合成接触代理；不是已接入的 ZUPT 状态机 |
+| 单线程 CPU ONNX 延迟 | 均值约 **0.397 ms**，P95 约 **0.610 ms** | 模型推理冒烟；不含采样、无线、服务端和求解链路 |
+| 模型规模 / 紧凑 ONNX | **约 0.97M / 3.99 MB** | v1 Hidden 96 工程产物 |
+| PyTorch/ONNX 8 帧递归对齐 | `atol ≤ 2×10⁻⁵` | 数值一致性检查 |
+
+### Phase 9 M1r/M1r-F 状态估计原型（合成长会话）
+
+在 10 组、每组 30 分钟的跨工况合成会话上，使用无真值泄漏的 `FrameV3` 输入评估静止段零偏估计器：
+
+| 指标 | 结果 |
+| :--- | :---: |
+| Raw `D_raw` → M1r `D_corr` | **199.46° → 31.85°** |
+| 净收益 / 改善率 | **+167.60° / 84.0%** |
+| 95% Bootstrap CI（净收益） | **[+70.02°, +263.65°]** |
+| 零漂移安全性 | **失败**：两条零漂会话均恶化约 25–31° |
+| 步态辅助 | 10 条会话触发 0 次，未证明有效 |
+
+这组结果只支持“输入隔离和显式状态滤波器已具备可运行原型”的结论。仿真按世界漂移率构造陀螺偏置，不能代表固定机体系硬件零偏；机器 `PASS` 漏掉零漂安全否决，已在 [Phase 9 复核](public/phase-09-stateful-bias-model/results.md)中撤销。真实裸陀螺链路、≥30 分钟实机会话、独立姿态真值和服务端端到端延迟尚未验收。
+
+---
+
+## 三、 工程结构
+
+项目按功能划分目录。官方前后端、驱动和固件保持独立；算法、评测和阶段文档分别放在 `ai_corrector/` 与 `public/`：
 
 ```
 h:/program/slimevr/
-├── ai_corrector/                       # 【神经运动学修正器全套组件 (AI Subproject)】
-│   ├── corrector/                      # 核心 AI 算法 (CSTN 模型、测地损失、GPU 训练、流式 ONNX 导出、权重生命周期)
+├── ai_corrector/                       # 神经运动学修正器相关组件
+│   ├── corrector/                      # CSTN、v2/v3 契约、状态滤波、ZARU、评测与 ONNX 工具
 │   ├── database/                       # 动捕数据库 (SMPL-H 体型参数、AMASS 1.68 万序列、加噪处理张量、下载器)
 │   ├── checkpoints/                    # 本地分层权重存储 (best/, latest/, top_k/，非 Git 隔离)
-│   ├── artifacts/                      # 导出部署模型与基准评测报告 (cstn_best.onnx, report.json)
+│   ├── artifacts/                      # 本地模型与机器评测报告（非 Git）
 │   ├── latex/                          # 模型数学证明与技术规范 LaTeX 单一源
 │   ├── .model-deps/                    # 本地 ONNX/ONNXRuntime 运行依赖
-│   └── README.md                       # 神经模型专属全套使用文档
+│   └── README.md                       # 神经模型使用文档
 ├── server/                             # SlimeVR Server 服务端 (Kotlin/Gradle) 与 GUI 前端控制台 (Electron/React)
 ├── driver/                             # SlimeVR SteamVR C++ 驱动源码
 ├── firmware/                           # SlimeVR 追踪节点单片机固件 (nRF52840 / ESP)
 ├── scripts/                            # 项目工程脚本与辅助工具
 ├── public/                             # 【团队协作中心】
-│   └── plan.md                         # 核心路线图、数据契约接口定义与团队协作执行手册
+│   ├── plan.md                         # 总路线图与当前状态
+│   └── phase-*/                         # 各阶段独立 plan.md / results.md
 ├── BUILD-REPORT.md                     # 本地驱动与服务端环境构建执行报告
 └── .gitignore                          # 完善的排除规则 (隔离大张量、二进制权重与外部子仓库)
 ```
 
 ---
 
-## 四、 核心数学原理与输入输出数据契约
+## 四、 数据契约与模型概要
 
-### 1. 输入特征张量 `X: [Batch, Time, 135]`
-统一右手坐标系（重力矢量指向 $-Z$），每帧由 8 个解耦的人体观测流组合而成：
+仓库同时保留两个契约版本，不能混用：
+
+### 1. v1 CSTN 输入：`X: [Batch, Time, 135]`
+
+这是 Phase 1–3 的短窗残差基线。统一右手坐标系（重力矢量指向 $-Z$），每帧由 8 个解耦的人体观测流组合而成：
 * **流 0 (头部 HMD 视觉锚)**：17 维（相对位置 3，6D 连续旋转 6，世界线速度 3，世界角速度 3，有效标志 1，时效 1）
 * **流 1 (躯干骨骼：胸部 + 骨盆 IMU)**：28 维（胸部 IMU 14 维 + 骨盆 IMU 14 维）
 * **流 2, 3 (双手手柄视觉定位)**：各 17 维（左/右手 6DoF 视觉观测位姿与速度）
@@ -69,25 +89,32 @@ h:/program/slimevr/
 * **流 6, 7 (双小腿 IMU)**：各 14 维（左/右小腿局部连续旋转 6，角加速度 3，角速度 3，有效位 1）
 * **足端加速度偏离量附加项**：$2 \times 2 = 4$ 维（双足动态模长残差）
 
-### 2. 输出三解耦头与损失函数设计
-网络前向传播同时驱动三个解耦的任务头：
-* **姿态残差四元数 $\Delta q \in \mathbb{H}^6$**：预测 6 处下半身关节点单位四元数增量，经由 $\tanh$ 硬约束在 $\pm 8.0^\circ$ 物理限幅内。  
+### 2. v2/v3 部署时序契约：124 维基础流
+
+Phase 9 使用 `contract_v2.py` / `contract_v3.py` 对齐在线输入：前四路 HMD/VD 视觉流共 `4×17=68` 维，后四路下肢 IMU 流共 `4×14=56` 维，合计 124 维；v3 另带时间戳、reset/重标定、有效性、数据年龄和追踪质量等时序状态。`V2ToV3Adapter` 与原始字段映射是当前服务端接入的关键验收项。
+
+### 3. v1 CSTN 输出与限制
+
+v1 网络前向传播同时驱动三个解耦的任务头：
+* **姿态残差四元数 $\Delta q \in \mathbb{H}^6$**：预测 6 处下半身关节点单位四元数增量，经由 $\tanh$ 硬约束在 $\pm 8.0^\circ$ 物理限幅内。
   **四元数双重覆盖性测地损失**：
   $$\mathcal{L}_{\text{rot}} = \frac{1}{6} \sum_{j=1}^6 \left(1 - \langle \Delta q_j^{\text{pred}}, \Delta q_j^{\text{true}} \rangle^2\right)$$
-  对 $q$ 与 $-q$ 具备完全严格的符号不变性，彻底规避欧氏 MSE 引起的梯度剧烈震荡。
-* **可靠性门控权重 $\text{gate} \in [0, 1]^6$**：Sigmoid 激活，输出当前预测置信度；当遇到剧烈非稳态动作时自动归零旁路，避免网络误干预。
-* **足底触地判别 $\text{contact} \in [0, 1]^2$**：Sigmoid 激活，输出双脚当前帧处于支撑相（触地）的置信度。当 $\ge 0.5$ 时在下游触发零速修正（ZUPT），瞬间锁死脚踝世界坐标。
+  对 $q$ 与 $-q$ 不敏感，可减少欧氏 MSE 在四元数符号切换时产生的训练不稳定。
+* **可靠性门控权重 $\text{gate} \in [0, 1]^6$**：Sigmoid 激活，输出当前预测置信度；低置信度时降低修正影响。
+* **足底触地判别 $\text{contact} \in [0, 1]^2$**：Sigmoid 激活，输出双脚当前帧处于支撑相（触地）的置信度。该输出目前只是模型头；完整 ZUPT/脚锁状态机尚未在服务端实现或验收。
+
+Phase 9 的主线不再把逐帧 3D 残差作为长期漂移解法，而是维护四路独立慢偏移状态 `e_i, b_i, P_i`，只在可靠锚点或逐颗传感器静止窗口出现时更新。
 
 ---
 
-## 五、 本地模型权重与检查点管理系统 (Non-Git Weights Lifecycle)
+## 五、 本地权重与检查点管理 (Non-Git Weights Lifecycle)
 
 为避免数以 GB 计的二进制模型写入 Git，本项目建立了专门的非 Git 本地检查点管理体系 [`ai_corrector/corrector/checkpoint.py`](ai_corrector/corrector/checkpoint.py)：
 
 ### 1. 结构与分工
-* **断点续训态 (`cstn_best_full.pt`)**：包含 PyTorch 模型、AdamW 优化器动量、Cosine 学习率调度器与 AMP 梯度缩放器，用于断点完全恢复。
-* **纯推理脱水态 (`cstn_best_infer.pt`)**：自动剥离优化器与训练态冗余张量，仅保留纯净结构和权重，体积紧凑、加载速度极快。
-* **流式部署态 (`cstn_best.onnx`)**：单帧显式状态递归输入 $(x_t, h_{t-1}, c_{t-1}) \to (\Delta q_t, \text{gate}_t, \text{contact}_t, h_t, c_t)$，无未来帧等待。
+* **断点续训态 (`cstn_best_full.pt`)**：包含 PyTorch 模型、AdamW 优化器动量、Cosine 学习率调度器与 AMP 梯度缩放器，用于恢复训练状态。
+* **纯推理脱水态 (`cstn_best_infer.pt`)**：剥离优化器与训练态冗余张量，仅保留模型结构和权重，便于推理加载。
+* **流式基线态 (`cstn_best.onnx`)**：单帧显式状态递归输入 $(x_t, h_{t-1}, c_{t-1}) \to (\Delta q_t, \text{gate}_t, \text{contact}_t, h_t, c_t)$，无未来帧等待；它是工程基线，不是已通过实机验收的生产修正器。
 
 ### 2. 管理器常用命令行工具
 ```powershell
@@ -97,15 +124,15 @@ python -m ai_corrector.corrector.checkpoint list
 # 2. 深度体检任意权重文件（查看内部张量列表、参数量、是否含优化器、训练指标溯源）
 python -m ai_corrector.corrector.checkpoint info ai_corrector/checkpoints/best/cstn_best_full.pt
 
-# 3. 将任意全量训练检查点手动脱水剥离，生成生产用轻量纯推理权重
+# 3. 将训练检查点剥离为推理用权重
 python -m ai_corrector.corrector.checkpoint strip ai_corrector/checkpoints/best/cstn_best_full.pt --output ai_corrector/checkpoints/best/cstn_best_infer.pt
 ```
 
 ---
 
-## 六、 快速上手与全链路复现指南
+## 六、 v1 工程基线复现指南
 
-> **提示**：所有模型相关操作既可在根目录通过 `ai_corrector.` 运行，也可直接进入 `ai_corrector/` 目录运行。更多详细文档请参考 [`ai_corrector/README.md`](ai_corrector/README.md)。
+> **提示**：以下命令复现的是 v1 CSTN 的数据、训练、验收和 ONNX 工程基线，不会完成真实硬件校正。所有模型相关操作既可在根目录通过 `ai_corrector.` 运行，也可直接进入 `ai_corrector/` 目录运行；具体限制见 [`ai_corrector/corrector/README.md`](ai_corrector/corrector/README.md)。
 
 ### 1. 环境准备与依赖约定
 推荐使用支持 CUDA 加速的 PyTorch 环境：
@@ -118,18 +145,18 @@ $env:HTTPS_PROXY="http://127.0.0.1:7892"
 $env:PYTHONPATH="h:\program\slimevr\ai_corrector\.model-deps;$env:PYTHONPATH"
 ```
 
-### 2. 执行工程合规性全套验收测试
+### 2. 执行工程验收测试
 ```powershell
 python -m ai_corrector.corrector.acceptance
 ```
-*自动验证：参数量预算、模型正向传播、四元数超球面单位归一化、符号不变性、流式状态递归、ONNX 对齐与延迟合规性。*
+*检查参数量预算、模型正向传播、四元数归一化、符号不变性、流式状态递归、ONNX 对齐和推理延迟；这些是工程检查，不是实机精度验收。*
 
 ### 3. 数据拉取与全量切窗流水线
 ```powershell
 # 1. 批量多线程拉取全量 38 个 AMASS 子集与 SMPL-H 几何模型 (走 7892 代理)
 python -u ai_corrector/database/download.py --threads 16
 
-# 2. 启动 10 进程并发并行切窗引擎 (自动处理 16,834 条序列并生成 train.npz / val.npz)
+# 2. 使用 10 个进程切窗 (处理本地数据并生成 train.npz / val.npz)
 python -u -m ai_corrector.corrector.prepare_dataset --per-subset-limit 0 --windows-per-sequence 10 --workers 10
 ```
 
@@ -142,7 +169,7 @@ python -u -m ai_corrector.corrector.train `
   --val-data ai_corrector/database/processed/val.npz `
   --epochs 20 --batch-size 256 --hidden 96 --patience 3 --print-iters 100
 
-# 若训练意外中断，一键秒级断点无缝续训：
+# 从检查点继续训练：
 python -u -m ai_corrector.corrector.train `
   --resume ai_corrector/checkpoints/latest/cstn_latest.pt --epochs 20
 ```
@@ -154,18 +181,36 @@ python -m ai_corrector.corrector.export `
   ai_corrector/checkpoints/best/cstn_best.onnx
 ```
 
+### 6. Phase 9 合成状态估计评测
+
+M1r/M1r-F 的 30 分钟连续会话评测由 [`execute_task_m1r.py`](ai_corrector/corrector/execute_task_m1r.py) 生成机器报告。它使用合成 `FrameV3` 流验证输入隔离和 ZARU 原型，不能替代真实设备日志：
+
+```powershell
+python -u ai_corrector/corrector/execute_task_m1r.py
+```
+
+报告默认写入被 `.gitignore` 隔离的 `ai_corrector/artifacts/m1r_deployable_bias_model_report.json`。当前服务端桥接仍未创建 ONNX session，也未把修正结果提交给 Avatar 求解器。
+
 ---
 
 ## 七、 团队协作与当前工程阶段 (Roadmap)
 
 团队持续更新的完整计划书参见 [`public/plan.md`](public/plan.md)。
 
-* [x] **Phase 1: 数据准备与骨骼几何** (SMPL-H 模型对齐、1.68 万条 AMASS 序列下载、多进程切片加噪)
-* [x] **Phase 2: 离线多任务因果训练** (符号不变性损失、RTX 4070 AMP 加速、EarlyStopping 达成 0.153° 偏角残差与 95.8% 触地 F1)
-* [x] **Phase 3: 模型轻量化与流式 ONNX 交付** (单帧状态递归 ONNX 导出、0.40 ms 极低单核 CPU 延迟验收)
-* [x] **Phase 3.5: 模型权重全生命周期管理系统** (`checkpoints/` 规范化分层流转、权重脱水瘦身、断点秒级恢复)
-* [ ] **Phase 4: 跨域与真实物理传感器评测** (接入 DIP-IMU Xsens 真实噪声集测试、ZUPT 锁足状态机联合调试)
-* [ ] **Phase 5: SlimeVR 服务端 OSC 桥接中继实机联调** (编写独立 OSC/VMC 桥接守护进程，打通 SlimeVR Server $\to$ VRChat 联机全身体感验证)
+* [x] **Phase 1–3：v1 原型、训练与 ONNX 工程基线**（AMASS/SMPL-H 流水线、CSTN、参数/数学/流式验收；指标来自合成数据和工程测试）
+* [x] **Phase 4：v2 数据契约与方案调研**（124 维部署契约、时序状态与观测边界）
+* [ ] **Phase 5：服务端影子桥接**（已有 Kotlin 钩子和配置骨架；ONNX 推理、契约映射、影子输出和状态清理待完成）
+* [ ] **Phase 6：序列隔离精度评测**（D3c 连续模型 B 当前未显示可用收益；旧 C 分支坐标/观测条件有误，不能据此否定正确物理方案）
+* [ ] **Phase 7：合成回放与离线端到端验收**（已有部分合成结果，等待服务端链路打通）
+* [ ] **Phase 8：真实设备采集与在线迁移**（尚无同步动捕、独立真值和 ≥30 分钟实机会话结果）
+* [ ] **Phase 9：四路偏航状态估计原型**（合成 10×30 分钟均值改善约 84%，但零漂安全失败、步态分支未触发；修复与实机验收待完成）
+* [x] **Phase 10：README 与阶段成果同步**（本页与 `public/` 阶段索引已对齐）
+
+### 当前结论边界
+
+- 当前结果不能证明真实 SlimeVR 偏航漂移、脚滑或 VRChat 全身体验已经改善。
+- M0 的 99.4% 理想锚点上限、M1 的 -20.7% 历史对照和 v1 的 0.1533° 合成残差不应作为实机 KPI。
+- 在 Phase 5/8 的契约、裸陀螺链路、独立真值和安全回放完成前，不在线覆写下肢姿态。
 
 ---
 
