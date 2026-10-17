@@ -1,0 +1,211 @@
+{
+  "created_at": "2026-10-17T22:50:49",
+  "sample_rate_hz": 10.0,
+  "duration_minutes": 30.0,
+  "train_sessions": [
+    {
+      "session_id": "train_session_00",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 4.607687563938285,
+        "right_thigh": -11.549791706267829,
+        "left_calf": 13.508485930470739,
+        "right_calf": -0.5342579571600545
+      }
+    },
+    {
+      "session_id": "train_session_01",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -5.813034613535837,
+        "right_thigh": -7.048093031774827,
+        "left_calf": -9.118198105465456,
+        "right_calf": -2.084355702988571
+      }
+    },
+    {
+      "session_id": "train_session_02",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -11.130351340143902,
+        "right_thigh": -1.1653145162307172,
+        "left_calf": -2.5153820617965756,
+        "right_calf": 3.0817269472970175
+      }
+    },
+    {
+      "session_id": "train_session_03",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 2.934173942699126,
+        "right_thigh": -1.9219863342018346,
+        "left_calf": -14.493900183252052,
+        "right_calf": 2.9006237517660907
+      }
+    },
+    {
+      "session_id": "train_session_04",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -13.831450845415256,
+        "right_thigh": 10.694875802647203,
+        "left_calf": 7.395009238711793,
+        "right_calf": 10.917836797347178
+      }
+    },
+    {
+      "session_id": "train_session_05",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 4.7764329272292345,
+        "right_thigh": -12.875960445519102,
+        "left_calf": -0.8856270549751439,
+        "right_calf": 10.289555564487731
+      }
+    },
+    {
+      "session_id": "train_session_06",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 7.293820865937047,
+        "right_thigh": -8.207269952236873,
+        "left_calf": 4.27601489202695,
+        "right_calf": 11.470663804813409
+      }
+    },
+    {
+      "session_id": "train_session_07",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 1.4474970076379705,
+        "right_thigh": 8.91663889657354,
+        "left_calf": -14.81673327340728,
+        "right_calf": 6.469827930603014
+      }
+    },
+    {
+      "session_id": "train_session_08",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 3.42007597771913,
+        "right_thigh": 12.892185314558713,
+        "left_calf": -7.352696063152161,
+        "right_calf": 3.4930632150487853
+      }
+    },
+    {
+      "session_id": "train_session_09",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 3.4464083869315627,
+        "right_thigh": -10.06276124269778,
+        "left_calf": -5.97026111079291,
+        "right_calf": -6.796533047795817
+      }
+    }
+  ],
+  "val_sessions": [
+    {
+      "session_id": "val_session_00",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 2.11551856135398,
+        "right_thigh": 1.9358626561452004,
+        "left_calf": -0.3467450236648393,
+        "right_calf": -4.905667396040258
+      }
+    },
+    {
+      "session_id": "val_session_01",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -9.986230712726956,
+        "right_thigh": -12.570058893345042,
+        "left_calf": 13.80677220065548,
+        "right_calf": 13.153507324578673
+      }
+    },
+    {
+      "session_id": "val_session_02",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 4.635412147952657,
+        "right_thigh": -6.081498509739022,
+        "left_calf": 0.7166124262112916,
+        "right_calf": 0.432956909824254
+      }
+    },
+    {
+      "session_id": "val_session_03",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -0.2312893680669497,
+        "right_thigh": -1.6321812555994004,
+        "left_calf": -2.8461459587652134,
+        "right_calf": -4.608174496967404
+      }
+    },
+    {
+      "session_id": "val_session_04",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 2.632448673296569,
+        "right_thigh": 9.133169501986396,
+        "left_calf": -0.8899410723629516,
+        "right_calf": -0.42912450150593356
+      }
+    }
+  ],
+  "test_sessions": [
+    {
+      "session_id": "test_session_00",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": 0.3238068349999157,
+        "right_thigh": 2.5681183750064065,
+        "left_calf": 6.338095190248271,
+        "right_calf": -5.231158733008006
+      }
+    },
+    {
+      "session_id": "test_session_01",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -7.29597359094813,
+        "right_thigh": -13.874428777885706,
+        "left_calf": 13.863652839530872,
+        "right_calf": -1.4925767491744752
+      }
+    },
+    {
+      "session_id": "test_session_02",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -11.294490076563239,
+        "right_thigh": 1.9941884924710536,
+        "left_calf": 3.735377872497391,
+        "right_calf": -11.203458581058849
+      }
+    },
+    {
+      "session_id": "test_session_03",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -4.828767109754676,
+        "right_thigh": 6.159938313088347,
+        "left_calf": -11.63766203617309,
+        "right_calf": -9.775914235804636
+      }
+    },
+    {
+      "session_id": "test_session_04",
+      "duration_sec": 1800.0,
+      "drift_rates_deg_min": {
+        "left_thigh": -0.13318715668175152,
+        "right_thigh": -8.034436637733133,
+        "left_calf": 7.507144420998749,
+        "right_calf": -6.6562840310017375
+      }
+    }
+  ]
+}
