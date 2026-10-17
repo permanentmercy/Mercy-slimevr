@@ -79,7 +79,9 @@ def build_sequence(path, rng):
     # Independent random walks: a separate offset for each lower-body sensor.
     drift = np.cumsum(rng.normal(0, np.deg2rad(.035), (len(local), 6)), axis=0)
     raw_local = local.copy()
-    z = Rotation.from_euler("z", drift.reshape(-1)).as_matrix().reshape(len(local), 6, 3, 3)
+    rotvec = np.zeros((len(local), 6, 3), dtype=np.float32)
+    rotvec[..., 2] = drift
+    z = Rotation.from_rotvec(rotvec.reshape(-1, 3)).as_matrix().reshape(len(local), 6, 3, 3)
     for k, joint in enumerate(TARGET):
         raw_local[:, joint] = np.einsum("nij,njk->nik", z[:, k], raw_local[:, joint])
     raw_world, raw_positions = world_pose(raw_local, trans)

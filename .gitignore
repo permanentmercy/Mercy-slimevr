@@ -24,7 +24,6 @@ $RECYCLE.BIN/
 .fuse_hidden*
 .directory
 .idea/
-
 # ===================== 编辑器 / IDE =====================
 *.swp
 *.swo
@@ -167,3 +166,35 @@ htmlcov/
 /external_repos/
 /.model-deps/
 /artifacts/
+
+# ===================== 数据集、人体骨骼模型与预处理张量 =====================
+# 原始动捕序列、SMPL-H 模型文件与滑动窗口张量体积过大（数 GB），严禁提交至 Git
+/database/amass/
+/database/smplh/
+/database/processed/
+*.npz
+
+# ===================== 深度学习模型权重与导出推理文件 =====================
+*.pt
+*.pth
+*.onnx
+*.tflite
+*.ckpt
+*.h5
+*.hdf5
+
+# ===================== 压缩归档文件 =====================
+*.tar
+*.tar.bz2
+*.tar.gz
+*.zip
+*.7z
+*.rar
+
+# ===================== 本地临时展示、测试产物与文档草稿 =====================
+pelican_seaside_cycling.html
+*.docx
+*.docx.bak*
+*.log
+page_*.png
+test_*.png

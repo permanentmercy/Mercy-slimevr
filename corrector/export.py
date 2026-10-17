@@ -1,8 +1,13 @@
-"""Export FP32 streaming ONNX with explicit recurrent state and parity checks."""
 import argparse
 import json
-import time
 from pathlib import Path
+import sys
+import time
+# Ensure local dependency directory is available for onnx/onnxruntime
+deps_dir = Path(__file__).resolve().parent.parent / ".model-deps"
+if deps_dir.exists() and str(deps_dir) not in sys.path:
+    sys.path.insert(0, str(deps_dir))
+
 import numpy as np
 import torch
 from torch import nn
@@ -26,7 +31,7 @@ def main():
     args = p.parse_args()
     torch.manual_seed(42)
     torch.set_num_threads(1)
-    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=True)
+    ckpt = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
     model = Corrector(Config(**ckpt["config"])).eval()
     model.load_state_dict(ckpt["state_dict"])
     wrapper = Streaming(model).eval()

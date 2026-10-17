@@ -5,8 +5,8 @@
     "parameters": 6689306,
     "fp32_state_dict_bytes": 26793746,
     "cpu_streaming_ms": {
-      "mean": 4.854778300000005,
-      "p95": 6.1545,
+      "mean": 10.678971100000004,
+      "p95": 19.0881,
       "frames": 1000
     },
     "tiny_training_loss": [
@@ -41,8 +41,8 @@
     "parameters": 974426,
     "fp32_state_dict_bytes": 3933970,
     "cpu_streaming_ms": {
-      "mean": 2.3965159000000007,
-      "p95": 3.2543,
+      "mean": 6.577381499999995,
+      "p95": 11.933,
       "frames": 1000
     },
     "tiny_training_loss": [
