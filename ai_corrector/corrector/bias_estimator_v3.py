@@ -75,16 +75,25 @@ class StationaryZARUDetector:
             yaw_rate_world = float(omega_world[1])  # Y 轴 (世界竖直轴)
             self.still_rate_accumulator.append(yaw_rate_world)
             
-            # 只有在持续静止超过门限时长后，才输出稳定的零偏观测
+            # 只有在持续静止超过门限时长 (>= 3.0s)，且间隔一定帧数 (如每 1.0s / 10 帧) 才触发一次更新
             if self.consecutive_still_count >= self.min_still_frames:
-                # 稳健中位数/均值
-                b_meas = float(np.mean(self.still_rate_accumulator[-self.min_still_frames:]))
-                # 死区阈值: 若漂移率低于 0.5°/min，视为传感器底噪，置零保护防止零漂虚假积分
-                deadband_rad_s = math.radians(0.5 / 60.0)
-                if abs(b_meas) < deadband_rad_s:
-                    b_meas = 0.0
-                var_b = 1e-6
-                return (b_meas, var_b)
+                # 每 10 帧更新一次，避免 10 Hz 相关噪声过度驱动卡尔曼滤波器
+                if (self.consecutive_still_count % 10) == 0:
+                    N_still = min(len(self.still_rate_accumulator), 150)
+                    recent_rates = list(self.still_rate_accumulator)[-N_still:]
+                    b_meas = float(np.mean(recent_rates))
+                    
+                    # 动态白噪声标准误估计
+                    noise_std = float(np.std(recent_rates)) if len(recent_rates) > 10 else 0.005
+                    stderr = noise_std / math.sqrt(N_still)
+                    
+                    # 3-sigma 统计死区门限 (至少 1.5°/min，防止零漂时白噪声均值泄漏)
+                    deadband_rad_s = max(math.radians(1.5 / 60.0), 2.5 * stderr)
+                    if abs(b_meas) < deadband_rad_s:
+                        b_meas = 0.0
+                    
+                    var_b = max(stderr ** 2, 2.5e-7)
+                    return (b_meas, var_b)
         else:
             self.consecutive_still_count = 0
             self.still_rate_accumulator.clear()
@@ -111,6 +120,10 @@ class GaitSwingPlaneDetector:
         检查 HMD 位移是否为稳定直线前进，且双腿是否存在周期性摆动。
         若条件严苛满足，返回逐路世界偏航误差观测候选: {joint: (e_meas_rad, var_rad2)}
         """
+        # 安全性门禁: 若上身 HMD / VD 有效性不足，拒绝步态推断
+        if not frame.upper_body.hmd_valid or not frame.upper_body.vd_chest_valid:
+            return {}
+
         hmd_pos = frame.upper_body.hmd_pos
         self.hmd_pos_history.append(hmd_pos)
         
@@ -121,29 +134,33 @@ class GaitSwingPlaneDetector:
         if len(self.hmd_pos_history) < self.window_size:
             return {}
             
-        # 1. 检验 HMD 位移: 起点到终点位移矢量
+        # 1. 检验 HMD 水平位移: 起点到终点在 X-Z 平面的位移矢量 (X 为横向, Z 为前后纵向)
         p_start = self.hmd_pos_history[0]
         p_end = self.hmd_pos_history[-1]
         delta_p = p_end - p_start
+        delta_horiz = np.array([delta_p[0], delta_p[2]], dtype=np.float32)
+        norm_h = float(np.linalg.norm(delta_horiz))
+        
         dt = float(len(self.hmd_pos_history)) * frame.meta.dt
-        speed = float(np.linalg.norm(delta_p[:2])) / max(dt, 1e-4)  # X-Z 平面水平速度
+        speed = norm_h / max(dt, 1e-4)  # 水平前进速度
         
         if speed < self.min_speed:
             return {}  # 速度不足或原地转圈，拒绝
             
-        # 检验位移直线度: 轨迹沿前进方向的投影方差
-        dir_walk = delta_p[:2] / max(np.linalg.norm(delta_p[:2]), 1e-6)
+        # 检验位移直线度: 轨迹沿前进方向的投影
+        dir_walk = delta_horiz / max(norm_h, 1e-6)
+        # 前进航向角 (X 轴为分母/正弦, Z 轴为余弦)
         walk_heading_rad = math.atan2(float(dir_walk[0]), float(dir_walk[1]))
         
         candidates = {}
         for j in ("left_thigh", "right_thigh"):  # 大腿摆动最显著
             omegas = np.array(self.leg_omega_history[j])  # (W, 3)
-            # 检验是否具备明显的周期性摆动 (方差显著大于静止阈值)
+            # 检验是否具备明显的周期性摆动 (X 轴前后俯仰摆动方差显著大于阈值)
             omega_std = float(np.std(omegas[:, 0]))  # 俯仰摆动轴标准差
             if omega_std > 0.3:  # 明确在迈步
                 R_raw = frame.trackers[j].rot_raw
-                # 提取大腿局部前向轴在世界平面的投影偏航
-                forward_vec = R_raw[:, 2]  # Z 轴
+                # 提取大腿局部前向轴在世界平面的投影偏航 (局部 Z 轴为前向)
+                forward_vec = R_raw[:, 2]
                 leg_heading_rad = math.atan2(float(forward_vec[0]), float(forward_vec[2]))
                 
                 # 偏航创新量 = wrap(leg_heading - walk_heading)

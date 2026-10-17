@@ -59,13 +59,15 @@ class ContinuousSessionSynthesizer:
                  duration_sec: float = 1800.0,
                  sample_rate_hz: float = 10.0,
                  drift_tier_deg_min: float = 3.0,
-                 seed: int = 123):
+                 seed: int = 123,
+                 scenario: str = "default"):
         self.duration_sec = float(duration_sec)
         self.sample_rate_hz = float(sample_rate_hz)
         self.dt = 1.0 / self.sample_rate_hz
         self.num_frames = int(self.duration_sec * self.sample_rate_hz)
         self.drift_tier = float(drift_tier_deg_min)
         self.rng = np.random.RandomState(seed)
+        self.scenario = scenario
 
     def generate(self, session_id: str) -> ContinuousSessionStream:
         t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
@@ -89,23 +91,42 @@ class ContinuousSessionSynthesizer:
             true_drift_curves[j] = lin + rw
 
         # 3. 构造宏观行为状态时间线 (按分段循环)
-        # 0: 直立静止 (Standing rest, ~60s)
-        # 1: 直线行走 (Walking forward, ~120s)
-        # 2: 端坐/侧坐休息 (Sitting / quiet, ~180s)
-        # 3: 原地转身/漫步 (Turning / wandering, ~60s)
+        # 0: 直立静止 (Standing rest)
+        # 1: 直线行走 (Walking forward)
+        # 2: 端坐/侧坐休息 (Sitting / quiet)
+        # 3: 原地转身/漫步 (Turning / wandering)
         behavior_states = np.zeros(self.num_frames, dtype=np.int32)
-        cycle_len = int(420.0 * self.sample_rate_hz)  # 7 分钟一个周期
-        for i in range(self.num_frames):
-            c_pos = i % cycle_len
-            t_in_cycle = c_pos * self.dt
-            if t_in_cycle < 60.0:
-                behavior_states[i] = 0  # 站立静止
-            elif t_in_cycle < 180.0:
-                behavior_states[i] = 1  # 直线行走
-            elif t_in_cycle < 360.0:
-                behavior_states[i] = 2  # 端坐/侧坐静止
-            else:
-                behavior_states[i] = 3  # 转身漫步
+        if self.scenario == "all_sitting":
+            behavior_states[:] = 2
+        elif self.scenario == "no_still":
+            for i in range(self.num_frames):
+                behavior_states[i] = 1 if (i // int(30.0 * self.sample_rate_hz)) % 2 == 0 else 3
+        elif self.scenario == "complex_gait":
+            cycle_len = int(240.0 * self.sample_rate_hz)
+            for i in range(self.num_frames):
+                c_pos = i % cycle_len
+                t_in = c_pos * self.dt
+                if t_in < 40.0:
+                    behavior_states[i] = 1  # 前进
+                elif t_in < 80.0:
+                    behavior_states[i] = 3  # 转身
+                elif t_in < 140.0:
+                    behavior_states[i] = 0  # 站立
+                else:
+                    behavior_states[i] = 2  # 静坐
+        else:
+            cycle_len = int(420.0 * self.sample_rate_hz)  # 7 分钟一个周期
+            for i in range(self.num_frames):
+                c_pos = i % cycle_len
+                t_in_cycle = c_pos * self.dt
+                if t_in_cycle < 60.0:
+                    behavior_states[i] = 0  # 站立静止
+                elif t_in_cycle < 180.0:
+                    behavior_states[i] = 1  # 直线行走
+                elif t_in_cycle < 360.0:
+                    behavior_states[i] = 2  # 端坐/侧坐静止
+                else:
+                    behavior_states[i] = 3  # 转身漫步
 
         # 4. 生成每帧的物理信号
         features_124 = np.zeros((self.num_frames, TOTAL_INPUT_DIM_V2), dtype=np.float32)
@@ -196,7 +217,10 @@ class ContinuousSessionSynthesizer:
             hmd_rot = rot_y_matrix(hmd_heading).astype(np.float32)
             s0 = pack_stream_17d(hmd_pos, hmd_rot, hmd_lin_vel, hmd_ang_vel, valid=1.0, age=0.0)
             vd_chest_pos = hmd_pos - np.array([0.0, 0.3, 0.0], dtype=np.float32)
-            s1 = pack_stream_17d(vd_chest_pos, hmd_rot, hmd_lin_vel, hmd_ang_vel, valid=1.0, age=0.0)
+            if self.scenario == "vd_missing":
+                s1 = pack_stream_17d(vd_chest_pos, hmd_rot, hmd_lin_vel, hmd_ang_vel, valid=0.0, age=999.0)
+            else:
+                s1 = pack_stream_17d(vd_chest_pos, hmd_rot, hmd_lin_vel, hmd_ang_vel, valid=1.0, age=0.0)
             s2 = np.zeros(17, dtype=np.float32)
             s3 = np.zeros(17, dtype=np.float32)
 
