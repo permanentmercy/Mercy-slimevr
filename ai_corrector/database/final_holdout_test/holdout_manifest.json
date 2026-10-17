@@ -1,0 +1,1726 @@
+{
+  "timestamp": "2026-10-17 21:05:49",
+  "role": "Final Independent Evaluation Holdout Set (Never seen in any training/tuning)",
+  "source": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52",
+  "subset_count": 38,
+  "sequences_per_subset": 5,
+  "total_sequences": 190,
+  "test_windows": 2221,
+  "zero_drift_windows": 2221,
+  "sha256": {
+    "test_npz": "7eb4d8be19775af6c201afa0834890ba669f6052625675f5098b1aac5badbfd5",
+    "test_zero_drift_npz": "7f1bcfe2a5709f8c7c99662eb5d88d5caab2de435cfccd12818da649532ae60b"
+  },
+  "sequences": [
+    {
+      "seq_id": 10000,
+      "seq_name": "000029",
+      "subset": "0000",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0000\\000029.npz"
+    },
+    {
+      "seq_id": 10001,
+      "seq_name": "000030",
+      "subset": "0000",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0000\\000030.npz"
+    },
+    {
+      "seq_id": 10002,
+      "seq_name": "000031",
+      "subset": "0000",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0000\\000031.npz"
+    },
+    {
+      "seq_id": 10003,
+      "seq_name": "000031_30_120",
+      "subset": "0000",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0000\\000031_30_120.npz"
+    },
+    {
+      "seq_id": 10004,
+      "seq_name": "000032",
+      "subset": "0000",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0000\\000032.npz"
+    },
+    {
+      "seq_id": 10005,
+      "seq_name": "000130",
+      "subset": "0001",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0001\\000130.npz"
+    },
+    {
+      "seq_id": 10006,
+      "seq_name": "000130_0_120",
+      "subset": "0001",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0001\\000130_0_120.npz"
+    },
+    {
+      "seq_id": 10007,
+      "seq_name": "000132",
+      "subset": "0001",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0001\\000132.npz"
+    },
+    {
+      "seq_id": 10008,
+      "seq_name": "000133",
+      "subset": "0001",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0001\\000133.npz"
+    },
+    {
+      "seq_id": 10009,
+      "seq_name": "000133_30_90",
+      "subset": "0001",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0001\\000133_30_90.npz"
+    },
+    {
+      "seq_id": 10010,
+      "seq_name": "000228_0_300",
+      "subset": "0002",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0002\\000228_0_300.npz"
+    },
+    {
+      "seq_id": 10011,
+      "seq_name": "000229",
+      "subset": "0002",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0002\\000229.npz"
+    },
+    {
+      "seq_id": 10012,
+      "seq_name": "000230",
+      "subset": "0002",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0002\\000230.npz"
+    },
+    {
+      "seq_id": 10013,
+      "seq_name": "000230_0_120",
+      "subset": "0002",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0002\\000230_0_120.npz"
+    },
+    {
+      "seq_id": 10014,
+      "seq_name": "000231",
+      "subset": "0002",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0002\\000231.npz"
+    },
+    {
+      "seq_id": 10015,
+      "seq_name": "000328",
+      "subset": "0003",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0003\\000328.npz"
+    },
+    {
+      "seq_id": 10016,
+      "seq_name": "000329",
+      "subset": "0003",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0003\\000329.npz"
+    },
+    {
+      "seq_id": 10017,
+      "seq_name": "000330",
+      "subset": "0003",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0003\\000330.npz"
+    },
+    {
+      "seq_id": 10018,
+      "seq_name": "000331",
+      "subset": "0003",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0003\\000331.npz"
+    },
+    {
+      "seq_id": 10019,
+      "seq_name": "000332",
+      "subset": "0003",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0003\\000332.npz"
+    },
+    {
+      "seq_id": 10020,
+      "seq_name": "000433",
+      "subset": "0004",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0004\\000433.npz"
+    },
+    {
+      "seq_id": 10021,
+      "seq_name": "000434",
+      "subset": "0004",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0004\\000434.npz"
+    },
+    {
+      "seq_id": 10022,
+      "seq_name": "000435",
+      "subset": "0004",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0004\\000435.npz"
+    },
+    {
+      "seq_id": 10023,
+      "seq_name": "000436",
+      "subset": "0004",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0004\\000436.npz"
+    },
+    {
+      "seq_id": 10024,
+      "seq_name": "000437",
+      "subset": "0004",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0004\\000437.npz"
+    },
+    {
+      "seq_id": 10025,
+      "seq_name": "000535",
+      "subset": "0005",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0005\\000535.npz"
+    },
+    {
+      "seq_id": 10026,
+      "seq_name": "000536",
+      "subset": "0005",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0005\\000536.npz"
+    },
+    {
+      "seq_id": 10027,
+      "seq_name": "000537",
+      "subset": "0005",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0005\\000537.npz"
+    },
+    {
+      "seq_id": 10028,
+      "seq_name": "000538",
+      "subset": "0005",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0005\\000538.npz"
+    },
+    {
+      "seq_id": 10029,
+      "seq_name": "000539",
+      "subset": "0005",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0005\\000539.npz"
+    },
+    {
+      "seq_id": 10030,
+      "seq_name": "000630",
+      "subset": "0006",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0006\\000630.npz"
+    },
+    {
+      "seq_id": 10031,
+      "seq_name": "000631",
+      "subset": "0006",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0006\\000631.npz"
+    },
+    {
+      "seq_id": 10032,
+      "seq_name": "000632",
+      "subset": "0006",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0006\\000632.npz"
+    },
+    {
+      "seq_id": 10033,
+      "seq_name": "000633",
+      "subset": "0006",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0006\\000633.npz"
+    },
+    {
+      "seq_id": 10034,
+      "seq_name": "000634",
+      "subset": "0006",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0006\\000634.npz"
+    },
+    {
+      "seq_id": 10035,
+      "seq_name": "000728",
+      "subset": "0007",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0007\\000728.npz"
+    },
+    {
+      "seq_id": 10036,
+      "seq_name": "000729",
+      "subset": "0007",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0007\\000729.npz"
+    },
+    {
+      "seq_id": 10037,
+      "seq_name": "000730",
+      "subset": "0007",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0007\\000730.npz"
+    },
+    {
+      "seq_id": 10038,
+      "seq_name": "000731",
+      "subset": "0007",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0007\\000731.npz"
+    },
+    {
+      "seq_id": 10039,
+      "seq_name": "000732",
+      "subset": "0007",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0007\\000732.npz"
+    },
+    {
+      "seq_id": 10040,
+      "seq_name": "000828",
+      "subset": "0008",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0008\\000828.npz"
+    },
+    {
+      "seq_id": 10041,
+      "seq_name": "000828_0_210",
+      "subset": "0008",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0008\\000828_0_210.npz"
+    },
+    {
+      "seq_id": 10042,
+      "seq_name": "000829",
+      "subset": "0008",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0008\\000829.npz"
+    },
+    {
+      "seq_id": 10043,
+      "seq_name": "000830",
+      "subset": "0008",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0008\\000830.npz"
+    },
+    {
+      "seq_id": 10044,
+      "seq_name": "000831",
+      "subset": "0008",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0008\\000831.npz"
+    },
+    {
+      "seq_id": 10045,
+      "seq_name": "000931",
+      "subset": "0009",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0009\\000931.npz"
+    },
+    {
+      "seq_id": 10046,
+      "seq_name": "000932",
+      "subset": "0009",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0009\\000932.npz"
+    },
+    {
+      "seq_id": 10047,
+      "seq_name": "000933",
+      "subset": "0009",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0009\\000933.npz"
+    },
+    {
+      "seq_id": 10048,
+      "seq_name": "000934",
+      "subset": "0009",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0009\\000934.npz"
+    },
+    {
+      "seq_id": 10049,
+      "seq_name": "000935",
+      "subset": "0009",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0009\\000935.npz"
+    },
+    {
+      "seq_id": 10050,
+      "seq_name": "001028",
+      "subset": "0010",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0010\\001028.npz"
+    },
+    {
+      "seq_id": 10051,
+      "seq_name": "001029",
+      "subset": "0010",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0010\\001029.npz"
+    },
+    {
+      "seq_id": 10052,
+      "seq_name": "001030",
+      "subset": "0010",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0010\\001030.npz"
+    },
+    {
+      "seq_id": 10053,
+      "seq_name": "001031",
+      "subset": "0010",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0010\\001031.npz"
+    },
+    {
+      "seq_id": 10054,
+      "seq_name": "001032",
+      "subset": "0010",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0010\\001032.npz"
+    },
+    {
+      "seq_id": 10055,
+      "seq_name": "001128",
+      "subset": "0011",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0011\\001128.npz"
+    },
+    {
+      "seq_id": 10056,
+      "seq_name": "001129",
+      "subset": "0011",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0011\\001129.npz"
+    },
+    {
+      "seq_id": 10057,
+      "seq_name": "001130",
+      "subset": "0011",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0011\\001130.npz"
+    },
+    {
+      "seq_id": 10058,
+      "seq_name": "001131",
+      "subset": "0011",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0011\\001131.npz"
+    },
+    {
+      "seq_id": 10059,
+      "seq_name": "001131_0_300",
+      "subset": "0011",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0011\\001131_0_300.npz"
+    },
+    {
+      "seq_id": 10060,
+      "seq_name": "001228",
+      "subset": "0012",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0012\\001228.npz"
+    },
+    {
+      "seq_id": 10061,
+      "seq_name": "001229",
+      "subset": "0012",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0012\\001229.npz"
+    },
+    {
+      "seq_id": 10062,
+      "seq_name": "001230",
+      "subset": "0012",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0012\\001230.npz"
+    },
+    {
+      "seq_id": 10063,
+      "seq_name": "001230_210_270",
+      "subset": "0012",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0012\\001230_210_270.npz"
+    },
+    {
+      "seq_id": 10064,
+      "seq_name": "001231",
+      "subset": "0012",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0012\\001231.npz"
+    },
+    {
+      "seq_id": 10065,
+      "seq_name": "001331",
+      "subset": "0013",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0013\\001331.npz"
+    },
+    {
+      "seq_id": 10066,
+      "seq_name": "001332",
+      "subset": "0013",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0013\\001332.npz"
+    },
+    {
+      "seq_id": 10067,
+      "seq_name": "001333",
+      "subset": "0013",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0013\\001333.npz"
+    },
+    {
+      "seq_id": 10068,
+      "seq_name": "001334",
+      "subset": "0013",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0013\\001334.npz"
+    },
+    {
+      "seq_id": 10069,
+      "seq_name": "001335",
+      "subset": "0013",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0013\\001335.npz"
+    },
+    {
+      "seq_id": 10070,
+      "seq_name": "001431_0_300",
+      "subset": "0014",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0014\\001431_0_300.npz"
+    },
+    {
+      "seq_id": 10071,
+      "seq_name": "001432",
+      "subset": "0014",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0014\\001432.npz"
+    },
+    {
+      "seq_id": 10072,
+      "seq_name": "001433",
+      "subset": "0014",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0014\\001433.npz"
+    },
+    {
+      "seq_id": 10073,
+      "seq_name": "001434",
+      "subset": "0014",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0014\\001434.npz"
+    },
+    {
+      "seq_id": 10074,
+      "seq_name": "001435",
+      "subset": "0014",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0014\\001435.npz"
+    },
+    {
+      "seq_id": 10075,
+      "seq_name": "001528",
+      "subset": "0015",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0015\\001528.npz"
+    },
+    {
+      "seq_id": 10076,
+      "seq_name": "001529",
+      "subset": "0015",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0015\\001529.npz"
+    },
+    {
+      "seq_id": 10077,
+      "seq_name": "001530",
+      "subset": "0015",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0015\\001530.npz"
+    },
+    {
+      "seq_id": 10078,
+      "seq_name": "001532",
+      "subset": "0015",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0015\\001532.npz"
+    },
+    {
+      "seq_id": 10079,
+      "seq_name": "001533",
+      "subset": "0015",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0015\\001533.npz"
+    },
+    {
+      "seq_id": 10080,
+      "seq_name": "001629",
+      "subset": "0016",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0016\\001629.npz"
+    },
+    {
+      "seq_id": 10081,
+      "seq_name": "001629_0_120",
+      "subset": "0016",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0016\\001629_0_120.npz"
+    },
+    {
+      "seq_id": 10082,
+      "seq_name": "001630",
+      "subset": "0016",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0016\\001630.npz"
+    },
+    {
+      "seq_id": 10083,
+      "seq_name": "001631",
+      "subset": "0016",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0016\\001631.npz"
+    },
+    {
+      "seq_id": 10084,
+      "seq_name": "001632",
+      "subset": "0016",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0016\\001632.npz"
+    },
+    {
+      "seq_id": 10085,
+      "seq_name": "001728",
+      "subset": "0017",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0017\\001728.npz"
+    },
+    {
+      "seq_id": 10086,
+      "seq_name": "001729",
+      "subset": "0017",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0017\\001729.npz"
+    },
+    {
+      "seq_id": 10087,
+      "seq_name": "001730",
+      "subset": "0017",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0017\\001730.npz"
+    },
+    {
+      "seq_id": 10088,
+      "seq_name": "001731",
+      "subset": "0017",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0017\\001731.npz"
+    },
+    {
+      "seq_id": 10089,
+      "seq_name": "001731_0_90",
+      "subset": "0017",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0017\\001731_0_90.npz"
+    },
+    {
+      "seq_id": 10090,
+      "seq_name": "001829",
+      "subset": "0018",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0018\\001829.npz"
+    },
+    {
+      "seq_id": 10091,
+      "seq_name": "001830",
+      "subset": "0018",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0018\\001830.npz"
+    },
+    {
+      "seq_id": 10092,
+      "seq_name": "001831",
+      "subset": "0018",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0018\\001831.npz"
+    },
+    {
+      "seq_id": 10093,
+      "seq_name": "001832",
+      "subset": "0018",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0018\\001832.npz"
+    },
+    {
+      "seq_id": 10094,
+      "seq_name": "001833",
+      "subset": "0018",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0018\\001833.npz"
+    },
+    {
+      "seq_id": 10095,
+      "seq_name": "001929",
+      "subset": "0019",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0019\\001929.npz"
+    },
+    {
+      "seq_id": 10096,
+      "seq_name": "001929_0_300",
+      "subset": "0019",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0019\\001929_0_300.npz"
+    },
+    {
+      "seq_id": 10097,
+      "seq_name": "001930",
+      "subset": "0019",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0019\\001930.npz"
+    },
+    {
+      "seq_id": 10098,
+      "seq_name": "001931",
+      "subset": "0019",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0019\\001931.npz"
+    },
+    {
+      "seq_id": 10099,
+      "seq_name": "001932",
+      "subset": "0019",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0019\\001932.npz"
+    },
+    {
+      "seq_id": 10100,
+      "seq_name": "002033",
+      "subset": "0020",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0020\\002033.npz"
+    },
+    {
+      "seq_id": 10101,
+      "seq_name": "002034",
+      "subset": "0020",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0020\\002034.npz"
+    },
+    {
+      "seq_id": 10102,
+      "seq_name": "002035",
+      "subset": "0020",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0020\\002035.npz"
+    },
+    {
+      "seq_id": 10103,
+      "seq_name": "002036",
+      "subset": "0020",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0020\\002036.npz"
+    },
+    {
+      "seq_id": 10104,
+      "seq_name": "002037",
+      "subset": "0020",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0020\\002037.npz"
+    },
+    {
+      "seq_id": 10105,
+      "seq_name": "002130",
+      "subset": "0021",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0021\\002130.npz"
+    },
+    {
+      "seq_id": 10106,
+      "seq_name": "002131",
+      "subset": "0021",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0021\\002131.npz"
+    },
+    {
+      "seq_id": 10107,
+      "seq_name": "002133",
+      "subset": "0021",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0021\\002133.npz"
+    },
+    {
+      "seq_id": 10108,
+      "seq_name": "002133_120_180",
+      "subset": "0021",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0021\\002133_120_180.npz"
+    },
+    {
+      "seq_id": 10109,
+      "seq_name": "002135",
+      "subset": "0021",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0021\\002135.npz"
+    },
+    {
+      "seq_id": 10110,
+      "seq_name": "002228",
+      "subset": "0022",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0022\\002228.npz"
+    },
+    {
+      "seq_id": 10111,
+      "seq_name": "002228_0_270",
+      "subset": "0022",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0022\\002228_0_270.npz"
+    },
+    {
+      "seq_id": 10112,
+      "seq_name": "002229",
+      "subset": "0022",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0022\\002229.npz"
+    },
+    {
+      "seq_id": 10113,
+      "seq_name": "002230",
+      "subset": "0022",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0022\\002230.npz"
+    },
+    {
+      "seq_id": 10114,
+      "seq_name": "002231",
+      "subset": "0022",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\0022\\002231.npz"
+    },
+    {
+      "seq_id": 10115,
+      "seq_name": "M000029",
+      "subset": "M000",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M000\\M000029.npz"
+    },
+    {
+      "seq_id": 10116,
+      "seq_name": "M000030",
+      "subset": "M000",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M000\\M000030.npz"
+    },
+    {
+      "seq_id": 10117,
+      "seq_name": "M000031",
+      "subset": "M000",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M000\\M000031.npz"
+    },
+    {
+      "seq_id": 10118,
+      "seq_name": "M000031_30_120",
+      "subset": "M000",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M000\\M000031_30_120.npz"
+    },
+    {
+      "seq_id": 10119,
+      "seq_name": "M000032",
+      "subset": "M000",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M000\\M000032.npz"
+    },
+    {
+      "seq_id": 10120,
+      "seq_name": "M001028",
+      "subset": "M001",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M001\\M001028.npz"
+    },
+    {
+      "seq_id": 10121,
+      "seq_name": "M001029",
+      "subset": "M001",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M001\\M001029.npz"
+    },
+    {
+      "seq_id": 10122,
+      "seq_name": "M001030",
+      "subset": "M001",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M001\\M001030.npz"
+    },
+    {
+      "seq_id": 10123,
+      "seq_name": "M001031",
+      "subset": "M001",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M001\\M001031.npz"
+    },
+    {
+      "seq_id": 10124,
+      "seq_name": "M001032",
+      "subset": "M001",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M001\\M001032.npz"
+    },
+    {
+      "seq_id": 10125,
+      "seq_name": "M002033",
+      "subset": "M002",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M002\\M002033.npz"
+    },
+    {
+      "seq_id": 10126,
+      "seq_name": "M002034",
+      "subset": "M002",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M002\\M002034.npz"
+    },
+    {
+      "seq_id": 10127,
+      "seq_name": "M002035",
+      "subset": "M002",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M002\\M002035.npz"
+    },
+    {
+      "seq_id": 10128,
+      "seq_name": "M002036",
+      "subset": "M002",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M002\\M002036.npz"
+    },
+    {
+      "seq_id": 10129,
+      "seq_name": "M002037",
+      "subset": "M002",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M002\\M002037.npz"
+    },
+    {
+      "seq_id": 10130,
+      "seq_name": "M003027",
+      "subset": "M003",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M003\\M003027.npz"
+    },
+    {
+      "seq_id": 10131,
+      "seq_name": "M003028",
+      "subset": "M003",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M003\\M003028.npz"
+    },
+    {
+      "seq_id": 10132,
+      "seq_name": "M003029",
+      "subset": "M003",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M003\\M003029.npz"
+    },
+    {
+      "seq_id": 10133,
+      "seq_name": "M003030",
+      "subset": "M003",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M003\\M003030.npz"
+    },
+    {
+      "seq_id": 10134,
+      "seq_name": "M003030_90_270",
+      "subset": "M003",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M003\\M003030_90_270.npz"
+    },
+    {
+      "seq_id": 10135,
+      "seq_name": "M004029",
+      "subset": "M004",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M004\\M004029.npz"
+    },
+    {
+      "seq_id": 10136,
+      "seq_name": "M004030",
+      "subset": "M004",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M004\\M004030.npz"
+    },
+    {
+      "seq_id": 10137,
+      "seq_name": "M004031",
+      "subset": "M004",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M004\\M004031.npz"
+    },
+    {
+      "seq_id": 10138,
+      "seq_name": "M004032",
+      "subset": "M004",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M004\\M004032.npz"
+    },
+    {
+      "seq_id": 10139,
+      "seq_name": "M004033",
+      "subset": "M004",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M004\\M004033.npz"
+    },
+    {
+      "seq_id": 10140,
+      "seq_name": "M005032",
+      "subset": "M005",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M005\\M005032.npz"
+    },
+    {
+      "seq_id": 10141,
+      "seq_name": "M005033",
+      "subset": "M005",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M005\\M005033.npz"
+    },
+    {
+      "seq_id": 10142,
+      "seq_name": "M005034",
+      "subset": "M005",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M005\\M005034.npz"
+    },
+    {
+      "seq_id": 10143,
+      "seq_name": "M005035",
+      "subset": "M005",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M005\\M005035.npz"
+    },
+    {
+      "seq_id": 10144,
+      "seq_name": "M005036",
+      "subset": "M005",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M005\\M005036.npz"
+    },
+    {
+      "seq_id": 10145,
+      "seq_name": "M006033",
+      "subset": "M006",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M006\\M006033.npz"
+    },
+    {
+      "seq_id": 10146,
+      "seq_name": "M006035",
+      "subset": "M006",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M006\\M006035.npz"
+    },
+    {
+      "seq_id": 10147,
+      "seq_name": "M006036",
+      "subset": "M006",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M006\\M006036.npz"
+    },
+    {
+      "seq_id": 10148,
+      "seq_name": "M006037",
+      "subset": "M006",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M006\\M006037.npz"
+    },
+    {
+      "seq_id": 10149,
+      "seq_name": "M006038",
+      "subset": "M006",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M006\\M006038.npz"
+    },
+    {
+      "seq_id": 10150,
+      "seq_name": "M007030",
+      "subset": "M007",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M007\\M007030.npz"
+    },
+    {
+      "seq_id": 10151,
+      "seq_name": "M007031",
+      "subset": "M007",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M007\\M007031.npz"
+    },
+    {
+      "seq_id": 10152,
+      "seq_name": "M007032",
+      "subset": "M007",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M007\\M007032.npz"
+    },
+    {
+      "seq_id": 10153,
+      "seq_name": "M007032_0_90",
+      "subset": "M007",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M007\\M007032_0_90.npz"
+    },
+    {
+      "seq_id": 10154,
+      "seq_name": "M007033",
+      "subset": "M007",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M007\\M007033.npz"
+    },
+    {
+      "seq_id": 10155,
+      "seq_name": "M008030",
+      "subset": "M008",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M008\\M008030.npz"
+    },
+    {
+      "seq_id": 10156,
+      "seq_name": "M008031",
+      "subset": "M008",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M008\\M008031.npz"
+    },
+    {
+      "seq_id": 10157,
+      "seq_name": "M008032",
+      "subset": "M008",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M008\\M008032.npz"
+    },
+    {
+      "seq_id": 10158,
+      "seq_name": "M008032_0_300",
+      "subset": "M008",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M008\\M008032_0_300.npz"
+    },
+    {
+      "seq_id": 10159,
+      "seq_name": "M008033",
+      "subset": "M008",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M008\\M008033.npz"
+    },
+    {
+      "seq_id": 10160,
+      "seq_name": "M009031",
+      "subset": "M009",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M009\\M009031.npz"
+    },
+    {
+      "seq_id": 10161,
+      "seq_name": "M009032",
+      "subset": "M009",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M009\\M009032.npz"
+    },
+    {
+      "seq_id": 10162,
+      "seq_name": "M009033",
+      "subset": "M009",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M009\\M009033.npz"
+    },
+    {
+      "seq_id": 10163,
+      "seq_name": "M009034",
+      "subset": "M009",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M009\\M009034.npz"
+    },
+    {
+      "seq_id": 10164,
+      "seq_name": "M009035",
+      "subset": "M009",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M009\\M009035.npz"
+    },
+    {
+      "seq_id": 10165,
+      "seq_name": "M010029_0_300",
+      "subset": "M010",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M010\\M010029_0_300.npz"
+    },
+    {
+      "seq_id": 10166,
+      "seq_name": "M010030",
+      "subset": "M010",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M010\\M010030.npz"
+    },
+    {
+      "seq_id": 10167,
+      "seq_name": "M010031",
+      "subset": "M010",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M010\\M010031.npz"
+    },
+    {
+      "seq_id": 10168,
+      "seq_name": "M010032",
+      "subset": "M010",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M010\\M010032.npz"
+    },
+    {
+      "seq_id": 10169,
+      "seq_name": "M010033",
+      "subset": "M010",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M010\\M010033.npz"
+    },
+    {
+      "seq_id": 10170,
+      "seq_name": "M011028",
+      "subset": "M011",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M011\\M011028.npz"
+    },
+    {
+      "seq_id": 10171,
+      "seq_name": "M011029",
+      "subset": "M011",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M011\\M011029.npz"
+    },
+    {
+      "seq_id": 10172,
+      "seq_name": "M011033",
+      "subset": "M011",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M011\\M011033.npz"
+    },
+    {
+      "seq_id": 10173,
+      "seq_name": "M011034",
+      "subset": "M011",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M011\\M011034.npz"
+    },
+    {
+      "seq_id": 10174,
+      "seq_name": "M011035",
+      "subset": "M011",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M011\\M011035.npz"
+    },
+    {
+      "seq_id": 10175,
+      "seq_name": "M012030",
+      "subset": "M012",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M012\\M012030.npz"
+    },
+    {
+      "seq_id": 10176,
+      "seq_name": "M012031",
+      "subset": "M012",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M012\\M012031.npz"
+    },
+    {
+      "seq_id": 10177,
+      "seq_name": "M012032",
+      "subset": "M012",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M012\\M012032.npz"
+    },
+    {
+      "seq_id": 10178,
+      "seq_name": "M012034",
+      "subset": "M012",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M012\\M012034.npz"
+    },
+    {
+      "seq_id": 10179,
+      "seq_name": "M012035",
+      "subset": "M012",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M012\\M012035.npz"
+    },
+    {
+      "seq_id": 10180,
+      "seq_name": "M013028",
+      "subset": "M013",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M013\\M013028.npz"
+    },
+    {
+      "seq_id": 10181,
+      "seq_name": "M013029",
+      "subset": "M013",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M013\\M013029.npz"
+    },
+    {
+      "seq_id": 10182,
+      "seq_name": "M013030",
+      "subset": "M013",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M013\\M013030.npz"
+    },
+    {
+      "seq_id": 10183,
+      "seq_name": "M013031",
+      "subset": "M013",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M013\\M013031.npz"
+    },
+    {
+      "seq_id": 10184,
+      "seq_name": "M013032",
+      "subset": "M013",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M013\\M013032.npz"
+    },
+    {
+      "seq_id": 10185,
+      "seq_name": "M014031",
+      "subset": "M014",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 30,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M014\\M014031.npz"
+    },
+    {
+      "seq_id": 10186,
+      "seq_name": "M014033",
+      "subset": "M014",
+      "split": "final_holdout_test",
+      "drift_tier": 3.0,
+      "source_index_in_subset": 31,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M014\\M014033.npz"
+    },
+    {
+      "seq_id": 10187,
+      "seq_name": "M014034",
+      "subset": "M014",
+      "split": "final_holdout_test",
+      "drift_tier": 10.0,
+      "source_index_in_subset": 32,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M014\\M014034.npz"
+    },
+    {
+      "seq_id": 10188,
+      "seq_name": "M014035",
+      "subset": "M014",
+      "split": "final_holdout_test",
+      "drift_tier": 0.0,
+      "source_index_in_subset": 33,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M014\\M014035.npz"
+    },
+    {
+      "seq_id": 10189,
+      "seq_name": "M014036",
+      "subset": "M014",
+      "split": "final_holdout_test",
+      "drift_tier": 1.0,
+      "source_index_in_subset": 34,
+      "path": "H:\\program\\slimevr\\ai_corrector\\database\\amass\\HumanML3D_SMPLH52\\M014\\M014036.npz"
+    }
+  ]
+}
