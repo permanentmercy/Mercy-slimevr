@@ -1,0 +1,74 @@
+[
+  {
+    "engineering_checks": "PASS",
+    "hidden": 256,
+    "parameters": 6689306,
+    "fp32_state_dict_bytes": 26793746,
+    "cpu_streaming_ms": {
+      "mean": 4.854778300000005,
+      "p95": 6.1545,
+      "frames": 1000
+    },
+    "tiny_training_loss": [
+      0.41312047839164734,
+      0.029474301263689995
+    ],
+    "torch": "2.4.1+cu121",
+    "python": "3.8.20",
+    "device": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "threads": 1,
+    "accuracy_acceptance": "NOT EVALUATED: no AMASS/DIP or real-device test set",
+    "integration_acceptance": "NOT EVALUATED: no live SlimeVR/VD/VRChat session",
+    "latency_scope": "CPU PyTorch batch=1 single-frame model only; not ONNX or end-to-end",
+    "checks": [
+      "future-frame isolation",
+      "stream/full sequence parity",
+      "quaternion unit norm and 8-degree bound",
+      "right-multiplication target",
+      "gate bypass and full correction",
+      "finite three-head gradients",
+      "tiny-batch loss decrease",
+      "quaternion sign invariance",
+      "checkpoint round trip",
+      "NPZ loading and invalid-label rejection",
+      "zero-angle finite gradients",
+      "invalid feature width rejection"
+    ]
+  },
+  {
+    "engineering_checks": "PASS",
+    "hidden": 96,
+    "parameters": 974426,
+    "fp32_state_dict_bytes": 3933970,
+    "cpu_streaming_ms": {
+      "mean": 2.3965159000000007,
+      "p95": 3.2543,
+      "frames": 1000
+    },
+    "tiny_training_loss": [
+      0.40487122535705566,
+      0.09751907736063004
+    ],
+    "torch": "2.4.1+cu121",
+    "python": "3.8.20",
+    "device": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
+    "threads": 1,
+    "accuracy_acceptance": "NOT EVALUATED: no AMASS/DIP or real-device test set",
+    "integration_acceptance": "NOT EVALUATED: no live SlimeVR/VD/VRChat session",
+    "latency_scope": "CPU PyTorch batch=1 single-frame model only; not ONNX or end-to-end",
+    "checks": [
+      "future-frame isolation",
+      "stream/full sequence parity",
+      "quaternion unit norm and 8-degree bound",
+      "right-multiplication target",
+      "gate bypass and full correction",
+      "finite three-head gradients",
+      "tiny-batch loss decrease",
+      "quaternion sign invariance",
+      "checkpoint round trip",
+      "NPZ loading and invalid-label rejection",
+      "zero-angle finite gradients",
+      "invalid feature width rejection"
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+# Environment used for engineering acceptance on Windows, Python 3.8.20.
+# torch build in the existing local runtime: 2.4.1+cu121
+torch==2.4.1
+numpy==1.24.4
+onnx==1.17.0
+onnxruntime==1.19.2
+protobuf==4.25.5
+coloredlogs==15.0.1
+flatbuffers==25.12.19
+humanfriendly==10.0
+packaging==26.2

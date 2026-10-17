@@ -1,0 +1,20 @@
+{
+  "onnx_checker": "PASS",
+  "recurrent_parity_frames": 8,
+  "atol": 2e-05,
+  "rtol": 0.0002,
+  "bytes": 3997816,
+  "config": {
+    "hidden": 96,
+    "layers": 3,
+    "heads": 8,
+    "max_degrees": 8.0
+  },
+  "onnxruntime": "1.19.2",
+  "cpu_single_thread_ms": {
+    "mean": 0.3965121,
+    "p95": 0.6103899999999998,
+    "frames": 1000
+  },
+  "scope": "Engineering smoke weights; no accuracy or end-to-end certification"
+}

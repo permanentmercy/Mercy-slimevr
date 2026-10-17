@@ -36,9 +36,9 @@
 \begin{abstract}
 本项目是一套自制的低成本全身动作捕捉系统：以 nRF52840 主控与 LSM6DSV 六轴 IMU 构建 6 个追踪节点，覆盖胸、髋、两大腿与两小腿，经 Wi-Fi 接入 SlimeVR-Server 解算骨架，最终驱动 VRChat 虚拟形象。系统的核心设计是在 PC 服务端引入一层轻量神经网络，作为“姿态先验 / 去噪器”，对多传感器姿态做联合误差纠正，弥补官方服务端仅依赖骨骼几何约束与最小二乘自动测比例（AutoBone）的不足。
 
-由于所选 IMU 为六轴（无磁力计），偏航（yaw）只能由陀螺仪积分获得，其零偏与角随机游走会随时间累积，表现为全身缓慢转偏。对此，本设计采用“上半身绝对锚 + 下半身残差兜底”的分层抑制架构：上半身由 Virtual Desktop Estimation 生成的虚拟追踪器提供绝对、零漂移的姿态参考，下半身残留的局部小漂则由 SlimeVR 内置 Stay Aligned、本设计的神经网络残差校正器与骨架几何约束共同吸收。
+由于所选 IMU 为六轴（无磁力计），偏航（yaw）只能由陀螺仪积分获得，其零偏与角随机游走会随时间累积，表现为全身缓慢转偏。对此，本设计采用“上半身辅助参考 + 下半身逐节点漂移抑制”的分层抑制架构：上半身由 Virtual Desktop Estimation 生成的虚拟追踪器提供带误差与时延的辅助姿态参考。各下肢 IMU 的独立偏航漂移不会因胸部参考而自动消失；Stay Aligned、神经网络与关节约束仅用于在适用动作下减轻漂移，目标为降低误差并延长两次偏航重置的间隔，不保证长期无漂移。
 
-校正器采用严格因果（无未来帧）的时空主干，单次前向并行输出姿态残差、传感器置信门控与足部触地判别三个结果，并经轻量物理仲裁层（加权 SLERP + ZUPT 零速锁脚）输出。训练走“纯离线数据驱动”范式：以 AMASS 光学动捕为纯净真值，注入 LSM6DSV 量级的陀螺零偏游走与噪声构造全合成配对样本，无需真人标注，也无需等待硬件到位；泛化能力由真实物理传感器数据集 DIP-IMU 独立评估。目标指标为单帧推理 $\le 2.0$\,ms（GPU FP16）、平均关节位置误差 MPJPE $\le 45$\,mm、偏航漂移消除率 $\ge 88\%$、足部触地判别 F1 $\ge 93\%$。端到端管线延迟控制在 20\,ms 以内。
+校正器采用严格因果（无未来帧）的时空主干，单次前向并行输出姿态残差、传感器置信门控与足部触地判别三个结果，并经轻量物理仲裁层（加权 SLERP + ZUPT 零速锁脚）输出。训练走“纯离线数据驱动”范式：以 AMASS 光学动捕为纯净真值，注入 LSM6DSV 量级的陀螺零偏游走与噪声构造全合成配对样本，无需真人标注，也无需等待硬件到位；泛化能力由真实物理传感器数据集 DIP-IMU 独立评估。目标指标为单帧推理 $\le 2.0$\,ms（GPU FP16）、平均关节位置误差 MPJPE $\le 45$\,mm、偏航误差削减率（待验证） $\ge 88\%$、足部触地判别 F1 $\ge 93\%$。端到端管线延迟控制在 20\,ms 以内。
 \end{abstract}
 
 \noindent\textbf{文档说明：}本文档是 SlimeVR DIY 全身动作捕捉项目的\textbf{主文档}，独立描述其目标、系统架构、硬件与固件、漂移抑制方案、校正器设计、方案定位与实施路线，\textbf{不依附于任何课程项目申报材料}。神经网络模型的训练数据集与实施规范另见同目录下的独立配套文档《SlimeVR 神经网络残差校正器 —— 模型训练、数据集与技术路线实施规范》（\texttt{model\_training\_specification.tex}）。除这两份文档外，不再另建独立文档；主文档层面的设计修订、实现记录与评测结果均追加于本文件。
@@ -55,7 +55,7 @@
 
 \textbf{动机。}商用全身追踪方案价格高昂，而 SlimeVR 开源硬件可将整套成本压到千元以内，显著降低虚拟形象驱动的门槛。
 
-\textbf{创新点。}SlimeVR 官方服务端仅依赖骨骼几何约束、最小二乘自动测比例（AutoBone）与脚锁做纠偏：各 tracker 的绝对朝向由固件侧 VQF 融合给出，服务端信任该朝向并装配成骨架，因此既无跨 tracker 的统计融合，也不自动纠正偏航（yaw）漂移，单点失稳仅由相邻关节约束兜底。本设计在服务端增加一层神经网络姿态先验，用于抑制抖动、穿模与偏航漂移。
+\textbf{创新点。}SlimeVR 官方服务端仅依赖骨骼几何约束、最小二乘自动测比例（AutoBone）与脚锁做纠偏：各 tracker 的姿态估计由固件侧 VQF 融合给出，服务端信任该朝向并装配成骨架，现有 Stay Aligned 可借助放松姿态先验逐步减轻偏航漂移，但不能保证任意动作下均可恢复真实航向。本设计在服务端增加一层神经网络姿态先验，用于抑制抖动、穿模与偏航漂移。
 
 % ==================== 2 总体架构 ====================
 \section{系统总体架构}
@@ -67,7 +67,7 @@
 \centering
 \begin{tikzpicture}[scale=0.82, every node/.style={transform shape}]
 \node[imubox]    (imu)    at (0,0)     {6× IMU Tracker\\（nRF52840 + LSM6DSV）};
-\node[imubox]    (vd)     at (7.2,0)   {VD Estimation 虚拟 Tracker\\（胸 / 上脊柱，绝对偏航）};
+\node[imubox]    (vd)     at (7.2,0)   {VD Estimation 虚拟 Tracker\\（胸 / 上脊柱，辅助参考）};
 \node[solverbox] (server) at (3.6,-2.3){SlimeVR-Server 骨架求解器\\（统一解算 IMU + VD 设备）};
 \node[solverbox] (out)    at (3.6,-4.2){OpenVR 驱动 / OSC·VMC 输出};
 \node[residbox]  (nn)     at (9.0,-4.2){NN 残差校正\\旁路进程};
@@ -112,19 +112,20 @@
 \subsection{漂移机理}
 \label{subsec:drift-mech}
 
-本项目全部采用 6 轴 IMU（加速度计 + 陀螺仪，无磁力计），因此无法获得绝对偏航参考：加速度计只能依靠重力校正俯仰（pitch）与横滚（roll），而偏航（绕重力轴的旋转）只能由陀螺仪积分得到。陀螺零偏与角随机游走随时间累积（约 $0.1^{\circ}$/s 量级，即 $6^{\circ}$/min），表现为全身缓慢转偏。为此本设计引入“上半身绝对锚 + 下半身残差兜底”的分层抑制架构。
+本项目全部采用 6 轴 IMU（加速度计 + 陀螺仪，无磁力计），因此无法获得绝对偏航参考：加速度计只能依靠重力校正俯仰（pitch）与横滚（roll），而偏航（绕重力轴的旋转）只能由陀螺仪积分得到。各节点的陀螺零偏与角随机游走独立累积，可能导致不同肢段分别转偏；漂移速度受器件、温度、标定与运动影响，应由实机测量，不能以固定数值代表本系统。为此本设计引入“上半身辅助参考 + 下半身逐节点漂移抑制”的分层抑制架构。
 
 \subsection{组件与数据流}
 
-上半身姿态（胸 / 肩 / 肘 / 腕）由 Virtual Desktop 的 Estimation 功能提供：它利用 Quest 3 头显自带的下视侧摄做 Inside-Out Body Tracking（IOBT），生成一组“虚拟 tracker”，其位姿为相机绝对测量、偏航零漂移，且零额外硬件。VD 虚拟 tracker 在 SteamVR 中以设备形式暴露，经由官方 SlimeVR Feeder App（随 SlimeVR 安装器附带、随 SteamVR 启动的 OpenVR 桥）通过命名管道喂入 SlimeVR-Server，与本项目的 6 个 IMU 在同一套骨架求解器中统一解算。社区工具 Virtual Desktop Body Tracking Configurator 可关闭 VD 的下半身虚拟 tracker（Generative Legs），仅保留上半身，把腿留给 IMU。
+上半身姿态（胸 / 肩 / 肘 / 腕）由 Virtual Desktop 的 Estimation 功能提供：它利用 Quest 3 头显自带的下视侧摄做 Inside-Out Body Tracking（IOBT），生成一组“虚拟 tracker”，其身体关节位姿是视觉与人体模型共同估计的结果，可能受遮挡、估计误差、时延及参考空间重定位影响，不应视为零误差或零漂移的直接测量；在已有兼容头显的前提下可不增加身体追踪硬件。VD 虚拟 tracker 在 SteamVR 中以设备形式暴露，经由官方 SlimeVR Feeder App（随 SlimeVR 安装器附带、随 SteamVR 启动的 OpenVR 桥）通过命名管道喂入 SlimeVR-Server，与本项目的 6 个 IMU 在同一套骨架求解器中统一解算。社区工具 Virtual Desktop Body Tracking Configurator 可关闭 VD 的下半身虚拟 tracker（Generative Legs），仅保留上半身，把腿留给 IMU。
 
-官方兼容文档明确 SlimeVR 与 Virtual Desktop Estimation “specifically for arms” 搭配使用。
+官方兼容文档明确 SlimeVR 与 Virtual Desktop Estimation “specifically for arms” 搭配使用（\url{https://docs.slimevr.dev/misc/compatibility.html}）。这说明存在上半身融合使用路径，不构成胸部或肘部准确度、可用性与下肢漂移消除的保证。具体设备输出与优先级须实机确认。
 
 \subsection{漂移抑制分层}
 
 \begin{itemize}
-    \item \textbf{第一层（全局锚，消除全局偏航漂移）}：VD Estimation 的胸 / 上脊柱（可含髋）作为绝对参考，骨架求解器自胸向下做前向运动学传播；胸一经固定，原本会贯穿全身的全局偏航漂移即被消除。
-    \item \textbf{第二层（局部残差，吸收下半身小漂）}：仅余大腿 / 小腿的局部偏航小漂，幅度远小于全局漂，由以下三者共同吸收——(a) SlimeVR 内置 Stay Aligned（基于校准放松姿态的姿态先验，规则式梯度下降）；(b) 第~\ref{sec:nn} 节的神经网络残差校正器；(c) 骨架几何约束（骨长守恒、关节角限、地面约束、相邻 tracker 互推）。
+    \item \textbf{第一层（参考空间与上半身辅助观测）}：将 HMD 与可用的 VD 上半身位姿变换到统一坐标系，依据跟踪状态、时延和创新残差分配权重。胸部观测只约束被观测肢段；前向运动学传播位置，不会自动校正大腿、小腿 tracker 的独立偏航误差。
+    \item \textbf{第二层（下半身逐节点估计）}：为髋、大腿与小腿分别维护偏航修正及其不确定度，结合 Stay Aligned、膝关节近似铰链约束和可靠接触事件，条件性地约束相对朝向。局部漂移不保证比上半身漂移小；髋关节自由度高、伸腿静止等退化姿态下约束可能不足。
+    \item \textbf{第三层（学习先验与失效恢复）}：神经网络提供小幅残差与候选权重，在分布外动作或低可观测状态下减弱更新。不能把真实转腿与漂移始终区分开；持续异常时提示用户执行已知姿态的偏航重置，或使用外部下肢观测重新锚定。
 \end{itemize}
 
 \begin{figure}[H]
@@ -132,26 +133,38 @@
 \begin{tikzpicture}[
     node distance=1.6cm and 3.2cm
 ]
-\node[anchorbox] (vd) {VD Estimation 虚拟追踪器\\（胸/上脊柱，绝对偏航，零漂移）};
+\node[anchorbox] (vd) {VD Estimation 虚拟追踪器\\（胸/上脊柱，带不确定度）};
 \node[solverbox] (solver) [below=of vd] {SlimeVR 骨架求解器\\（统一解算 IMU + VD 虚拟追踪器）};
-\node[imubox]    (imu)    [left=of solver] {下半身 IMU trackers\\（大腿/小腿，局部偏航小漂）};
+\node[imubox]    (imu)    [left=of solver] {下半身 IMU trackers\\（大腿/小腿，独立偏航漂移）};
 \node[residbox]  (resid)  [right=of solver] {残差吸收层（每 tick）：\\Stay Aligned（规则式）\\NN 残差校正器（本设计）\\骨架几何约束};
 \node[solverbox] (vrc)    [below=of solver] {OSC / VMC 输出 $\to$ VRChat};
 
-\draw[arrow] (vd) -- (solver) node[midway, left] {固定全局偏航};
-\draw[arrow] (imu) -- (solver) node[midway, above] {局部小漂};
+\draw[arrow] (vd) -- (solver) node[midway, left] {辅助观测};
+\draw[arrow] (imu) -- (solver) node[midway, above] {逐节点漂移};
 \draw[arrow] (solver) -- (vrc) node[midway, left] {骨架};
 \draw[<->, arrow] (resid) -- (solver) node[midway, above] {每 tick 残差吸收};
 \end{tikzpicture}
-\caption{分层漂移抑制架构：上半身绝对锚消除全局偏航漂移，下半身局部小漂由残差吸收层兜底}
+\caption{分层漂移抑制架构：上半身辅助参考与下半身条件性约束，低置信时保留重置路径}
 \label{fig:layered_arch}
 \end{figure}
+
+\subsection{可实施的下肢漂移抑制路线与边界}
+\label{subsec:heading_solution}
+推荐先建立规则与运动学基线，再接入学习模块。以下均为待实现、待验证的设计，不代表现有旁路已经具备这些能力。
+\begin{enumerate}
+    \item \textbf{源头减漂}：先验证固件静止零偏估计与标定效果，记录预热、温度变化和不同动作下各 tracker 的漂移；固定绑带并检查安装标定，区分安装滑动与陀螺漂移。静止零角速度更新可估计零偏，但不能恢复已经丢失的绝对偏航。
+    \item \textbf{持续状态估计}：设 $\hat q_i = R_g(\delta\psi_i)\otimes q_i^{\rm raw}$，其中 $R_g$ 是绕世界重力轴的旋转，为每个节点维护 $\delta\psi_i$；具备原始角速度时可进一步估计陀螺零偏。采用误差状态滤波或小规模约束优化，限制更新速率、记录不确定度，并与固件已有零偏补偿明确分工。
+    \item \textbf{条件性运动学约束}：在完成传感器到肢段标定后，以屈伸时膝关节近似铰链轴的一致性约束大腿与小腿的相对偏航。应检测运动激励与约束残差；退化动作下冻结或减弱相关更新。真实膝关节并非理想铰链，髋关节也不能强行套用该约束。参考可观测性研究：\url{https://arxiv.org/abs/2102.02675}。
+    \item \textbf{接触与视觉辅助}：可靠支撑相中以软约束抑制足端速度与高度误差，允许足部转动、脚跟抬起和接触切换。当前没有足部 IMU，不能直接把小腿静止等同于足底静止；触地约束也不是绝对航向观测。VD 仅在跟踪有效、坐标对齐且时延可控时约束上半身，不将胸部 yaw 直接复制给髋或双腿。
+    \item \textbf{学习与恢复}：神经网络优先预测接触、异常和小幅姿态残差，权重还需结合规则检查与独立验证；不能仅凭网络自报置信度保证安全。持续不可观测时保留用户确认的已知姿态重置。若目标是长时间强约束下肢航向，应增加可见的腿部视觉标记或外部位置/姿态追踪；单个胸部或骨盆参考仍不足以保证所有下肢节点可观测。
+\end{enumerate}
+验收以原生 SlimeVR（含 Stay Aligned 与脚锁）为基线，分别比较源头标定、运动学约束及神经网络的增益。按站立、走动、转身、坐姿、盘腿与躺卧分别记录偏航误差、误修正率、脚滑距离和达到预定误差阈值前的重置间隔；没有独立真值时不得将自洽骨架误差称为真实跟踪精度。
 
 \subsection{Stay Aligned 与神经网络校正器的互补}
 
 Stay Aligned 是规则式姿态先验：每 tick 将 tracker 偏航朝“校准时的放松姿态”做梯度下降微调，它读取的是玩家自身姿态与放松姿态先验，\textbf{不读取头显偏航}，因此本身并非绝对参考；其盲区在于非放松姿态（侧躺、大幅跳舞、前倾）时放松姿态不成立而失效。
 
-神经网络残差校正器从 AMASS 等大规模动捕数据中学到“人类在各活动下的合理姿态分布”，可覆盖上述盲区。二者同属姿态先验类，神经网络是 Stay Aligned 的\emph{补强}而非替代；代价是神经网络可能产生“幻觉”（将姿态掰到合理但错误的位置），因此必须采用残差叠加 + 置信门控的形式（见~\ref{subsec:discipline}）。
+神经网络残差校正器从 AMASS 等大规模动捕数据中学到“人类在各活动下的合理姿态分布”，有机会改善部分训练覆盖的非放松动作，但不能保证覆盖上述盲区或恢复不可观测的真实偏航。二者同属姿态先验类，神经网络是 Stay Aligned 的\emph{补强}而非替代；代价是神经网络可能产生“幻觉”（将姿态掰到合理但错误的位置），因此必须采用残差叠加 + 置信门控的形式（见~\ref{subsec:discipline}）。
 
 % ==================== 6 神经网络残差校正器 ====================
 \section{服务器端神经网络残差校正器}
@@ -159,13 +172,13 @@ Stay Aligned 是规则式姿态先验：每 tick 将 tracker 偏航朝“校准�
 
 \subsection{问题定位}
 
-SlimeVR 官方服务端仅用骨骼几何约束、最小二乘自动测比例（AutoBone）与脚锁做纠偏，各 tracker 的绝对朝向由固件侧 VQF 融合给出，服务端信任该朝向并装配成骨架。其局限是：无跨 tracker 的统计融合、不自动纠正偏航（yaw）漂移、单点失稳仅由相邻关节约束兜底。
+SlimeVR 官方服务端仅用骨骼几何约束、最小二乘自动测比例（AutoBone）与脚锁做纠偏，各 tracker 的姿态估计由固件侧 VQF 融合给出，服务端信任该朝向并装配成骨架。其局限是：Stay Aligned 等现有约束依赖动作与先验适用性，无法保证任意动作下的真实偏航可观测。
 
 此外，纯开链几何解算缺少足部触地约束，静止站立时下肢易出现“滑步 / 溜冰”现象。因此本设计在 PC 服务端增加一层轻量神经网络，作为“姿态先验 / 去噪器”，同时输出姿态残差、传感器置信门控与足部触地判别，对多传感器姿态做联合误差纠正。
 
 \subsection{输入与输出}
 
-\textbf{输入：}滑动窗口特征 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{N \times 135}$，由两路构成——(a) 上半身绝对锚：Quest 3 / VD Estimation 提供的胸、手肘绝对位姿（零漂移）；(b) 下半身 6 点 LSM6DSV 的角速度与加速度。两路数据先经时间戳 Slerp 环形插值缓冲池（50\,ms）对齐，以消除视觉传输（$\sim$20\,ms）与 2.4G 射频（$\sim$5\,ms）之间的相位差。
+\textbf{输入：}滑动窗口特征 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{N \times 135}$，由两路构成——(a) 上半身辅助参考：Quest 3 / VD Estimation 提供的胸、手肘估计位姿及其可用性标记（带误差与时延）；(b) 下半身 6 点 LSM6DSV 的角速度与加速度。两路数据先经时间戳 Slerp 环形插值缓冲池（50\,ms）对齐，以消除视觉传输（$\sim$20\,ms）与 2.4G 射频（$\sim$5\,ms）之间的相位差。
 
 \textbf{输出（多任务头，单次前向并行给出）：}
 \begin{itemize}
@@ -205,7 +218,7 @@ SparsePoser   & SIGGRAPH 2023 & \textbf{解剖学流形参考}：借鉴关节极
     \item \textbf{备选 B（姿态流形去噪后处理）}：在残差输出后串联轻量自编码器潜空间投影，关节角超限时投影回自然姿态流形；为防止“AI 幻觉吃动作”，须配合大残差自动退避机制。
 \end{itemize}
 
-模型总参数量控制在 $1.2$\,M 以内，导出 ONNX 权重不超过 $8$\,MB。
+原定参数与体积预算为 $1.2$\,M 与 $8$\,MB；2026-10-17 实现核算表明，256 维完整配置有 6,689,306 参数，超出预算；96 维轻量配置有 974,426 参数。具体实现契约、工程验收及尚未验证的精度指标见配套训练规范的模型代码落地记录与 \texttt{corrector/README.md}。
 
 \subsection{训练数据与目标函数}
 
@@ -219,7 +232,7 @@ SparsePoser   & SIGGRAPH 2023 & \textbf{解剖学流形参考}：借鉴关节极
 \[
 \psi_t = \psi_{t-1} + b_{\text{gyro}}\Delta t + \sigma_{\text{arw}}\sqrt{\Delta t}\,\epsilon_t,\qquad \epsilon_t \sim \mathcal{N}(0,1)
 \]
-并叠加加速度扰动与高斯白噪声；同时由脚踝速度与离地高度生成触地真值（$v_{\text{foot}} < 0.1$\,m/s 且 $z_{\text{foot}} < 0.03$\,m 时置 1）。监督目标为残差 $\Delta q^{*} = q^{*} \otimes (q^{\text{corrupt}})^{-1}$，构成 corrupted→clean 配对，无需真人标注。
+并叠加加速度扰动与高斯白噪声；同时由脚踝速度与离地高度生成触地真值（$v_{\text{foot}} < 0.1$\,m/s 且 $z_{\text{foot}} < 0.03$\,m 时置 1）。监督目标为残差 $\Delta q^{*} = (q^{\text{corrupt}})^{-1} \otimes q^{*}$，构成 corrupted→clean 配对，无需真人标注。
 
 \textbf{损失与优化}：
 \[
@@ -259,7 +272,7 @@ VR 要求端到端管线 $\le 20$\,ms（从 IMU 打包到 VRChat 收到骨骼）
 \multirow{3}{*}{姿态精度}
     & 平均关节位置误差 MPJPE & $\le 45.0$\,mm \\
     & 关节角度 RMSE & $\le 7.5^{\circ}$ \\
-    & 偏航漂移消除率 & $\ge 88\%$（注入 $10^{\circ}$/min 漂移） \\
+    & 偏航误差削减率（待验证） & $\ge 88\%$（注入 $10^{\circ}$/min 漂移） \\
 \midrule
 \multirow{2}{*}{接触与稳定}
     & 足部触地判别 F1 & $\ge 93.0\%$ \\
@@ -294,7 +307,7 @@ VR 要求端到端管线 $\le 20$\,ms（从 IMU 打包到 VRChat 收到骨骼）
 Stay Aligned & 规则式姿态先验 & 否（相对校准放松姿态） & 非放松姿态（侧躺/大幅舞蹈）失效；\textbf{保留为基线} \\
 RoNIN / TLIO & 学术 AHRS 神经网络（单 IMU） & 否 & 单 IMU、无全身约束、需真机标定；\textbf{借鉴其网络思想} \\
 相机 ML 全身追踪（KinectAIFusionFBT / Fever / Mediapipe-VR / ToucanTrack） & 视觉绝对参考 & 是 & 需额外摄像头/算力、遮挡敏感；\textbf{替代路线，本设计不采用} \\
-\textbf{本设计}（VD 锚 + NN 残差校正） & 分层（绝对锚 + 统计残差） & 上半身绝对（VD）、下半身残差 & NN 幻觉需置信门控；\textbf{主路线} \\
+\textbf{本设计}（VD 锚 + NN 残差校正） & 分层（辅助观测 + 统计残差） & VD 上半身估计；下肢无直接绝对参考 & NN 幻觉需置信门控；\textbf{主路线} \\
 \bottomrule
 \end{tabular}
 \end{table}

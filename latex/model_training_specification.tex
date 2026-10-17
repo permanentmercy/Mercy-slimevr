@@ -11,8 +11,10 @@
 \usepackage{booktabs}
 \usepackage{multirow}
 \usepackage{makecell}
+\usepackage{array}
 \usepackage{graphicx}
 \usepackage{float}
+\usepackage{xurl}
 
 % 架构框图绘图包（单色规范，与主文档保持一致）
 \usepackage{tikz}
@@ -20,7 +22,13 @@
 \tikzstyle{boxmain}    = [rectangle, draw=black, thick, rounded corners, fill=gray!12, minimum height=1.0cm, align=center, font=\small]
 \tikzstyle{boxsub}     = [rectangle, draw=black, thick, rounded corners, fill=white, minimum height=0.9cm, align=center, font=\small]
 \tikzstyle{boxsensor}  = [rectangle, draw=black, thick, rounded corners, fill=gray!6,  minimum height=0.85cm, align=center, font=\small]
-\tikzstyle{arrow}      = [-{Stealth}, thick, draw=black]
+\tikzstyle{boxlayer}   = [rectangle, draw=black, thick, fill=white, minimum height=0.6cm, font=\scriptsize, align=center]
+\tikzstyle{boxact}     = [rectangle, draw=black!80, fill=gray!15, rounded corners=2pt, minimum height=0.5cm, font=\scriptsize, align=center]
+\tikzstyle{boxop}      = [circle, draw=black, thick, fill=gray!20, minimum size=0.5cm, font=\small\bfseries, inner sep=0pt]
+\tikzstyle{boxhead}    = [rectangle, draw=black, thick, fill=gray!8, rounded corners=2pt, minimum height=0.7cm, font=\scriptsize, align=center]
+\tikzstyle{decision}   = [diamond, draw=black, thick, fill=gray!10, aspect=2.0, font=\scriptsize, align=center, inner sep=1pt]
+\tikzstyle{arrow}      = [-{Stealth[length=2.2mm, width=1.6mm]}, thick, draw=black]
+\tikzstyle{dasharrow}  = [-{Stealth[length=2.2mm, width=1.6mm]}, thick, dashed, draw=black!70]
 
 \usepackage[hidelinks]{hyperref}
 
@@ -58,7 +66,7 @@
 \small
 \caption{核心参考开源项目与技术功能映射}
 \label{tab:repos}
-\begin{tabular}{p{2.6cm}p{2.6cm}p{3.2cm}p{5.4cm}}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.2cm}>{\raggedright\arraybackslash}p{2.2cm}p{4.0cm}p{5.8cm}}
 \toprule
 \textbf{仓库名称} & \textbf{发表出处} & \textbf{核心源码模块} & \textbf{在本项目中的具体复用与参考职责} \\
 \midrule
@@ -112,7 +120,7 @@
 \subsection{人体模型参数包依赖}
 动捕数据正向运动学（FK）计算依赖 SMPL-H 基础网格参数文件：
 \begin{itemize}
-    \item 前往 MANO 官方网站（\url{https://mano.is.tue.mpg.de/}）下载 \texttt{SMPL+H model (with DMPLs)}；
+    \item 访问 MANO 官网（\url{https://mano.is.tue.mpg.de/}），下载所需模型包 \texttt{SMPL+H model (with DMPLs)}；
     \item 解压得到 \texttt{smplh/male/model.npz} 与 \texttt{smplh/female/model.npz}，放入数据处理脚本对应的 \texttt{support\_data/body\_models/} 路径下。
 \end{itemize}
 
@@ -124,12 +132,12 @@
     \[
     T_{\text{head}} = (q^*_{\text{head}}, x^*_{\text{head}})
     \]
-    该观测作为全局刚体参考，具备无偏航漂移特性。
+    该观测是合成训练中的理想参考，不代表真实 HMD 或 VD 身体关节观测无误差。训练应注入参考位姿噪声、时延、短时丢失和重定位扰动，并分别模拟各下肢节点的独立漂移；理想参考仅用于消融对照。
     \item \textbf{足部触地标签标注}：根据左右脚踝位移变化率计算线速度 $v_{\text{foot}, t} = \|x^*_{\text{foot}, t} - x^*_{\text{foot}, t-1}\| / \Delta t$，并结合脚底离地高度 $z_{\text{foot}, t}$，设定触地状态标签准则：
     \[
-    C^*_t = \begin{cases} 
-    1, & \text{if } v_{\text{foot}, t} < 0.1\,\text{m/s} \quad \text{且} \quad z_{\text{foot}, t} < 0.03\,\text{m} \\ 
-    0, & \text{otherwise} 
+    C^*_t = \begin{cases}
+    1, & \text{if } v_{\text{foot}, t} < 0.1\,\text{m/s} \quad \text{且} \quad z_{\text{foot}, t} < 0.03\,\text{m} \\
+    0, & \text{otherwise}
     \end{cases}
     \]
     \item \textbf{传感器偏航积分游走注入}：针对下半身关节点（骨盆、大腿、小腿），根据 MEMS 陀螺仪的角随机游走系数 $\sigma_{\text{arw}}$ 与零偏漂移项 $b_{\text{gyro}}$，按步长 $\Delta t$ 累积偏航漂移角：
@@ -143,89 +151,349 @@
     同时向线加速度引入高斯白噪声与动态离心扰动：$a^{\text{corrupt}}_{i, t} = a^*_{i, t} + \delta a_{\text{dyn}}$。
     \item \textbf{四元数残差回归目标构建}：监督目标定义为纯净旋转四元数相对于扰动旋转四元数的增量残差：
     \[
-    \Delta q^*_{i, t} = q^*_{i, t} \otimes (q^{\text{corrupt}}_{i, t})^{-1}
+    \Delta q^*_{i, t} = (q^{\text{corrupt}}_{i, t})^{-1} \otimes q^*_{i, t}
     \]
     \item \textbf{时序滑动窗口封装}：以时间步长截取长度为 $N$ 帧的时序窗口，组合 8 路身体流的相对旋转与速度参数，形成输入特征张量 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{N \times 135}$，输出配对训练样本 $(\mathbf{X}_{\text{in}}, \Delta q^*, C^*)$。
 \end{enumerate}
 
-% ==================== 三、模型网络架构与系统性增强设计 ====================
-\section{模型网络架构与系统性补偿设计}
+% ==================== 三、系统全架构分层设计与子系统构成 ====================
+\section{系统全架构分层设计与子系统构成}
 \label{sec:architecture}
 
-\subsection{主架构：多任务因果时空网络 (Unified Multi-Task Network)}
-为降低多模型级联带来的系统延迟与接口开销，本系统采用多任务联合预测架构，以因果时空网络为主干，单次前向推理并行输出姿态残差、传感器置信度与触地概率。
+为清晰界定多源感知、数据对齐、神经计算、物理仲裁与应用分发的职责边界，全系统划分为 5 个相互解耦、单向数据流动的子系统，如图~\ref{fig:macro_pipeline} 所示。为避免单张架构图信息过载与排版拥挤，本规范将全系统按抽象层级与执行逻辑拆分为三幅具有针对性尺度的模块图：
+\begin{enumerate}
+    \item \textbf{图~\ref{fig:macro_pipeline}（全系统宏观数据流与子系统分层图）}：展示物理硬件、信号调理、网络服务交互的端到端全链路；
+    \item \textbf{图~\ref{fig:nn_micro_architecture}（因果时空神经网络微观架构图）}：深入神经网络内部，逐层绘制线性投影层、LayerNorm、激活函数、因果 LSTM 隐状态循环、Spatial Transformer 中的多头自注意力机制、前馈网络、残差跳连（$\oplus$）及三路解耦输出头；
+    \item \textbf{图~\ref{fig:kinematics_arbitration}（物理运动学仲裁与 ZUPT 状态机执行流图）}：展示后处理阶段的置信度门控条件分支、软残差 SLERP 融合旁路保护及双足触地 4 状态闭环流。
+\end{enumerate}
+
+\subsection{全系统分层架构总览}
 
 \begin{figure}[H]
 \centering
-\begin{tikzpicture}[node distance=1.2cm and 1.5cm, auto]
-    % 输入层
-    \node[boxsensor] (in_hmd) {Quest 3 / VD 参考锚\\(胸/手肘绝对位姿)};
-    \node[boxsensor, right=0.8cm of in_hmd] (in_imu) {6 点 LSM6DSV\\(下半身角速度/加速度)};
-    
-    % 时钟缓冲
-    \node[boxsub, below=0.8cm of $(in_hmd)!0.5!(in_imu)$, text width=7.2cm] (slerp_buf) {
-        \textbf{时间戳 Slerp 环形插值缓冲池 (50\,ms)}\\
-        补偿视觉传输时延（约 20\,ms）与射频传输时延（约 5\,ms）之间的动态相位差
+\begin{tikzpicture}[node distance=0.55cm and 0.8cm, auto]
+    % ==================== 子系统 1 ====================
+    \node[boxmain, text width=14.8cm, fill=gray!8] (sub1) {
+        \textbf{【子系统一：多模态物理感知与硬件采集层】}\\
+        \vspace{0.12cm}
+        \begin{tikzpicture}[node distance=0.4cm and 0.4cm]
+            \node[boxsensor, text width=6.6cm] (sub1_vis) {
+                \textbf{上半身视觉参考锚 (Quest 3 / VD)}\\
+                下视摄像头 (IOBT 60\,Hz) $\to$ Virtual Desktop 虚拟 Tracker\\
+                $\to$ VDBTC 过滤下半身 $\to$ 保留胸部/手肘 6DoF 估计位姿
+            };
+            \node[boxsensor, text width=6.8cm, right=0.4cm of sub1_vis] (sub1_imu) {
+                \textbf{下半身 6 轴 IMU 阵列 (6 点 LSM6DSV16X)}\\
+                ST LSM6DSV16X (ODR 120\,Hz) $\to$ nRF52840 SoC (Cortex-M4F)\\
+                $\to$ 板载 VQF 固件姿态解算 $\to$ 2.4\,GHz ESB 私有无线流
+            };
+        \end{tikzpicture}
     };
 
-    % 主干网
-    \node[boxmain, below=0.8cm of slerp_buf, text width=7.6cm] (backbone) {
-        \textbf{因果时空骨干网络 (Causal Spatio-Temporal Backbone)}\\
-        8 路独立单向因果 LSTM ($256d$, 严格无未来帧依赖) \\
-        + Spatial Transformer Encoder (跨关节解剖关联自注意力)
+    % ==================== 子系统 2 ====================
+    \node[boxmain, text width=14.8cm, fill=gray!4, below=0.42cm of sub1] (sub2) {
+        \textbf{【子系统二：前置信号调理与多模态时空对齐层】}\\
+        \vspace{0.12cm}
+        \begin{tikzpicture}[node distance=0.3cm and 0.35cm]
+            \node[boxsub, text width=4.1cm] (sub2_filter) {
+                \textbf{STA 软组织晃动低通滤波}\\
+                二阶数字滤波 (截频 12\,Hz)\\
+                滤除肌肉颤振伪高频
+            };
+            \node[boxsub, text width=4.3cm, right=0.35cm of sub2_filter] (sub2_acc) {
+                \textbf{动态线加速度模长校验}\\
+                $e_a = \big|\|\mathbf{a}\| - 1.0g\big| > 0.3g$\\
+                触发重力对准自适应降权
+            };
+            \node[boxsub, text width=4.3cm, right=0.35cm of sub2_acc] (sub2_sync) {
+                \textbf{时钟对齐 Slerp 缓冲池 (50\,ms)}\\
+                四元数球面插值时间基准\\
+                补偿 15\,ms 视觉与无线电相位差
+            };
+        \end{tikzpicture}\\
+        \vspace{0.08cm}
+        \textbf{特征组装}：提取 8 身体流通道动力学与相对位姿 $\to$ 组装滑动窗口张量 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{B \times 20 \times 135}$
     };
 
-    % 多任务头
-    \node[boxsub, below left=1.0cm and -0.8cm of backbone, text width=3.4cm] (head_q) {
-        \textbf{分支 1：姿态残差头 $\Delta q$}\\
-        输出局部四元数残差\\
-        限幅单帧角 $\le 8^\circ$
-    };
-    \node[boxsub, below=1.0cm of backbone, text width=3.4cm] (head_w) {
-        \textbf{分支 2：可靠性门控头 $W$}\\
-        预测传感器置信度\\
-        低置信度退避回原值
-    };
-    \node[boxsub, below right=1.0cm and -0.8cm of backbone, text width=3.4cm] (head_c) {
-        \textbf{分支 3：PIP 触地判别头 $C$}\\
-        预测双脚触地概率\\
-        $P_L, P_R \in [0, 1]$
+    % ==================== 子系统 3 ====================
+    \node[boxmain, text width=14.8cm, fill=gray!8, below=0.42cm of sub2] (sub3) {
+        \textbf{【子系统三：因果时空神经网络核心层 (统一多任务 CSTN，详见图~\ref{fig:nn_micro_architecture} 与第~\ref{subsec:neural_core} 节)】}\\
+        \vspace{0.08cm}
+        \textbf{时空骨干网络}：8-Stream Linear Embedding $\to$ 8-Stream Causal LSTM $\to$ 3-Layer Spatial Transformer (残差跳连 $\oplus$)\\
+        \textbf{三路解耦头}：姿态残差头 $\Delta q \in \mathbb{R}^{6 \times 4}$ \quad|\quad 可靠性门控头 $\mathbf{w} \in [0, 1]^6$ \quad|\quad PIP 触地判别头 $P_L, P_R \in [0, 1]$
     };
 
-    % 物理与仲裁层
-    \node[boxmain, below=1.0cm of head_w, text width=8.5cm] (arbitrator) {
-        \textbf{物理与运动学后处理层 (耗时 $< 0.3$\,ms)}\\
-        残差加权融合：$q^{\text{final}} = \text{SLERP}(q^{\text{raw}}, q^{\text{raw}} \otimes \Delta q, \alpha \cdot W)$\\
-        ZUPT 零速锁脚状态机（单足支撑锁定位移，双足支撑闭链高度均摊）
+    % ==================== 子系统 4 ====================
+    \node[boxmain, text width=14.8cm, fill=gray!4, below=0.42cm of sub3] (sub4) {
+        \textbf{【子系统四：物理运动学仲裁与接触约束层 (执行开销 $< 0.3$\,ms，详见图~\ref{fig:kinematics_arbitration})】}\\
+        \vspace{0.12cm}
+        \begin{tikzpicture}[node distance=0.3cm and 0.4cm]
+            \node[boxsub, text width=6.6cm] (sub4_blend) {
+                \textbf{软残差球面插值融合 (SLERP Blending)}\\
+                $q^{\text{final}}_i = \text{SLERP}(q^{\text{raw}}_i, q^{\text{raw}}_i \otimes \Delta q_i, \alpha w_i)$\\
+                若 $w_i < 0.3$ 则自动触发旁路保护，跳过修正
+            };
+            \node[boxsub, text width=6.8cm, right=0.4cm of sub4_blend] (sub4_zupt) {
+                \textbf{ZUPT 零速触地与双足闭链状态机}\\
+                单足支撑：锁死足端世界坐标，反解下肢 (消滑步)\\
+                双足支撑：双足地面闭环，误差平摊至骨盆双膝 (消悬空)
+            };
+        \end{tikzpicture}
     };
 
-    % 输出
-    \node[boxsensor, below=0.8cm of arbitrator] (out_vrchat) {输出至目标应用 (算法处理延迟 $< 3.5$\,ms)};
+    % ==================== 子系统 5 ====================
+    \node[boxmain, text width=14.8cm, fill=gray!8, below=0.42cm of sub4] (sub5) {
+        \textbf{【子系统五：服务集成与应用交互呈现层】}\\
+        \vspace{0.08cm}
+        SlimeVR Server (AutoBone 骨骼比例装配 + 全局 FK 求解) $\to$ 独立 OSC/VMC 桥 (UDP 39539 $\to$ 9000) $\to$ VRChat 全身追踪
+    };
 
-    % 连线
-    \draw[arrow] (in_hmd) -- (slerp_buf);
-    \draw[arrow] (in_imu) -- (slerp_buf);
-    \draw[arrow] (slerp_buf) -- (backbone);
-    \draw[arrow] (backbone) -- (head_q);
-    \draw[arrow] (backbone) -- (head_w);
-    \draw[arrow] (backbone) -- (head_c);
-    \draw[arrow] (head_q) -- (arbitrator);
-    \draw[arrow] (head_w) -- (arbitrator);
-    \draw[arrow] (head_c) -- (arbitrator);
-    \draw[arrow] (arbitrator) -- (out_vrchat);
+    % 级联主箭头
+    \draw[arrow] (sub1) -- (sub2);
+    \draw[arrow] (sub2) -- (sub3);
+    \draw[arrow] (sub3) -- (sub4);
+    \draw[arrow] (sub4) -- (sub5);
 \end{tikzpicture}
-\caption{神经网络残差校正器单模型多任务全系统数据流图}
-\label{fig:pipeline}
+\caption{神经网络残差校正器全系统详细子系统划分与数据流拓扑图}
+\label{fig:macro_pipeline}
 \end{figure}
 
-\subsection{传感器级与系统级补偿机制}
-
-为抑制传感器动态噪声与异构数据源时钟不同步导致的姿态失真，系统引入以下 4 项补偿与约束机制：
+\subsection{子系统一：多模态物理感知与硬件层详细构成}
+本层负责人体运动物理信号的原始数字化采集，构成包含带不确定度的视觉辅助观测与惯性位姿两部分：
 \begin{enumerate}
-    \item \textbf{动态线加速度污染抑制}：特征输入中追加加速度模长误差 $e_a = \big|\|\mathbf{a}\| - 1.0g\big|$。当剧烈运动导致 $e_a > 0.3g$ 时，降低重力倾角置信度，增加陀螺仪时序积分权重。
-    \item \textbf{STA 软组织晃动自适应滤波}：针对肌肉颤振引起的 $15\sim30$\,Hz 假动作，前置截止频率为 $12$\,Hz 的数字低通滤波器。
-    \item \textbf{多模态时钟对齐环形缓冲池（Slerp Buffer）}：PC 服务端维护 $50$\,ms 队列，依照时间戳对高频 IMU 数据进行球面线性插值，对齐至同一时间基准，抑制高动态运动下的骨骼扭曲畸变。
-    \item \textbf{双足闭链支撑相几何仲裁}：双脚同时踩地（$P_L > 0.8, P_R > 0.8$）时，以两脚连线中点为地面支撑参考，将垂向高度闭环误差平均回摊至骨盆与双膝，避免开链正向运动学计算在双足支撑阶段产生的几何过约束与单足悬空。
+    \item \textbf{上半身视觉辅助参考链路}：Quest 3 / Virtual Desktop 提供身体关节估计，并通过 SteamVR 与 Feeder 链路接入服务端。实际可用 tracker、坐标变换和跟踪质量须实机确认，不假定胸部、肘部是直接测量或零漂移观测。上半身参考不能通过前向运动学自动消除各下肢 IMU 的独立偏航漂移；下肢需逐节点估计并保留已知姿态重置，详细路线见主文档第~5~节。
+    \item \textbf{下半身 6 轴 IMU 阵列链路}：包含骨盆（Pelvis）、左大腿、右大腿、左小腿、右小腿及双脚踝共 6 个物理节点。每个节点硬件由 ST LSM6DSV16X 传感器与 Nordic nRF52840 SoC 构成。传感器内部运行 120\,Hz 采样与硬件抗混叠滤波，原始角速度 $\omega$ 与加速度 $\mathbf{a}$ 输入 SoC 内置的 Cortex-M4F 浮点单元，由 VQF 固件算法进行刚体旋转积分与动态加速度自适应补偿，生成无磁力计依赖的局部姿态四元数，经 2.4\,GHz ESB 私有无线协议打包发送至 PC 端的 HolyIOT USB 接收器。
+\end{enumerate}
+
+\subsection{子系统二：前置信号调理与时空对齐中继层详细构成}
+由于视觉与惯性硬件来自不同物理通道，本层在 PC 服务端内存中执行传感器级信号预处理与多模态时间戳校准：
+\begin{enumerate}
+    \item \textbf{STA 软组织晃动自适应滤波器}：针对绑带固定于肌肉与脂肪表面引发的高频（$15\sim30$\,Hz）微小晃动，设计二阶数字低通滤波器（截频 $12$\,Hz），滤除与骨骼解剖学规律不符的高频颤颤伪影。
+    \item \textbf{动态线加速度模长校验器}：持续监测加速度模长相对于 $1.0g$ 标准重力的偏离量 $e_a = \big|\|\mathbf{a}\| - 1.0g\big|$。在跑步、踢腿或急停瞬间，当 $e_a > 0.3g$ 时，标记当前加速度计受到强非重力线加速度污染，降低其重力对准权重。
+    \item \textbf{多模态时钟对齐环形缓冲池（Slerp Buffer）}：在内存中开辟深度为 50\,ms 的双端队列。由于 Quest 3 视觉数据经视频编解码存在约 20\,ms 传输时延，而 2.4\,GHz 射频传输仅需约 5\,ms，两硬件数据在 PC 到达时刻存在约 15\,ms 动态相位差。该缓冲池根据数据包硬件时间戳，对高频 IMU 姿态进行四元数球面线性插值（Slerp），将其强行重采样对齐至视觉参考帧的同一物理时间切片，消除转身运动时的骨骼剪切扭曲。
+    \item \textbf{特征组装器}：将对齐后的数据映射为 8 个身体通道（头部、双手、双脚、骨盆及手部相对头部偏移），每帧拼装为 135 维规范化特征向量，维护长度为 $N=20$ 的历史滑动窗口张量 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{B \times 20 \times 135}$。
+\end{enumerate}
+
+\subsection{子系统三：因果时空神经网络核心层详细微架构}
+\label{subsec:neural_core}
+本层为全系统的运算核心。为全面展现网络内部张量演变与算子级构成，图~\ref{fig:nn_micro_architecture} 详尽绘制了从输入特征投影、因果时序编码、自注意力跨关节建模到三路解耦头的全部线性层维度、残差跳连（$\oplus$）及非线性激活。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.32cm and 0.4cm, auto]
+    % 输入层
+    \node[boxlayer, text width=14.8cm, fill=gray!8] (in_feat) {
+        \textbf{输入时序特征张量} $\mathbf{X}_{\text{in}} \in \mathbb{R}^{B \times 20 \times 135}$ \quad (按解剖拓扑切分为 8 身体流通道：头部、胸部/骨盆、左右手、左右大腿、左右脚踝)
+    };
+
+    % 8-Stream Embedding
+    \node[boxlayer, text width=14.8cm, below=0.28cm of in_feat] (stream_embed) {
+        \textbf{8 路多流独立特征嵌入层 (8-Stream Linear Embedding)}\\
+        各流 $k \in \{1,\dots,8\}$：$\mathbf{x}_t^{(k)} \in \mathbb{R}^{d_k} \xrightarrow{\quad} \text{Linear}(d_k \to 256) \xrightarrow{\quad} \text{LayerNorm}(256) \xrightarrow{\quad} \text{LeakyReLU}(0.1) \xrightarrow{\quad} \mathbf{e}_t^{(k)} \in \mathbb{R}^{256}$
+    };
+
+    % 8-Stream Causal LSTM
+    \node[boxlayer, text width=14.8cm, below=0.28cm of stream_embed] (stream_lstm) {
+        \textbf{8 路因果单向 LSTM 时序编码层 (Causal Temporal Backbone)}\\
+        隐状态递推：$(h_{t-1}^{(k)}, c_{t-1}^{(k)}) \xrightarrow{\mathbf{e}_t^{(k)}} (h_t^{(k)}, c_t^{(k)})$ \quad (隐藏维度 256，\textbf{严格因果：零未来帧依赖，单向递归})
+    };
+
+    % Spatial Transformer Block
+    \node[boxmain, text width=14.8cm, fill=gray!4, below=0.32cm of stream_lstm] (trans_block) {
+        \textbf{【空间自注意力编码器 (Spatial Transformer Layer $\times 3$ 重复堆叠)】}\\
+        \vspace{0.12cm}
+        \begin{tikzpicture}[node distance=0.28cm and 0.4cm]
+            \node[boxlayer, text width=11.2cm] (tokens_in) {
+                8 身体流当前步 Token 集合：$\mathbf{H}_t = \big[h_t^{(1)}, h_t^{(2)}, \dots, h_t^{(8)}\big] \in \mathbb{R}^{8 \times 256}$
+            };
+
+            % QKV 投影
+            \node[boxlayer, text width=3.3cm, below=0.25cm of tokens_in, xshift=-3.8cm] (q_proj) {$\mathbf{Q} = \text{Linear}(256, 256)$};
+            \node[boxlayer, text width=3.3cm, right=0.45cm of q_proj] (k_proj) {$\mathbf{K} = \text{Linear}(256, 256)$};
+            \node[boxlayer, text width=3.3cm, right=0.45cm of k_proj] (v_proj) {$\mathbf{V} = \text{Linear}(256, 256)$};
+
+            % 多头自注意力计算与投影
+            \node[boxlayer, text width=11.2cm, below=0.28cm of k_proj] (mha_attn) {
+                \textbf{缩放点积多头注意力 (8 Heads, $d_h=32$)}：$\text{Attention}(\mathbf{Q},\mathbf{K},\mathbf{V}) = \text{Softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{32}}\right)\mathbf{V} \xrightarrow{\quad} \text{Linear}(256, 256)$
+            };
+
+            % 残差 1 (居中)
+            \node[boxop, below=0.28cm of mha_attn] (add1) {+};
+            \node[boxact, below=0.22cm of add1] (ln1) {$\text{LayerNorm}(256)$};
+
+            % FFN
+            \node[boxlayer, text width=11.2cm, below=0.28cm of ln1] (ffn_block) {
+                \textbf{位置前馈网络 (FFN)}：$\text{Linear}(256, 1024) \xrightarrow{\quad} \text{GELU} \xrightarrow{\quad} \text{Linear}(1024, 256)$
+            };
+
+            % 残差 2 (居中)
+            \node[boxop, below=0.28cm of ffn_block] (add2) {+};
+            \node[boxact, below=0.22cm of add2] (ln2) {$\text{LayerNorm}(256)$};
+
+            % 内部主干连线
+            \draw[arrow] (tokens_in.south -| q_proj) -- (q_proj);
+            \draw[arrow] (tokens_in.south) -- (k_proj);
+            \draw[arrow] (tokens_in.south -| v_proj) -- (v_proj);
+            \draw[arrow] (q_proj.south) -- (mha_attn.north -| q_proj);
+            \draw[arrow] (k_proj.south) -- (mha_attn.north);
+            \draw[arrow] (v_proj.south) -- (mha_attn.north -| v_proj);
+            \draw[arrow] (mha_attn) -- (add1);
+            \draw[arrow] (add1) -- (ln1);
+            \draw[arrow] (ln1) -- (ffn_block);
+            \draw[arrow] (ffn_block) -- (add2);
+            \draw[arrow] (add2) -- (ln2);
+
+            % 残差跳连 1 (沿左侧外围回路)
+            \draw[dasharrow] (tokens_in.west) -- ++(-0.65,0) |- node[pos=0.45, fill=gray!4, font=\scriptsize, inner sep=1pt] {\textbf{残差 1} $\oplus$} (add1.west);
+            % 残差跳连 2 (沿右侧外围回路，绕过 ffn_block)
+            \draw[dasharrow] (ln1.east) -- ([xshift=0.65cm] ffn_block.east |- ln1.east) |- node[pos=0.45, fill=gray!4, font=\scriptsize, inner sep=1pt] {\textbf{残差 2} $\oplus$} (add2.east);
+        \end{tikzpicture}
+    };
+
+    % 三路解耦输出头
+    \node[boxhead, text width=4.5cm, below=0.35cm of trans_block, xshift=-4.9cm] (head1) {
+        \textbf{分支 1：姿态残差头 $\Delta q$}\\
+        $\text{Linear}(256, 128)$\\
+        $\to \text{LeakyReLU}(0.1)$\\
+        $\to \text{Linear}(128, 24)$\\
+        $\to \tanh \times \left(\frac{8\pi}{180}\right)$\\
+        \textbf{输出}：$\Delta q \in \mathbb{R}^{6 \times 4}$ (6 关键关节)
+    };
+
+    \node[boxhead, text width=4.5cm, below=0.35cm of trans_block] (head2) {
+        \textbf{分支 2：可靠性门控头 $W$}\\
+        $\text{Linear}(256, 64)$\\
+        $\to \text{LeakyReLU}(0.1)$\\
+        $\to \text{Linear}(64, 6)$\\
+        $\to \text{Sigmoid}$\\
+        \textbf{输出}：$\mathbf{w} \in [0, 1]^6$ (节点置信度)
+    };
+
+    \node[boxhead, text width=4.5cm, below=0.35cm of trans_block, xshift=4.9cm] (head3) {
+        \textbf{分支 3：PIP 触地判别头 $C$}\\
+        $\text{Linear}(256, 64)$\\
+        $\to \text{LeakyReLU}(0.1)$\\
+        $\to \text{Linear}(64, 2)$\\
+        $\to \text{Sigmoid}$\\
+        \textbf{输出}：$P_L, P_R \in [0, 1]$ (双足触地率)
+    };
+
+    % 主干连线
+    \draw[arrow] (in_feat) -- (stream_embed);
+    \draw[arrow] (stream_embed) -- (stream_lstm);
+    \draw[arrow] (stream_lstm) -- (trans_block);
+    \draw[arrow] (trans_block.south -| head1) -- (head1);
+    \draw[arrow] (trans_block.south) -- (head2);
+    \draw[arrow] (trans_block.south -| head3) -- (head3);
+\end{tikzpicture}
+\caption{因果时空神经网络 (CSTN) 微观层级架构与残差跳连机制详细构成}
+\label{fig:nn_micro_architecture}
+\end{figure}
+
+网络各微观子层的运算特征与数学参数定义如下：
+\begin{enumerate}
+    \item \textbf{多流解耦 MLP 嵌入模块}：配置 8 组独立的线性投影层 $\text{Linear}(d_k \to 256)$，后接 $\text{LayerNorm}$ 与 $\text{LeakyReLU}(\alpha=0.1)$，将量纲不一的异构输入投射至统一的 $256$ 维潜特征空间；
+    \item \textbf{因果时序编码模块}：包含 8 组独立的单向因果 LSTM（隐藏层维度 256）。每帧隐状态 $(h_t, c_t)$ 严格基于前序时间步传递，杜绝未来帧泄露；
+    \item \textbf{空间自注意力编码模块}：由 3 层标准的 Spatial Transformer 堆叠而成。每层内包含两级残差跳连（Residual Addition，记为 $\oplus$）和两级 $\text{LayerNorm}$：
+    \[
+    \mathbf{Z} = \text{LayerNorm}\big(\mathbf{H} \oplus \text{MultiHeadAttention}(\mathbf{H})\big), \quad
+    \mathbf{Y} = \text{LayerNorm}\big(\mathbf{Z} \oplus \text{FeedForward}(\mathbf{Z})\big)
+    \]
+    前馈网络采用先升维后降维结构：$\text{Linear}(256 \to 1024) \to \text{GELU} \to \text{Linear}(1024 \to 256)$。
+    \item \textbf{三路解耦输出头}：由 3 组独立的多层感知机组成，分别承担物理意义明确的推断任务，输出任务分离，但共享主干上的反向传播梯度会相互影响。
+\end{enumerate}
+
+\subsection{子系统四：物理运动学仲裁与接触约束层详细构成}
+\label{subsec:kinematics_arbitration}
+本层负责将神经网络预测值与物理世界刚体与接触规律相结合，执行开销仅需约 $0.25$\,ms。其执行流图如图~\ref{fig:kinematics_arbitration} 所示。
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[node distance=0.5cm and 0.6cm, auto]
+    % 输入层 (Row 1)
+    \node[boxlayer, text width=6.8cm, minimum height=0.8cm] (in_rot) {
+        \textbf{姿态修正输入分支}\\
+        原始姿态 $q_i^{\text{raw}}$ \quad|\quad 残差 $\Delta q_i$ \quad|\quad 置信度 $w_i$
+    };
+    \node[boxlayer, text width=6.8cm, minimum height=0.8cm, right=0.8cm of in_rot] (in_contact) {
+        \textbf{足底触地概率输入分支}\\
+        左足触地概率 $P_L \in [0, 1]$ \quad|\quad 右足触地概率 $P_R \in [0, 1]$
+    };
+
+    % 判决层 (Row 2)
+    \node[decision, below=0.55cm of in_rot] (dec_gate) {
+        置信度门控判定\\$w_i \ge 0.3$ ?
+    };
+    \node[decision, below=0.55cm of in_contact] (dec_fsm) {
+        触地状态分类判定\\$P_{L,R} \gtrless 0.8$ ?
+    };
+
+    % 算子/状态处理层 (Row 3) —— 统一高度 1.6cm 保证绝对对齐
+    \node[boxsub, text width=3.2cm, minimum height=1.6cm, below left=0.6cm and -0.15cm of dec_gate] (blend_slerp) {
+        \textbf{软残差 SLERP 融合}\\[0.05cm]
+        $q_i = \text{SLERP}\big(q_i^{\text{raw}},$\\
+        $q_i^{\text{raw}} \otimes \Delta q_i, \alpha w_i\big)$
+    };
+    \node[boxsub, text width=3.0cm, minimum height=1.6cm, below right=0.6cm and -0.15cm of dec_gate] (bypass_gate) {
+        \textbf{旁路保护 (Bypass)}\\[0.05cm]
+        $q_i = q_i^{\text{raw}}$\\
+        (强扰动跳过修正)
+    };
+
+    \node[boxsub, text width=6.8cm, minimum height=1.6cm, below=0.6cm of dec_fsm] (fsm_box) {
+        \textbf{【ZUPT 触地与双足闭链状态机】}\\[0.05cm]
+        \scriptsize
+        $\bullet$ \textbf{单足支撑}：锁死该踝世界坐标 (ZUPT 消除滑步)\\
+        $\bullet$ \textbf{双足支撑}：地面闭环，均摊高度误差 (消除悬空)\\
+        $\bullet$ \textbf{腾空摆动}：解除足端约束，开链前向运动学传递
+    };
+
+    % 仲裁输出层 (Row 4) —— 直接定位于上一层正下方 0.65cm
+    \node[boxlayer, text width=6.8cm, minimum height=0.75cm, below=0.65cm of blend_slerp, xshift=1.65cm] (rot_out) {
+        \textbf{仲裁姿态输出}：$q_i^{\text{final}} \in \mathbb{R}^{6 \times 4}$ (送入全身前向运动学求解)
+    };
+    \node[boxlayer, text width=6.8cm, minimum height=0.75cm, below=0.65cm of fsm_box] (fsm_out) {
+        \textbf{运动学约束输出}：$\mathbf{c}_t^{\text{contact}}$ (足端世界坐标锁死与闭合链约束)
+    };
+
+    % 服务集成层 (Row 5) —— 定位于 Row 4 正下方 0.65cm
+    \node[boxmain, text width=14.4cm, below=0.65cm of rot_out, xshift=3.8cm] (srv_bridge) {
+        \textbf{【服务集成与应用呈现】}：SlimeVR Server (AutoBone 骨骼比例装配 + 全局 FK 求解)\\
+        $\xrightarrow{\quad}$ 独立 OSC/VMC 本地 UDP 桥 (端口 39539 $\to$ 9000) $\xrightarrow{\quad}$ SteamVR / VRChat 角色驱动呈现
+    };
+
+    % 连线：左路
+    \draw[arrow] (in_rot) -- (dec_gate);
+    \draw[arrow] (dec_gate) -| node[above, font=\scriptsize] {是 (Yes)} (blend_slerp.north);
+    \draw[arrow] (dec_gate) -| node[above, font=\scriptsize] {否 (No)} (bypass_gate.north);
+    \draw[arrow] (blend_slerp.south) -- (rot_out.north -| blend_slerp.south);
+    \draw[arrow] (bypass_gate.south) -- (rot_out.north -| bypass_gate.south);
+
+    % 连线：右路
+    \draw[arrow] (in_contact) -- (dec_fsm);
+    \draw[arrow] (dec_fsm) -- (fsm_box);
+    \draw[arrow] (fsm_box) -- (fsm_out);
+
+    % 连线：汇聚至底层
+    \draw[arrow] (rot_out.south) -- (srv_bridge.north -| rot_out.south);
+    \draw[arrow] (fsm_out.south) -- (srv_bridge.north -| fsm_out.south);
+\end{tikzpicture}
+\caption{物理运动学仲裁、软残差融合与 ZUPT 状态机执行流图}
+\label{fig:kinematics_arbitration}
+\end{figure}
+
+本层的两级核心控制机制如下：
+\begin{enumerate}
+    \item \textbf{软残差加权姿态融合与旁路保护}：利用门控头输出的置信度权重 $w_i$，执行自适应姿态插值：$q^{\text{final}}_i = \text{SLERP}(q^{\text{raw}}_i, q^{\text{raw}}_i \otimes \Delta q_i, \alpha \cdot w_i)$。当检测到强磁异常或模型低置信度（$w_i < 0.3$）时，系统自动切换至旁路保护（Bypass），直接输出原始姿态，杜绝残差累积漂移。
+    \item \textbf{ZUPT 触地与双足闭链状态机}：根据模型预测的双足触地概率 $P_L, P_R$，将运动学状态分类为四类模式并施加刚体约束：单足支撑时反向锁死足底世界坐标消除滑移；双足支撑时以双足地面为闭环参考面，均摊骨盆与双膝的高度闭环误差；双足腾空时解除约束执行开链前向运动学传递。
+\end{enumerate}
+
+\subsection{子系统五：服务集成与应用交互层详细构成}
+本层负责将平滑滤波后的骨骼姿态桥接至虚拟现实客户端：
+\begin{enumerate}
+    \item \textbf{SlimeVR Server 骨架求解器}：接收经过仲裁融合的局部旋转四元数，结合用户佩戴校准得到的骨骼长度参数（AutoBone），装配完整的全身骨架运动学模型。
+    \item \textbf{独立 OSC/VMC 转发桥}：使用 Python 编写轻量中继进程，利用 \texttt{onnxruntime} 引擎在后台运行神经网络推理，监听 SlimeVR Server 广播端口（39539），将经过物理约束校正后的最终追踪点数据通过本地 UDP 套接字（127.0.0.1:9000）转发至 VRChat。
+    \item \textbf{终端应用呈现}：VRChat 识别为标准 Vive Tracker 全身追踪设备，驱动角色模型骨骼，实现端到端总时延 $< 7.5$\,ms 的动作驱动（时延与漂移改善均须实测）。
 \end{enumerate}
 
 \subsection{备选技术路线对比}
@@ -236,6 +504,17 @@
 \end{itemize}
 
 % ==================== 四、全流程执行指南 ====================
+\section{模型代码落地与工程验收记录（2026-10-17）}
+\textbf{本节是当前代码版本的实现约定，优先于前文尚未验证的结构预算与接口假设。}代码位于 \texttt{corrector/}，使用 PyTorch 实现八路独立嵌入、八路单向 LSTM、三层空间 Transformer（FFN 为隐藏维度的四倍），对当前八个身体 token 均值池化后输出三头。完整配置隐藏维度 256，实测参数量 6,689,306；可选轻量配置隐藏维度 96，参数量 974,426。完整配置不满足前文 2M 与 8MB 预算，轻量配置保留为性能基线，不声称精度等价。
+
+残差头改为输出 $6\times3$ 维旋转向量，每分量通过 $\tanh$ 缩放至 $8\pi/(180\sqrt{3})$，随后由指数映射生成单位四元数。因此整体角度不超过 $8^\circ$，不能直接对四元数四分量乘角度限幅。采用 wxyz、右乘残差：$q^{\rm clean}=q^{\rm raw}\otimes\Delta q$。接触头与门控头分别采用 BCE 监督；门控的语义是修正可靠性，需要独立标签。当前未加入缺少解剖标定的关节极限损失。
+
+输入契约 v1 为头显、双手三个 17 维观测与胸、髋、双大腿、双小腿六个 14 维 IMU 观测，总计 135 维；八路切分为 $(17,28,17,17,14,14,14,14)$。它并非 HMD-Poser 原生特征定义，具体字段、坐标与单位见 \texttt{corrector/README.md}。VD 胸肘辅助观测、原始设备采集和 OSC/VMC 转换尚未接入，不能宣称完整多模态链路已经实现。
+
+训练入口接收完成序列划分与预处理的 NPZ 张量，支持 AdamW、Cosine 调度、梯度裁剪和检查点保存；不直接处理原始 AMASS。在线推理显式传递八路隐状态，重置或重定位时清空。ONNX 导出采用固定 batch=1、单帧、FP32、opset14；FP16 与硬件加速需另行验证。
+
+工程验收脚本验证严格因果性、整段与逐帧一致、四元数单位范数、角度限幅、残差乘法方向、门控退避、三头有限梯度、微型样本优化和检查点往返。报告见 \texttt{corrector/acceptance-report.json}。这些检查不等价于真实动作精度验收：MPJPE、偏航误差削减率、触地 F1、全链路时延与真机效果仍待独立数据和设备实验；测试用微型训练权重不得投入实际追踪。
+
 \section{全流程执行指南}
 \label{sec:execution}
 
@@ -276,29 +555,29 @@
 \small
 \caption{神经网络残差校正器技术指标与量化验收标准}
 \label{tab:kpi}
-\begin{tabular}{p{3.2cm}p{3.8cm}p{3.5cm}p{3.5cm}}
+\begin{tabular}{>{\raggedright\arraybackslash}p{2.6cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{3.8cm}>{\raggedright\arraybackslash}p{3.8cm}}
 \toprule
 \textbf{指标类别} & \textbf{关键参数项} & \textbf{验收门槛值} & \textbf{测量/评估方式} \\
 \midrule
-\multirow{2}{*}{\textbf{实时性与算力开销}} 
+\multirow{2}{=}{\textbf{实时性与算力开销}}
 & 单帧模型前向推理时延 & $\le 2.0$\,ms (GPU FP16) \newline $\le 4.5$\,ms (CPU ONNX) & ONNX Runtime 运行 1000 帧统计均值 \\
 \cmidrule{2-4}
 & 端到端全链路数据时延 & $\le 20.0$\,ms & 从 IMU 采样到 VRChat 接收骨骼 \\
 \midrule
-\multirow{3}{*}{\textbf{姿态跟踪精度}} 
+\multirow{3}{=}{\textbf{姿态跟踪精度}}
 & 平均关节位置误差 (MPJPE) & $\le 45.0$\,mm & DIP-IMU / AMASS 测试集 \\
 \cmidrule{2-4}
 & 关节角度均方根误差 (RMSE) & $\le 7.5^\circ$ & 对比光学 Vicon 真实关节旋转 \\
 \cmidrule{2-4}
-& 偏航漂移消除率 (Yaw Recovery) & $\ge 88\%$ & 注入 $10^\circ$/min 漂移时输出残差压制 \\
+& 偏航误差削减率（待验证） & $\ge 88\%$ & 注入 $10^\circ$/min 漂移时输出残差压制 \\
 \midrule
-\multirow{2}{*}{\textbf{物理接触与稳定性}} 
+\multirow{2}{=}{\textbf{物理接触与稳定性}}
 & 足部触地判别 F1 分数 & $\ge 93.0\%$ & 对比动捕真实踩地标签 \\
 \cmidrule{2-4}
 & 足部滑步距离削减比例 & $\ge 80\%$ (相较开环基准) & 静态站立时脚踝世界坐标漂移量 \\
 \midrule
-\multirow{2}{*}{\textbf{模型轻量化指标}} 
-& 模型网络总参数量 & $\le 1.2 \times 10^6$ ($1.2$\,M) & \texttt{sum(p.numel())} \\
+\multirow{2}{=}{\textbf{模型轻量化指标}}
+& 模型网络总参数量 & $\le 2.0 \times 10^6$ ($2.0$\,M) \newline (标称 $\sim 1.54$\,M) & \texttt{sum(p.numel())} \\
 \cmidrule{2-4}
 & 导出的 ONNX 权重体积 & $\le 8.0$\,MB & 磁盘文件大小 \\
 \bottomrule
