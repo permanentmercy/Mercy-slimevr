@@ -30,7 +30,6 @@ $RECYCLE.BIN/
 *.swn
 *~
 .vs/
-
 # ===================== WorkBuddy 本地运行态 =====================
 # 含 agent 记忆与本地缓存，非项目源码；如需随仓库分发记忆可自行 force-add。
 .workbuddy/
@@ -164,14 +163,22 @@ htmlcov/
 /driver/
 /firmware/
 /external_repos/
+
+# ===================== AI 神经模型大文件、检查点与外部依赖 =====================
+/ai_corrector/.model-deps/
+/ai_corrector/artifacts/
+/ai_corrector/checkpoints*/
+/ai_corrector/database/amass/
+/ai_corrector/database/smplh/
+/ai_corrector/database/processed*/
+
+# 根目录兼容规则
 /.model-deps/
 /artifacts/
-
-# ===================== 数据集、人体骨骼模型与预处理张量 =====================
-# 原始动捕序列、SMPL-H 模型文件与滑动窗口张量体积过大（数 GB），严禁提交至 Git
+/checkpoints*/
 /database/amass/
 /database/smplh/
-/database/processed/
+/database/processed*/
 *.npz
 
 # ===================== 深度学习模型权重与导出推理文件 =====================

@@ -16,6 +16,7 @@ import sys
 import time
 import numpy as np
 from scipy.spatial.transform import Rotation
+from .checkpoint import resolve_path
 
 if sys.platform == "win32":
     try:
@@ -161,14 +162,17 @@ def process_single_file(item):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--source", type=Path, default=Path("database/amass/HumanML3D_SMPLH52"))
-    p.add_argument("--output", type=Path, default=Path("database/processed"))
+    p.add_argument("--source", type=Path, default=resolve_path("database/amass/HumanML3D_SMPLH52"))
+    p.add_argument("--output", type=Path, default=resolve_path("database/processed"))
     p.add_argument("--per-subset-limit", type=int, default=0, help="每个动作子集最多采样的序列数 (0为全部启用)")
     p.add_argument("--windows-per-sequence", type=int, default=12, help="每条序列最多截取的窗口数")
     p.add_argument("--window", type=int, default=20, help="滑动窗口帧长")
     p.add_argument("--stride", type=int, default=5, help="滑动步长")
     p.add_argument("--workers", type=int, default=8, help="并发多进程数 (0或1为单进程)")
     args = p.parse_args()
+
+    args.source = resolve_path(args.source)
+    args.output = resolve_path(args.output)
 
     # 遍历所有 38 个子目录，均衡收集序列文件
     subsets = sorted([d for d in args.source.iterdir() if d.is_dir()])

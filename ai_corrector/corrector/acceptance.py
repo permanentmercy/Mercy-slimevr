@@ -14,15 +14,19 @@ from .loss import objective
 from .train import load_data
 
 
-def run(hidden=256, frames=1000):
+def run(hidden=96, frames=1000, config=None):
     torch.manual_seed(42)
     torch.set_num_threads(1)
-    model = Corrector(Config(hidden=hidden)).eval()
+    cfg = config or Config(hidden=hidden)
+    in_dim = sum(cfg.stream_dims)
+    n_joints = cfg.num_joints
+
+    model = Corrector(cfg).eval()
     # Exercise nonzero, near-bound residuals instead of only identity initialization.
     with torch.no_grad():
         model.pose[-1].weight.normal_(0, .1)
         model.pose[-1].bias.fill_(4.)
-    x = torch.randn(2, 7, 135)
+    x = torch.randn(2, 7, in_dim)
     with torch.no_grad():
         full, _ = model(x)
         changed = x.clone()
@@ -37,26 +41,26 @@ def run(hidden=256, frames=1000):
                 collected[key].append(out[key])
         for key in full:
             torch.testing.assert_close(full[key], torch.cat(collected[key], 1), atol=2e-6, rtol=2e-5)
-        torch.testing.assert_close(full["dq"].norm(dim=-1), torch.ones(2, 7, 6))
+        torch.testing.assert_close(full["dq"].norm(dim=-1), torch.ones(2, 7, n_joints))
         angle = 2*torch.atan2(full["dq"][..., 1:].norm(dim=-1), full["dq"][..., 0])
-        assert angle.max() <= math.radians(8)+1e-6
+        assert angle.max() <= math.radians(cfg.max_degrees)+1e-6
         for key in ("gate", "contact"):
             assert ((full[key] >= 0) & (full[key] <= 1)).all()
-        raw = rotvec_to_quat(torch.randn(2, 6, 3))
-        clean = rotvec_to_quat(torch.randn(2, 6, 3))
+        raw = rotvec_to_quat(torch.randn(2, n_joints, 3))
+        clean = rotvec_to_quat(torch.randn(2, n_joints, 3))
         dq = residual_target(raw, clean)
         torch.testing.assert_close(multiply(raw, dq), clean, atol=1e-6, rtol=1e-5)
-        torch.testing.assert_close(blend(raw, dq, torch.zeros(2, 6)), raw)
-        blended = blend(raw, dq, torch.ones(2, 6))
-        torch.testing.assert_close((blended*clean).sum(-1).abs(), torch.ones(2, 6))
+        torch.testing.assert_close(blend(raw, dq, torch.zeros(2, n_joints)), raw)
+        blended = blend(raw, dq, torch.ones(2, n_joints))
+        torch.testing.assert_close((blended*clean).sum(-1).abs(), torch.ones(2, n_joints))
         # Identity SLERP must have finite outputs.
-        identity = rotvec_to_quat(torch.zeros(2, 6, 3))
-        assert torch.isfinite(blend(raw, identity, torch.ones(2, 6))).all()
-    zero = torch.zeros(2, 6, 3, requires_grad=True)
+        identity = rotvec_to_quat(torch.zeros(2, n_joints, 3))
+        assert torch.isfinite(blend(raw, identity, torch.ones(2, n_joints))).all()
+    zero = torch.zeros(2, n_joints, 3, requires_grad=True)
     rotvec_to_quat(zero).sum().backward()
     assert torch.isfinite(zero.grad).all()
     try:
-        model(torch.zeros(1, 2, 134))
+        model(torch.zeros(1, 2, in_dim - 1))
     except ValueError:
         pass
     else:
@@ -64,8 +68,8 @@ def run(hidden=256, frames=1000):
     # All heads receive finite gradients and optimization reduces a fixed tiny loss.
     model.train()
     optimizer = torch.optim.AdamW(model.parameters(), lr=1e-3)
-    targets = {"dq": rotvec_to_quat(torch.full((2, 7, 6, 3), .02)),
-               "gate": torch.ones(2, 7, 6), "contact": torch.zeros(2, 7, 2)}
+    targets = {"dq": rotvec_to_quat(torch.full((2, 7, n_joints, 3), .02)),
+               "gate": torch.ones(2, 7, n_joints), "contact": torch.zeros(2, 7, 2)}
     losses = []
     for _ in range(8):
         optimizer.zero_grad()
@@ -101,12 +105,12 @@ def run(hidden=256, frames=1000):
     buffer = io.BytesIO()
     torch.save(model.state_dict(), buffer)
     buffer.seek(0)
-    restored = Corrector(Config(hidden=hidden)).eval()
+    restored = Corrector(cfg).eval()
     restored.load_state_dict(torch.load(buffer, weights_only=True))
     with torch.no_grad():
         for key, value in model(x)[0].items():
             torch.testing.assert_close(value, restored(x)[0][key])
-        sample = torch.randn(1, 1, 135)
+        sample = torch.randn(1, 1, in_dim)
         state = None
         for _ in range(30):
             _, state = model(sample, state)
@@ -134,7 +138,7 @@ def run(hidden=256, frames=1000):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--output", type=Path, default=Path("corrector/acceptance-report.json"))
+    p.add_argument("--output", type=Path, default=Path(__file__).resolve().parent / "acceptance-report.json")
     p.add_argument("--frames", type=int, default=1000)
     args = p.parse_args()
     if args.frames < 1:

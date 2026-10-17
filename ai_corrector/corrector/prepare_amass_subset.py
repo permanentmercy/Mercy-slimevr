@@ -10,6 +10,7 @@ import argparse
 from pathlib import Path
 import numpy as np
 from scipy.spatial.transform import Rotation
+from .checkpoint import resolve_path
 
 
 PARENTS = np.array([-1, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 9, 9, 12, 13, 14, 16, 17, 18, 19])
@@ -125,13 +126,16 @@ def build_sequence(path, rng):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--source", type=Path, default=Path("database/amass/HumanML3D_SMPLH52"))
-    p.add_argument("--output", type=Path, default=Path("database/processed"))
+    p.add_argument("--source", type=Path, default=resolve_path("database/amass/HumanML3D_SMPLH52"))
+    p.add_argument("--output", type=Path, default=resolve_path("database/processed"))
     p.add_argument("--sequences", type=int, default=12)
     p.add_argument("--windows-per-sequence", type=int, default=8)
     p.add_argument("--window", type=int, default=20)
     p.add_argument("--stride", type=int, default=5)
     args = p.parse_args()
+
+    args.source = resolve_path(args.source)
+    args.output = resolve_path(args.output)
     if min(args.sequences, args.windows_per_sequence, args.window, args.stride) < 1:
         p.error("all limits must be positive")
     files = sorted(args.source.rglob("*.npz"))[:args.sequences]

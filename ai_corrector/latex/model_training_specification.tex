@@ -505,44 +505,45 @@
 
 % ==================== 四、全流程执行指南 ====================
 \section{模型代码落地与工程验收记录（2026-10-17）}
-\textbf{本节是当前代码版本的实现约定，优先于前文尚未验证的结构预算与接口假设。}代码位于 \texttt{corrector/}，使用 PyTorch 实现八路独立嵌入、八路单向 LSTM、三层空间 Transformer（FFN 为隐藏维度的四倍），对当前八个身体 token 均值池化后输出三头。完整配置隐藏维度 256，实测参数量 6,689,306；可选轻量配置隐藏维度 96，参数量 974,426。完整配置不满足前文 2M 与 8MB 预算，轻量配置保留为性能基线，不声称精度等价。
+\textbf{本节是工程代码版本的实现约定，优先于前文尚未验证的假设。}代码位于 \texttt{ai\_corrector/corrector/}，使用 PyTorch 实现八路独立嵌入、八路单向 LSTM、三层空间 Transformer（FFN 为隐藏维度的四倍），对当前八个身体 token 均值池化后输出三头。轻量配置隐藏维度 96，参数量 974,426，流式 ONNX 单线程 CPU 推理耗时实测均值 0.40\,ms、P95 0.54\,ms，已满足计算耗时预算，当前不优先继续压缩模型推理速度。
 
-残差头改为输出 $6\times3$ 维旋转向量，每分量通过 $\tanh$ 缩放至 $8\pi/(180\sqrt{3})$，随后由指数映射生成单位四元数。因此整体角度不超过 $8^\circ$，不能直接对四元数四分量乘角度限幅。采用 wxyz、右乘残差：$q^{\rm clean}=q^{\rm raw}\otimes\Delta q$。接触头与门控头分别采用 BCE 监督；门控的语义是修正可靠性，需要独立标签。当前未加入缺少解剖标定的关节极限损失。
+残差头输出旋转向量，每分量通过 $\tanh$ 缩放至 $8\pi/(180\sqrt{3})$，由指数映射生成单位四元数（整体偏转严格限幅在 $\pm 8^\circ$ 内）。采用 wxyz、右乘残差：$q^{\rm clean}=q^{\rm raw}\otimes\Delta q$。
 
-输入契约 v1 为头显、双手三个 17 维观测与胸、髋、双大腿、双小腿六个 14 维 IMU 观测，总计 135 维；八路切分为 $(17,28,17,17,14,14,14,14)$。它并非 HMD-Poser 原生特征定义，具体字段、坐标与单位见 \texttt{corrector/README.md}。VD 胸肘辅助观测、原始设备采集和 OSC/VMC 转换尚未接入，不能宣称完整多模态链路已经实现。
+\subsection{输入输出契约演进（v1 基线 $\to$ v2 目标配置）}
+\begin{itemize}
+    \item \textbf{v1 探索基线}：输入为头显、双手三个 17 维观测与胸、髋、双大腿、双小腿六个 14 维 IMU 观测，总计 135 维；输出 6 处下半身关节残差与全 1 门控。
+    \item \textbf{v2 目标配置契约}：针对 4 个下肢 IMU（双大腿、双小腿）+ Meta Quest 3（HMD）+ Virtual Desktop (VD) Upper Body Estimation 的实际硬件组合，固定输入为 $\mathbf{X}_{\text{in}} \in \mathbb{R}^{B \times T \times 124}$，由 8 路组成：
+    \begin{enumerate}
+        \item 通道 0：HMD 6DoF 视觉参考锚（17 维：相对位移 3、连续 6D 旋转 6、线速度 3、角速度 3、有效标志 1、时效 1）；
+        \item 通道 1：VD 胸部参考（17 维，可缺省，缺失填零并置有效位 0）；
+        \item 通道 2、3：VD 左右上臂视觉参考（各 17 维）；
+        \item 通道 4 $\sim$ 7：左右大腿、左右小腿 4 处 IMU 传感器观测（各 14 维：局部 6D 旋转 6、角加速度 3、角速度 3、有效标志 1、时效 1）。总维数：$4\times 17 + 4\times 14 = 124$。
+    \end{enumerate}
+    输出对应四个下肢关节四元数残差 $\Delta q \in \mathbb{R}^{B \times T \times 4 \times 4}$、收益置信度门控 $\text{gate} \in \mathbb{R}^{B \times T \times 4}$ 及双足触地概率 $\text{contact} \in \mathbb{R}^{B \times T \times 2}$。
+\end{itemize}
 
-训练入口接收完成序列划分与预处理的 NPZ 张量，支持 AdamW、Cosine 调度、梯度裁剪和检查点保存；不直接处理原始 AMASS。在线推理显式传递八路隐状态，重置或重定位时清空。ONNX 导出采用固定 batch=1、单帧、FP32、opset14；FP16 与硬件加速需另行验证。
+\subsection{指标口径分离与实机状态说明}
+\begin{itemize}
+    \item \textbf{目标界定}：旨在减少下肢偏航累积漂移速率、抑制肢体扭麻花畸变并延长两次 Quick Reset 间隔，不宣称彻底消除长期漂移；VD 上半身姿态参考仅用于降低漂移不确定性，不作为绝对无偏观测。
+    \item \textbf{残差角误差与姿态误差分离}：训练中 $0.153^\circ$ 仅衡量网络输出与加噪合成标签的差异，并非整机追踪精度；最终姿态精度以骨架前向运动学（FK）解算后的 MPJPE 为准。
+    \item \textbf{触地指标属性}：触地 F1 评测基于脚踝运动速度阈值（$<0.35$\,m/s）生成的合成代理真值，真实物理接触真值留待实机测试。
+    \item \textbf{实机状态声明}：当前尚无目标实机硬件，本阶段仅交付离线评估、合成回放及 SlimeVR 服务端影子模式验证，不将仿真指标描述为实机达标。
+\end{itemize}
 
-工程验收脚本验证严格因果性、整段与逐帧一致、四元数单位范数、角度限幅、残差乘法方向、门控退避、三头有限梯度、微型样本优化和检查点往返。报告见 \texttt{corrector/acceptance-report.json}。这些检查不等价于真实动作精度验收：MPJPE、偏航误差削减率、触地 F1、全链路时延与真机效果仍待独立数据和设备实验；测试用微型训练权重不得投入实际追踪。
-
-\section{全流程执行指南}
+\section{全流程执行指南 (v2 规划)}
 \label{sec:execution}
 
-\subsection{阶段一：数据准备与离线切片 (Week 1--2)}
-\begin{enumerate}
-    \item 下载 AMASS 子库（\texttt{CMU.tar.bz2}、\texttt{HDM05.tar.bz2}、\texttt{BMLrub.tar.bz2}）及 SMPL-H 基础模型参数文件；
-    \item 配置 Python 环境并安装科学计算依赖（\texttt{torch}, \texttt{numpy}, \texttt{scipy}, \texttt{human\_body\_prior}）；
-    \item 运行数据预处理脚本，指定原始动捕输入路径与目标张量存储路径，配置滑动窗口长度 $N=20$ 帧（在 60\,Hz 下对应约 333\,ms 历史时序上下文）及步长 $\text{stride}=5$ 帧，输出切片后的序列张量文件。
-\end{enumerate}
+\subsection{阶段一：v2 契约与坐标系统一}
+统一至 SlimeVR 内部标准右手系（$+Y$ 向上，$+X$ 向右，$+Z$ 向后），编写 AMASS、VD 与服务端 Tracker 转换测试。
 
-\subsection{阶段二：离线多任务训练 (Week 5--6)}
-\begin{enumerate}
-    \item 构建综合损失函数，联合优化四元数残差、触地分类交叉熵与关节角度极限约束：
-    \[
-    \mathcal{L} = \text{SmoothL1}(\Delta q, \Delta q^*) + \lambda_1 \text{BCE}(P_{\text{contact}}, C^*) + \lambda_2 \mathcal{L}_{\text{joint\_limit}}
-    \]
-    其中设置权重超参数 $\lambda_1 = 0.5, \lambda_2 = 0.1$；
-    \item 使用 AdamW 优化器（初始学习率 $10^{-3}$，Cosine 退火衰减），Batch Size 设置为 256，在消费级 GPU（如 RTX 3060/4060）上训练约 80 个 Epoch。
-\end{enumerate}
+\subsection{阶段二：SlimeVR 服务端影子模式接入}
+在 \texttt{Tracker.tick()} 与 \texttt{HumanPoseManager.update()} 之间接入 60\,Hz 采样适配器与 ONNX Runtime CPU 推理接口；Reset 或 Tracker 断连时自动清空隐状态；默认以影子模式运行，仅记录候选修正与延迟，不直接驱动 Avatar。
 
-\subsection{阶段三：模型导出与推理优化 (Week 6--7)}
-训练收敛后，将 PyTorch 计算图导出为 ONNX 格式（算子集版本 Opset 14）。指定输入张量形状为 $(B, 20, 135)$，输出节点分别命名为姿态残差 \texttt{dq}、置信度门控 \texttt{gate} 与触地概率 \texttt{contact}，并将其权重量化转换为 FP16 半精度浮点格式，生成独立的计算图模型文件 \texttt{corrector.onnx}。
+\subsection{阶段三：v2 真实切分数据重新生成与训练}
+按原始序列互斥划分数据集，注入恒定偏置积分漂移（0、1、3、10$^\circ$/min）、随机游走、Mounting 偏差与 VD 丢包；门控标签改为修正实际收益判定，重新训练 v2 模型。
 
-\subsection{阶段四：离线基准评测与量化验证 (Week 7)}
-在离线环境中载入 \texttt{DIP-IMU} 与 AMASS 验证集，运行评测脚本计算 MPJPE 误差分布、偏航漂移恢复率与触地 F1 分数，验证指标收敛性。
-
-\subsection{阶段五：OSC/VMC 中继联调 (Week 8)}
-编写 Python 中继客户端，监听 SlimeVR Server 的 OSC 默认输出端口（39539），使用 \texttt{onnxruntime} 进行实时推理，并将校正后的骨骼四元数转发至 VRChat（端口 9000），实现与上游服务端的解耦交互。
+\subsection{阶段四：合成 Tracker 回放与离线多维验收}
+使用合成 Tracker 回放验证数据流时序、坐标单位、超时降级与残差右乘方向，全链路测定端到端时延是否满足 $\le 20.0$\,ms 门槛。
 
 % ==================== 五、目标技术指标与量化验收规范 ====================
 \section{目标技术指标与量化验收规范}

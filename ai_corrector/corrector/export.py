@@ -3,10 +3,6 @@ import json
 from pathlib import Path
 import sys
 import time
-# Ensure local dependency directory is available for onnx/onnxruntime
-deps_dir = Path(__file__).resolve().parent.parent / ".model-deps"
-if deps_dir.exists() and str(deps_dir) not in sys.path:
-    sys.path.insert(0, str(deps_dir))
 
 import numpy as np
 import torch
@@ -35,7 +31,8 @@ def main():
     model = Corrector(Config(**ckpt["config"])).eval()
     model.load_state_dict(ckpt["state_dict"])
     wrapper = Streaming(model).eval()
-    x = torch.randn(1, 1, 135)
+    in_dim = sum(model.config.stream_dims)
+    x = torch.randn(1, 1, in_dim)
     h, c = model.initial_state(1)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     torch.onnx.export(wrapper, (x, h, c), str(args.output), opset_version=14,
@@ -52,7 +49,7 @@ def main():
     # Check recurrent rollout, not just a zero-state frame.
     with torch.no_grad():
         for _ in range(8):
-            x = torch.randn(1, 1, 135)
+            x = torch.randn(1, 1, in_dim)
             expected = wrapper(x, h, c)
             actual = session.run(None, {"x": x.numpy(), "h": oh, "c": oc})
             for a, b in zip(actual, expected):

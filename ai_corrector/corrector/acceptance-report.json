@@ -2,19 +2,19 @@
   {
     "engineering_checks": "PASS",
     "hidden": 256,
-    "parameters": 6689306,
-    "fp32_state_dict_bytes": 26793746,
+    "parameters": 6685586,
+    "fp32_state_dict_bytes": 26779231,
     "cpu_streaming_ms": {
-      "mean": 10.678971100000004,
-      "p95": 19.0881,
+      "mean": 12.8085191,
+      "p95": 21.8301,
       "frames": 1000
     },
     "tiny_training_loss": [
-      0.41312047839164734,
-      0.029474301263689995
+      0.4146229326725006,
+      0.032002657651901245
     ],
-    "torch": "2.4.1+cu121",
-    "python": "3.8.20",
+    "torch": "2.7.1+cu118",
+    "python": "3.12.13",
     "device": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
     "threads": 1,
     "accuracy_acceptance": "NOT EVALUATED: no AMASS/DIP or real-device test set",
@@ -38,19 +38,19 @@
   {
     "engineering_checks": "PASS",
     "hidden": 96,
-    "parameters": 974426,
-    "fp32_state_dict_bytes": 3933970,
+    "parameters": 972466,
+    "fp32_state_dict_bytes": 3926495,
     "cpu_streaming_ms": {
-      "mean": 6.577381499999995,
-      "p95": 11.933,
+      "mean": 6.581519500000001,
+      "p95": 11.4251,
       "frames": 1000
     },
     "tiny_training_loss": [
-      0.40487122535705566,
-      0.09751907736063004
+      0.3996827006340027,
+      0.10196655243635178
     ],
-    "torch": "2.4.1+cu121",
-    "python": "3.8.20",
+    "torch": "2.7.1+cu118",
+    "python": "3.12.13",
     "device": "Intel64 Family 6 Model 151 Stepping 2, GenuineIntel",
     "threads": 1,
     "accuracy_acceptance": "NOT EVALUATED: no AMASS/DIP or real-device test set",

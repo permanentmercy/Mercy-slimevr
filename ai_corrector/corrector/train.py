@@ -15,6 +15,7 @@ import torch.nn.functional as F
 from torch.utils.data import DataLoader, TensorDataset
 from .model import Corrector, Config
 from .loss import objective
+from .checkpoint import WeightsManager, resolve_path
 
 # Configure standard UTF-8 stream to avoid Windows terminal mojibake
 if sys.platform == "win32":
@@ -69,7 +70,9 @@ def load_data(path: Path):
         data = [torch.from_numpy(a[k].astype(np.float32)) for k in ("x", "dq", "gate", "contact")]
     x, dq, gate, contact = data
     n, t = x.shape[:2]
-    if x.shape != (n, t, 135) or dq.shape != (n, t, 6, 4) or gate.shape != (n, t, 6) or contact.shape != (n, t, 2):
+    valid_v1 = (x.shape == (n, t, 135) and dq.shape == (n, t, 6, 4) and gate.shape == (n, t, 6) and contact.shape == (n, t, 2))
+    valid_v2 = (x.shape == (n, t, 124) and dq.shape == (n, t, 4, 4) and gate.shape == (n, t, 4) and contact.shape == (n, t, 2))
+    if not (valid_v1 or valid_v2):
         raise ValueError(f"invalid NPZ shapes in {path}: x={x.shape}, dq={dq.shape}, gate={gate.shape}, contact={contact.shape}")
     if n == 0 or t == 0 or any(not torch.isfinite(v).all() for v in data):
         raise ValueError("empty or nonfinite dataset")
@@ -80,7 +83,7 @@ def load_data(path: Path):
     return TensorDataset(*data)
 
 
-def evaluate(model, loader, device, use_amp=False):
+def evaluate(model, loader, device, use_amp=False, loss_type="chordal", rot_weight=200.0):
     model.eval()
     total_loss = 0.0
     total_angle_err = 0.0
@@ -94,7 +97,7 @@ def evaluate(model, loader, device, use_amp=False):
             with torch.amp.autocast(device_type=device.type, enabled=use_amp and device.type == "cuda"):
                 pred, _ = model(x)
             pred_fp32 = {k: v.float() for k, v in pred.items()}
-            loss = objective(pred_fp32, target)
+            loss = objective(pred_fp32, target, rot_weight=rot_weight, loss_type=loss_type)
 
             total_loss += loss.item() * len(x)
 
@@ -146,8 +149,11 @@ def print_args_banner(args, config, train_path, val_path, device, device_name, p
     print(f"  {'Window Len:':<22}{'20 frames (333ms)':<28}{'Stride:':<20}{'5 frames':<10}")
     print(f"  {'Body Streams:':<22}{'8 (Head,Torso,Hands,Legs)':<28}{'Max Angle Clamp:':<20}{f'±{config.max_degrees:.1f} deg':<10}\n")
 
+    total_in = sum(config.stream_dims)
+    out_dim = config.num_joints * 3
+
     print(f"{b_on}Model Parameters{b_off}")
-    print(f"  {'Input Feat Dim:':<22}{135:<28}{'Output Dim:':<20}{'18 (6x3 rotvec)':<10}")
+    print(f"  {'Input Feat Dim:':<22}{total_in:<28}{'Output Dim:':<20}{f'{out_dim} ({config.num_joints}x3 rotvec)':<10}")
     print(f"  {'d model (Hidden):':<22}{config.hidden:<28}{'n heads:':<20}{config.heads:<10}")
     print(f"  {'Transformer Layers:':<22}{config.layers:<28}{'d FF:':<20}{4 * config.hidden:<10}")
     print(f"  {'Temporal Backbone:':<22}{'8x Causal LSTM':<28}{'Spatial Fusion:':<20}{'TransformerEncoder':<10}")
@@ -167,16 +173,17 @@ def print_args_banner(args, config, train_path, val_path, device, device_name, p
 
 def print_diagnostic(model, config, param_count, device):
     dev_str = f"cuda:0" if device.type == "cuda" else "cpu"
+    total_in = sum(config.stream_dims)
     print(f"Use GPU: {dev_str}\n")
     print("=" * 60)
     print("MODEL CONFIGURATION DIAGNOSTIC")
     print("=" * 60)
     print(f"Architecture: Causal Spatio-Temporal Network (CSTN)")
-    print(f"Input streams: 8 streams (HMD: 17, Torso: 28, Hands: 2x17, Legs: 4x14) -> 135-d")
-    print(f"Temporal backbones: 8 independent Causal LSTMs (hidden: {config.hidden})")
+    print(f"Input streams: {len(config.stream_dims)} streams {config.stream_dims} -> {total_in}-d")
+    print(f"Temporal backbones: {len(config.stream_dims)} independent Causal LSTMs (hidden: {config.hidden})")
     print(f"Spatial fusion: TransformerEncoder ({config.layers} layers, {config.heads} heads, d_ff: {4*config.hidden})")
-    print(f"Rotation head: Linear({config.hidden}->128->18) -> rotvec_to_quat (clamped ±{config.max_degrees}°)")
-    print(f"Gate head: Linear({config.hidden}->64->6) -> Sigmoid() [Reliability Gating]")
+    print(f"Rotation head: Linear({config.hidden}->128->{config.num_joints*3}) -> rotvec_to_quat (clamped ±{config.max_degrees}°)")
+    print(f"Gate head: Linear({config.hidden}->64->{config.num_joints}) -> Sigmoid() [Reliability Gating]")
     print(f"Contact head: Linear({config.hidden}->64->2) -> Sigmoid() [Foot Strike ZUPT]")
     trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
     print(f"Total parameters: {param_count:,}")
@@ -193,10 +200,10 @@ def estimate_macs(config, seq_len=20):
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("data", type=Path, nargs="?", default=Path("database/processed/train.npz"), help="Path to train NPZ")
-    p.add_argument("output", type=Path, nargs="?", default=Path("artifacts/cstn_compact_expanded.pt"), help="Path to output .pt")
-    p.add_argument("--val-data", type=Path, default=Path("database/processed/val.npz"), help="Path to validation NPZ")
-    p.add_argument("--epochs", type=int, default=20, help="Train Epochs (default: 20)")
+    p.add_argument("data", type=Path, nargs="?", default=resolve_path("database/processed_v2_stratified/train.npz"), help="Path to train NPZ")
+    p.add_argument("output", type=Path, nargs="?", default=resolve_path("artifacts/cstn_v2_d1_model.pt"), help="Path to output .pt")
+    p.add_argument("--val-data", type=Path, default=resolve_path("database/processed_v2_stratified/val.npz"), help="Path to validation NPZ")
+    p.add_argument("--epochs", type=int, default=15, help="Train Epochs (default: 15)")
     p.add_argument("--batch-size", type=int, default=256, help="Batch Size (default: 256)")
     p.add_argument("--hidden", type=int, default=96, help="Hidden size / d_model (default: 96)")
     p.add_argument("--lr", type=float, default=1e-3, help="Learning Rate (default: 1e-3)")
@@ -208,7 +215,23 @@ def main():
     p.add_argument("--model-id", type=str, default="CSTN_compact_20_135", help="Model ID")
     p.add_argument("--model", type=str, default="CSTN", help="Model name")
     p.add_argument("--des", type=str, default="test", help="Description tag")
+    p.add_argument("--checkpoint-dir", type=Path, default=resolve_path("checkpoints"), help="Directory for checkpoint management (best, latest, top_k)")
+    p.add_argument("--keep-top-k", type=int, default=3, help="Number of best checkpoints to retain in top_k/")
+    p.add_argument("--resume", type=Path, default=None, help="Path to checkpoint .pt to resume training from")
+    p.add_argument("--decoder-type", type=str, default="joint_decoupled", choices=["joint_decoupled", "mean_pooling"], help="Decoder architecture type")
+    p.add_argument("--loss-type", type=str, default="chordal", choices=["chordal", "smooth_geodesic", "yaw_aware"], help="Rotation loss type")
+    p.add_argument("--rot-weight", type=float, default=None, help="Rotation loss weight (default: 200.0 for chordal, 10.0 for geodesic)")
+    p.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
     args = p.parse_args()
+
+    args.data = resolve_path(args.data)
+    args.output = resolve_path(args.output)
+    if args.val_data:
+        args.val_data = resolve_path(args.val_data)
+    if args.checkpoint_dir:
+        args.checkpoint_dir = resolve_path(args.checkpoint_dir)
+    if args.resume:
+        args.resume = resolve_path(args.resume)
 
     if args.epochs < 1 or args.batch_size < 1:
         p.error("epochs and batch-size must be positive")
@@ -219,12 +242,24 @@ def main():
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     device_name = torch.cuda.get_device_name(0) if device.type == "cuda" else "CPU"
 
-    torch.manual_seed(42)
+    torch.manual_seed(args.seed)
+    np.random.seed(args.seed)
     if device.type == "cuda":
-        torch.cuda.manual_seed(42)
+        torch.cuda.manual_seed(args.seed)
         torch.cuda.reset_peak_memory_stats(device)
 
-    config = Config(hidden=args.hidden)
+    train_dataset = load_data(args.data)
+    sample_x, sample_dq = train_dataset[0][0], train_dataset[0][1]
+    in_dim = sample_x.shape[-1]
+    num_j = sample_dq.shape[-2]
+
+    if in_dim == 124:
+        config = Config(hidden=args.hidden, stream_dims=(17, 17, 17, 17, 14, 14, 14, 14), num_joints=4, decoder_type=args.decoder_type)
+    elif in_dim == 135:
+        config = Config(hidden=args.hidden, stream_dims=(17, 28, 17, 17, 14, 14, 14, 14), num_joints=6, decoder_type=args.decoder_type)
+    else:
+        config = Config(hidden=args.hidden, stream_dims=(in_dim,), num_joints=num_j, decoder_type=args.decoder_type)
+
     model = Corrector(config).to(device)
     param_count = sum(p.numel() for p in model.parameters() if p.requires_grad)
 
@@ -237,7 +272,6 @@ def main():
 
     print(f">>>>>>>start training : {setting}>>>>>>>>>>>>>>>>>>>>>>>>>>")
 
-    train_dataset = load_data(args.data)
     train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, pin_memory=(device.type == "cuda"))
     print(f"train {len(train_dataset)} windows ({len(train_dataset)*20:,} frames)")
 
@@ -261,6 +295,8 @@ def main():
     if use_amp:
         scaler = torch.amp.GradScaler("cuda", enabled=True) if hasattr(torch.amp, "GradScaler") else torch.cuda.amp.GradScaler(enabled=True)
 
+    weights_mgr = WeightsManager(checkpoint_dir=args.checkpoint_dir, keep_top_k=args.keep_top_k)
+    start_epoch = 1
     best_path = args.output.with_name(args.output.stem + "_best.pt")
     args.output.parent.mkdir(parents=True, exist_ok=True)
     early_stopping = EarlyStopping(patience=args.patience, verbose=True)
@@ -273,7 +309,15 @@ def main():
     best_val_deg = 0.0
     best_val_f1 = 0.0
 
-    for epoch in range(1, args.epochs + 1):
+    if args.resume:
+        res_info = weights_mgr.load_resume(args.resume, model, optimizer, scheduler, scaler, device=device)
+        start_epoch = res_info["start_epoch"]
+        best_val_loss = res_info["best_val_loss"]
+
+    rot_weight = args.rot_weight if args.rot_weight is not None else (200.0 if args.loss_type == "chordal" else 10.0)
+    print(f"[*] 训练损失配置: 损失函数={args.loss_type}, 旋转权重={rot_weight}")
+
+    for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         epoch_loss = 0.0
         t0 = time.time()
@@ -289,7 +333,7 @@ def main():
                 with torch.amp.autocast(device_type="cuda"):
                     pred, _ = model(x)
                 pred_fp32 = {k: v.float() for k, v in pred.items()}
-                loss = objective(pred_fp32, target)
+                loss = objective(pred_fp32, target, rot_weight=rot_weight, loss_type=args.loss_type)
                 if not torch.isfinite(loss):
                     raise RuntimeError(f"Epoch {epoch}: Non-finite loss (NaN/Inf)")
                 scaler.scale(loss).backward()
@@ -299,7 +343,7 @@ def main():
                 scaler.update()
             else:
                 pred, _ = model(x)
-                loss = objective(pred, target)
+                loss = objective(pred, target, rot_weight=rot_weight, loss_type=args.loss_type)
                 if not torch.isfinite(loss):
                     raise RuntimeError(f"Epoch {epoch}: Non-finite loss (NaN/Inf)")
                 loss.backward()
@@ -324,9 +368,13 @@ def main():
 
         print(f"Epoch: {epoch} cost time: {epoch_cost:.6f} s")
 
+        is_best = False
         if val_loader:
-            val_loss, val_deg, val_f1 = evaluate(model, val_loader, device, use_amp=use_amp)
+            val_loss, val_deg, val_f1 = evaluate(
+                model, val_loader, device, use_amp=use_amp, loss_type=args.loss_type, rot_weight=rot_weight
+            )
             if val_loss < best_val_loss:
+                is_best = True
                 print(f"Best model stored in memory (Vali Loss: {val_loss:.6f})")
                 best_val_loss = val_loss
                 best_val_deg = val_deg
@@ -338,12 +386,40 @@ def main():
             extra_info = dict(config=asdict(config), epoch=epoch, val_loss=val_loss, val_deg=val_deg, val_f1=val_f1)
             improved = early_stopping(val_loss, model, best_path, extra=extra_info)
 
+            # Checkpoint lifecycle management: save latest, rotate top-K, archive best
+            weights_mgr.save_epoch(
+                epoch=epoch,
+                model=model,
+                optimizer=optimizer,
+                scheduler=scheduler,
+                scaler=scaler,
+                val_loss=val_loss,
+                val_deg=val_deg,
+                val_f1=val_f1,
+                config=asdict(config),
+                is_best=is_best,
+                dataset_name=str(args.data)
+            )
+
             if early_stopping.early_stop:
                 print("Early stopping")
                 break
         else:
             print(f"Epoch: {epoch}, Steps: {total_steps_per_epoch} | Train Loss: {train_loss:.7f}")
             print(f"lr = {scheduler.get_last_lr()[0]:.10f}")
+            weights_mgr.save_epoch(
+                epoch=epoch,
+                model=model,
+                optimizer=optimizer,
+                scheduler=scheduler,
+                scaler=scaler,
+                val_loss=train_loss,
+                val_deg=0.0,
+                val_f1=0.0,
+                config=asdict(config),
+                is_best=False,
+                dataset_name=str(args.data)
+            )
 
     avg_epoch_time = sum(epoch_times) / max(1, len(epoch_times))
     print(f"average training time: {avg_epoch_time:.6f} s")
@@ -359,15 +435,16 @@ def main():
         print(f"test {len(val_dataset)} windows ({len(val_dataset)*20:,} frames)")
         macs_g = estimate_macs(config, seq_len=20)
         print(f"Computational complexity(MACs): {macs_g:.2f} GMac, Number of parameters: {param_count/1e6:.2f} M")
-        print(f"test tensor shape: ({len(val_dataset)}, 20, 135)")
+        print(f"test tensor shape: ({len(val_dataset)}, 20, {in_dim})")
         print(f"val_loss:   {best_val_loss:.7f} (multitask composite loss)")
-        print(f"angle_err:  {best_val_deg:.4f} deg (per-joint residual yaw drift)")
-        print(f"contact_f1: {best_val_f1*100:.2f} % (foot strike classification for ZUPT)")
+        print(f"angle_err:  {best_val_deg:.4f} deg (residual target error; proxy metric, not end-to-end drift)")
+        print(f"contact_f1: {best_val_f1*100:.2f} % (synthetic ankle velocity threshold proxy, not real contact GT)")
         print(f"Predictions saved to {best_path}")
 
     # Save final model
     torch.save(dict(config=asdict(config), state_dict=model.state_dict(),
-                    trained_on=str(args.data), epochs=args.epochs), args.output)
+                    trained_on=str(args.data), epochs=args.epochs,
+                    loss_type=args.loss_type, rot_weight=rot_weight, seed=args.seed), args.output)
 
 
 if __name__ == "__main__":
