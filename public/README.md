@@ -7,7 +7,7 @@
 
 | 功能模块 | 内容 | 阶段目录 |
 |---|---|---|
-| `model-development/` | 模型原型、数据契约、精度研究、偏航状态模型与融合架构 | Phase 1–4、6、9、11、15 |
+| `model-development/` | 模型原型、数据契约、精度研究、偏航状态模型与融合架构 | Phase 1–4、6、9、11、15–16 |
 | `runtime-integration/` | 服务端影子推理与回放接入 | Phase 5、7 |
 | `system-validation/` | 无硬件的软件链路与系统验收 | Phase 12–14 |
 | `hardware-validation/` | 板卡 bring-up、实机采集与在线迁移 | Phase 8 |
@@ -27,6 +27,7 @@
 | Phase 12 | 无实机影子推理、回放与算法离线复验 | 未通过整体验收：13 项 Kotlin 测试通过；S2 逐帧 108,000 次推理、P95 0.657ms；S1 缺 Session 关闭调用；A1 静态门禁硬编码且观测链路不匹配；A2 复用旧 FinalConfirm 且 P9-only 等于 Raw | [计划](system-validation/phase-12-prehardware-validation/plan.md) · [结果](system-validation/phase-12-prehardware-validation/results.md) |
 | Phase 13 | 无硬件软件闭环与可复现交付准备 | **部分完成**：P3 mock tick 基础子门禁通过（108,000 帧逐帧零写回，P95 4.638ms），但时间、故障恢复及 reset 后状态检查不足；P4 合成门禁通过；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入和 GUI/服务冒烟；P5 数据受限待新数据 | [计划](system-validation/phase-13-no-hardware-readiness/plan.md) · [结果](system-validation/phase-13-no-hardware-readiness/results.md) |
 | Phase 14 | 无硬件软件链路闭环 | **部分完成**：UDP parser/派发至 `tickServer()` 的 10.8 万帧核心回放和模型场景测试通过（0 篡改、最新 P95 4.733ms）；时间间隔/完整故障矩阵未覆盖，固件 clean build 与 GUI/package 未完成 | [计划](system-validation/phase-14-software-closure/plan.md) · [结果](system-validation/phase-14-software-closure/results.md) |
-| Phase 15 | 固定参数预算的双时间尺度模型架构 | **已完成**：严格锁定 1,102,066 参数（1.10M），150 条 30 分钟连续会话（270 万帧）消融通过；LSM6DSV 标称漂移下端点误差消除 83.2%~84.4%，严格零漂与静坐门禁 100% PASS | [计划](model-development/phase-15-fixed-budget-dual-timescale/plan.md) · [结果](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
+| Phase 15 | 固定参数预算的双时间尺度模型架构 | **合成评测完成**：1,102,066 参数冻结，150 条 30 分钟合成会话消融通过；±0.14°/min 为脚本测试档位，部署输入一致性待验证 | [计划](model-development/phase-15-fixed-budget-dual-timescale/plan.md) · [结果](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
+| Phase 16 | 慢偏航观测器输入一致性与误校正边界 | **已完成**：全 4 项门禁 PASS。124D 契约对齐（误差 $2.98 \times 10^{-8}$）；125 会话（75万帧）验证三态保守观测器在真实慢动作下 0 误更新与 0.00° 恶化（朴素 ZARU 误更新 4768 次、-11.97° 恶化）；总参数严格锁死 1,102,066 | [计划](model-development/phase-16-observation-fidelity/plan.md) · [结果](model-development/phase-16-observation-fidelity/results.md) |
 
 模型、数据集、评测脚本与 JSON 机器报告继续保存在 `ai_corrector/`；阶段 `results.md` 记录摘要并链接到这些原始产物，不复制二进制数据或报告内容。原先 `nextplan.md` 的待执行内容已并入 Phase 6 子计划。README 同步记录在 [Phase 10](project-documentation/phase-10-readme-sync/results.md)。

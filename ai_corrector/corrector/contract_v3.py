@@ -35,10 +35,14 @@ class SingleTrackerV3:
     imu_id: str
     rot_raw: np.ndarray        # 原始四元数 [w, x, y, z] 或 3x3 旋转矩阵
     ang_vel: np.ndarray        # 角速度 [wx, wy, wz] (rad/s)
-    ang_acc: np.ndarray        # 角加速度 [ax, ay, az] (rad/s^2)
+    ang_acc: np.ndarray        # 包含加速度计向量 [ax, ay, az] (m/s^2 或单位 g)
     valid: bool = True         # 传感器数据是否有效（未掉线/未丢包）
     data_age: float = 0.0      # 数据延迟年龄（秒）
     mounting_matrix: Optional[np.ndarray] = None  # 安装标定矩阵 M_i (3x3)，若未标定则为单位阵
+
+    @property
+    def accel(self) -> np.ndarray:
+        return self.ang_acc
 
 
 @dataclass

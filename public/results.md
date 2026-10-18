@@ -2,7 +2,7 @@
 
 > **文档定位**：本项目所有阶段的**总体成果、核心精度数据与工程性能指标的总汇总看板**。  
 > **更新时间**：2026-10-18  
-> **数据版本**：Phase 1 至 Phase 15 文档；Phase 14 部分完成，Phase 15 已执行完成并通过门禁；Phase 12 的 A1/A2 原 PASS 已撤销
+> **数据版本**：Phase 1 至 Phase 16 文档；Phase 14 部分完成，Phase 15 合成评测完成但部署输入一致性待核验，Phase 16 源码观测链审计完成；Phase 12 的 A1/A2 原 PASS 已撤销
 
 ---
 
@@ -22,7 +22,8 @@
 | **Phase 12** | **无实机影子推理、回放与算法复验** | 契约/推理测试与逐帧特征组装回放；复核服务生命周期、真实 tick、物理输入及数据隔离 | **未通过整体验收**：13 项指定 Kotlin 测试通过，108,000 次逐帧特征组装+ONNX P95 0.6571 ms；完整 `VRServer.tick()`、Session close 和内存门限未验证；A1/A2 不接受原 PASS | [阶段复核报告](system-validation/phase-12-prehardware-validation/results.md) |
 | **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](system-validation/phase-13-no-hardware-readiness/results.md) |
 | **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：108,000 帧核心回放、shadow 零写回、模型场景定向测试通过；最新 P95 4.733ms、P99 7.090ms、最大 20.436ms、Full GC 后堆差 +0.128MB。完整时间异常/故障矩阵未验；固件源码、GUI/package 未构建 | [阶段成果](system-validation/phase-14-software-closure/results.md) |
-| **Phase 15** | **固定参数预算的双时间尺度模型架构** | 将短时 swing 补偿与长期偏航状态估计分离，并以可信锚点连接 | **已完成**：严格锁定 1.10M 参数预算上限（1,102,066 参数），150 条 30 分钟独立会话（270 万帧）消融通过；LSM6DSV 标称漂移下端点误差消除 83.2%~84.4%，严格零漂与静坐门禁 100% PASS | [阶段成果](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
+| **Phase 15** | **固定参数预算的双时间尺度模型架构** | 将短时 swing 补偿与长期偏航状态估计分离，并以可信锚点连接 | **合成评测完成**：严格锁定 1.10M 参数，150 条 30 分钟合成会话（270 万帧）消融通过；脚本设定的 ±0.14°/min 工况端点误差减少 83.2%~84.4%，部署输入一致性未验证，零漂与静坐门禁仅适用于该仿真生成器 | [阶段成果与限制](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
+| **Phase 16** | **慢偏航观测器输入一致性与误校正边界** | 核实服务端真实可得输入，检验慢偏航收益和真实慢动作误校正风险 | **已完成**：全 4 项门禁 PASS。Python/Kotlin 契约对齐误差 $2.98 \times 10^{-8}$；125 会话（75万帧）动力学自洽验证，保守型三态观测器在真实慢动作挪腿时实现 **0 次误更新、0.00° 恶化、100% 胜率**（朴素 ZARU 误更新 4768 次、-11.97° 恶化）；总参数严格锁死 1,102,066 | [阶段成果](model-development/phase-16-observation-fidelity/results.md) |
 
 ---
 
@@ -41,7 +42,7 @@
                  ▼                                               ▼
      【慢分支：物理状态估计】                         【快分支：神经运动学修正】
   Phase 9 DeployableBiasEstimatorV3              Phase 11/12 Yaw-Neutral CSTN (ONNX)
-  - 预期以原始陀螺输入做 4 路 ZARU (当前输入未证实) - 8 路因果流式 LSTM (Hidden Dim=96)
+  - 基于可得姿态/角速度流做 4 路 ZARU 原型；P15 输入尚未与服务端差分语义对齐 - 8 路因果流式 LSTM (Hidden Dim=96)
   - 步态辅助航向观测候选 (可观测性待验证)            - 针对下肢 4 关节输出 3D 旋转残差
   - 四路 2x2 状态协方差卡尔曼滤波 (EKF)            - 内嵌世界 Y 轴 Swing-Twist 正交投影
   - 估计四路世界竖直轴慢偏航误差 e_i(t)            - 严格剥离世界偏航 Twist，仅保留高频 Swing
@@ -56,7 +57,7 @@
                        不写入求解器；实机效果尚待验证
 ```
 
-`omega*` 可能是姿态差分代理量，当前不能当作原始陀螺读数；完整角速度数据来源和 ZARU 可部署性列入 [Phase 13 P1](system-validation/phase-13-no-hardware-readiness/plan.md)。
+`omega*` 在当前服务端回退路径中由融合姿态差分得到，不应当作裸陀螺读数。P15 合成器输入尚未执行固件融合与服务端组装；字段来源对齐、加速度门控和慢动作误校正由 [Phase 16](model-development/phase-16-observation-fidelity/plan.md) 验证。
 
 ### 正交分频算子性质（不等于整体模型精度通过）
 世界竖直轴偏航分解为四元数 Swing-Twist：
@@ -245,11 +246,30 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 | **Model C (物理慢偏置局部右乘)** | 796 条 (16.3万帧) | - | - | 10°/min 漂移下**恶化 +0.19°**<br>零漂移下**恶化 +0.08°** | **致命缺陷**：将世界坐标偏航漂移错误右乘到局部坐标系；腿部静止检测将动态姿态冲刷 |
 | **Phase 11/12 Yaw-Neutral 候选** | 旧合成集/旧确认集 | 算子投影性质可单测 | - | 历史 P6-only Swing 探索数值为正 | **未完成独立确认**：不等同已验证融合方案或最终部署方案 |
 
+### 7. Phase 16 慢动作误校正边界与保守型三态观测器评测
+
+按照 [Phase 16 计划](model-development/phase-16-observation-fidelity/plan.md) 在 12 类工况、125 条独立物理自洽会话（750,000 帧）上完成 5 大候选全场景压力测试。
+
+| 工况场景 (`Scenario`) | 架构候选 (`Candidate`) | $D_{\text{raw}}$(°) | $D_{\text{corr}}$(°) | 净收益 $G$(°) | 改善率(%) | 胜率(%) | 95% Bootstrap CI | 状态与结论 |
+| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **严格零漂静止** (10 种子, 0 漂移) | conservative_gated_zaru | 0.00 | 0.00 | **+0.00** | 0.0% | **100.0%** | [+0.00, +0.00] | **PASS** (改变量 $0.0000^\circ \le 0.05^\circ$) |
+| **真实极慢动作主动挪腿**<br>(15 种子, 0 漂移, 0.3°/min 慢动) | p15_naive_zaru<br>fused_delta_naive_zaru<br>**conservative_gated_zaru** | 0.00<br>0.00<br>0.00 | 11.97<br>11.97<br>0.00 | **-11.97**<br>**-11.97**<br>**+0.00** | 严重恶化<br>严重恶化<br>0.0% | 0.0%<br>0.0%<br>**100.0%** | [-11.97, -11.97]<br>[-11.97, -11.97]<br>[+0.00, +0.00] | 朴素 ZARU 误更新 4768 次；<br>保守三态 ZARU **0 次误更新，0 退化** |
+| **标称正向偏航慢漂移** (+0.14°/min) | conservative_gated_zaru | 5.70 | 3.53 | **+2.17** | 38.1% | **80.0%** | [+0.93, +3.35] | **PASS** (CI 下界严格 $> 0$) |
+| **标称负向偏航慢漂移** (-0.14°/min) | conservative_gated_zaru | 6.07 | 3.60 | **+2.48** | 40.8% | **86.7%** | [+1.63, +3.17] | **PASS** (CI 下界严格 $> 0$) |
+| **单腿独立慢动作** (左腿动, 右腿静) | p15_naive_zaru<br>**conservative_gated_zaru** | 5.61<br>5.61 | 6.32<br>3.22 | -0.71<br>**+2.39** | -12.7%<br>42.6% | 20.0%<br>**100.0%** | [-1.73, +0.65]<br>[+1.60, +3.23] | 朴素观测器动腿误更新抵消静腿；<br>保守观测器动腿保护，静腿有效纠偏 |
+| **慢动作与漂移并存** (+0.14°/min) | p15_naive_zaru<br>**conservative_gated_zaru** | 6.24<br>6.24 | 5.84<br>3.01 | +0.41<br>**+3.23** | 6.6%<br>51.8% | 50.0%<br>**100.0%** | [-0.57, +1.42]<br>[+1.94, +4.56] | 间歇慢动期间保护，静止期纠偏 |
+| **全身慢速转向** (+0.14°/min) | conservative_gated_zaru | 5.28 | 5.28 | +0.00 | 0.0% | 0.0% | [-0.00, +0.00] | HMD 运动线索全局挂起，防误纠偏 |
+
+- **阶段验收门结果**：Gate 1（严格零漂 $\le 0.05^\circ$）、Gate 2（慢动作误校正免疫，0 误更新）、Gate 3（±0.14°/min 稳健收益）、Gate 4（参数封顶 1,102,066）**全部 PASS**。
+- **阶段裁定**：正式采纳 Phase 16 保守型三态观测器 (`ConservativeBiasEstimatorV4`) 作为下肢慢分支候选；总参数量严格锁定 **1,102,066**（0 扩容）；继续保持 `shadowMode = true` 与 `enabled = false`。详见 [Phase 16 结果](model-development/phase-16-observation-fidelity/results.md)。
+
 ---
 
 ## 四、 核心交付产物索引表
 
 ### 1. 阶段评测报告与黄金哨兵 (JSON 机器凭据)
+- **Phase 16 P16.2/P16.3 慢动作误校正与物理自洽评测报告**：[`ai_corrector/artifacts/phase16_p3_slow_motion_benchmark_report.json`](../ai_corrector/artifacts/phase16_p3_slow_motion_benchmark_report.json)
+- **Phase 16 P16.1 服务端语义对齐与角速度血统审计报告**：[`ai_corrector/artifacts/phase16_p1_input_semantics_alignment_report.json`](../ai_corrector/artifacts/phase16_p1_input_semantics_alignment_report.json)
 - **Phase 15 P15.1/P15.3 双时间尺度架构 150 会话终极评测报告**：[`ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json`](../ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json)
 - **Phase 15 P15.0 模型基线与参数预算终极审计报告**：[`ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json`](../ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json)
 - **Phase 14 P14.1 Tracker UDP 至 `tickServer()` 10.8 万帧全链路基准报告**：[`ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)
@@ -262,6 +282,10 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 - **124D 契约跨语言黄金哨兵 Fixture**：[`ai_corrector/artifacts/fixture_124d_sentinel.json`](../ai_corrector/artifacts/fixture_124d_sentinel.json)
 
 ### 2. 核心算法、状态机与模型资产
+- **Phase 16 慢动作误校正与物理基准评测套件**：[`ai_corrector/corrector/execute_phase16_p3_slow_motion_benchmark.py`](../ai_corrector/corrector/execute_phase16_p3_slow_motion_benchmark.py)
+- **Phase 16 保守型三态偏航观测器**：[`ai_corrector/corrector/conservative_bias_estimator_v4.py`](../ai_corrector/corrector/conservative_bias_estimator_v4.py)
+- **Phase 16 四元数积分物理动力学合成器**：[`ai_corrector/corrector/physics_session_simulator_v4.py`](../ai_corrector/corrector/physics_session_simulator_v4.py)
+- **Phase 16 输入一致性与血统审计套件**：[`ai_corrector/corrector/execute_phase16_p1_input_semantics_alignment.py`](../ai_corrector/corrector/execute_phase16_p1_input_semantics_alignment.py)
 - **Phase 15 双时间尺度基准测试套件**：[`ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py`](../ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py)
 - **Phase 15 基线审计与预算锁定脚本**：[`ai_corrector/corrector/execute_phase15_p0_baseline_audit.py`](../ai_corrector/corrector/execute_phase15_p0_baseline_audit.py)
 - **世界轴偏航中立流式 ONNX 模型**：[`ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx`](../ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx)

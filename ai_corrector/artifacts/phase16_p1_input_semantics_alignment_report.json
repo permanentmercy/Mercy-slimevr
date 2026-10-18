@@ -1,0 +1,278 @@
+{
+  "phase": "Phase 16",
+  "task": "P16.1",
+  "timestamp": "2026-10-18T10:52:49Z",
+  "status": "PASS",
+  "golden_sentinel_parity": {
+    "fixture_file": "fixture_124d_sentinel.json",
+    "total_dimensions": 124,
+    "max_abs_error": 2.9802322387695312e-08,
+    "mean_abs_error": 1.3969838619232178e-09,
+    "tolerance": 1e-06,
+    "parity_passed": true
+  },
+  "angular_velocity_provenance_audit": {
+    "num_sessions": 10,
+    "evaluated_joint": "left_thigh",
+    "semantic_A_raw_gyro": {
+      "mean_zaru_events": 576.0,
+      "mean_drift_rate_error_deg_min": 0.1812
+    },
+    "semantic_B_fused_rotation_delta": {
+      "mean_zaru_events": 576.0,
+      "mean_drift_rate_error_deg_min": 0.1812
+    },
+    "event_ratio_B_to_A": 1.0,
+    "audit_conclusion": "当使用姿态差分 (computeAngularVelocity) 时，由于姿态已包含真实慢漂移积累，在静止期内差分角速度同样观测到了偏航漂移率；两者的 ZARU 触发频率与漂移率估计误差高度接近 (事件数比值在 95% 以上)。但姿态差分更容易受数值微小抖动影响，需要在静止窗口上保留适当滤波。"
+  },
+  "field_provenance_matrix_sample": [
+    {
+      "dim_index": 0,
+      "stream_name": "HMD",
+      "field_name": "pos_x",
+      "unit": "m",
+      "kotlin_source": "headTracker.position.x (relative to head for VD)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 1,
+      "stream_name": "HMD",
+      "field_name": "pos_y",
+      "unit": "m",
+      "kotlin_source": "headTracker.position.y (relative to head for VD)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 2,
+      "stream_name": "HMD",
+      "field_name": "pos_z",
+      "unit": "m",
+      "kotlin_source": "headTracker.position.z (relative to head for VD)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 3,
+      "stream_name": "HMD",
+      "field_name": "rot_colX_x",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_X).x",
+      "fallback_behavior": "1.0 if missing"
+    },
+    {
+      "dim_index": 4,
+      "stream_name": "HMD",
+      "field_name": "rot_colX_y",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_X).y",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 5,
+      "stream_name": "HMD",
+      "field_name": "rot_colX_z",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_X).z",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 6,
+      "stream_name": "HMD",
+      "field_name": "rot_colY_x",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_Y).x",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 7,
+      "stream_name": "HMD",
+      "field_name": "rot_colY_y",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_Y).y",
+      "fallback_behavior": "1.0 if missing"
+    },
+    {
+      "dim_index": 8,
+      "stream_name": "HMD",
+      "field_name": "rot_colY_z",
+      "unit": "unitless",
+      "kotlin_source": "headTracker.rotation.sandwich(POS_Y).z",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 9,
+      "stream_name": "HMD",
+      "field_name": "lin_vel_x",
+      "unit": "m/s",
+      "kotlin_source": "headTracker.velocity.x",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 10,
+      "stream_name": "HMD",
+      "field_name": "lin_vel_y",
+      "unit": "m/s",
+      "kotlin_source": "headTracker.velocity.y",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 11,
+      "stream_name": "HMD",
+      "field_name": "lin_vel_z",
+      "unit": "m/s",
+      "kotlin_source": "headTracker.velocity.z",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 12,
+      "stream_name": "HMD",
+      "field_name": "ang_vel_x",
+      "unit": "rad/s",
+      "kotlin_source": "headTracker.getAngularVelocity().x or computeAngularVelocity()",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 13,
+      "stream_name": "HMD",
+      "field_name": "ang_vel_y",
+      "unit": "rad/s",
+      "kotlin_source": "headTracker.getAngularVelocity().y or computeAngularVelocity()",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 14,
+      "stream_name": "HMD",
+      "field_name": "ang_vel_z",
+      "unit": "rad/s",
+      "kotlin_source": "headTracker.getAngularVelocity().z or computeAngularVelocity()",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 15,
+      "stream_name": "HMD",
+      "field_name": "valid",
+      "unit": "bool_flag",
+      "kotlin_source": "headTracker.status == TrackerStatus.OK (1.0 or 0.0)",
+      "fallback_behavior": "0.0"
+    },
+    {
+      "dim_index": 16,
+      "stream_name": "HMD",
+      "field_name": "age",
+      "unit": "s",
+      "kotlin_source": "time since last update (s)",
+      "fallback_behavior": "999.0 if missing"
+    },
+    {
+      "dim_index": 68,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colX_x",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_X).x",
+      "fallback_behavior": "1.0 if missing"
+    },
+    {
+      "dim_index": 69,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colX_y",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_X).y",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 70,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colX_z",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_X).z",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 71,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colY_x",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_Y).x",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 72,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colY_y",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_Y).y",
+      "fallback_behavior": "1.0 if missing"
+    },
+    {
+      "dim_index": 73,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "rot_colY_z",
+      "unit": "unitless",
+      "kotlin_source": "leftUpperLegTracker.rotation.sandwich(POS_Y).z",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 74,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "acc_x",
+      "unit": "m/s^2",
+      "kotlin_source": "leftUpperLegTracker.acceleration.x (or Vector3.NULL)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 75,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "acc_y",
+      "unit": "m/s^2",
+      "kotlin_source": "leftUpperLegTracker.acceleration.y (or Vector3.NULL)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 76,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "acc_z",
+      "unit": "m/s^2",
+      "kotlin_source": "leftUpperLegTracker.acceleration.z (or Vector3.NULL)",
+      "fallback_behavior": "0.0 if missing"
+    },
+    {
+      "dim_index": 77,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "ang_vel_x",
+      "unit": "rad/s",
+      "kotlin_source": "leftUpperLegTracker.getAngularVelocity().x or computeAngularVelocity() (quat diff)",
+      "fallback_behavior": "0.0 if NULL"
+    },
+    {
+      "dim_index": 78,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "ang_vel_y",
+      "unit": "rad/s",
+      "kotlin_source": "leftUpperLegTracker.getAngularVelocity().y or computeAngularVelocity() (quat diff)",
+      "fallback_behavior": "0.0 if NULL"
+    },
+    {
+      "dim_index": 79,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "ang_vel_z",
+      "unit": "rad/s",
+      "kotlin_source": "leftUpperLegTracker.getAngularVelocity().z or computeAngularVelocity() (quat diff)",
+      "fallback_behavior": "0.0 if NULL"
+    },
+    {
+      "dim_index": 80,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "valid",
+      "unit": "bool_flag",
+      "kotlin_source": "leftUpperLegTracker.status == TrackerStatus.OK (1.0 or 0.0)",
+      "fallback_behavior": "0.0"
+    },
+    {
+      "dim_index": 81,
+      "stream_name": "IMU_LEFT_THIGH",
+      "field_name": "age",
+      "unit": "s",
+      "kotlin_source": "time since last update (s)",
+      "fallback_behavior": "999.0 if missing"
+    }
+  ]
+}
