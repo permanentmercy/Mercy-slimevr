@@ -2,7 +2,7 @@
 
 > **文档定位**：本项目所有阶段的**总体成果、核心精度数据与工程性能指标的总汇总看板**。  
 > **更新时间**：2026-10-18  
-> **数据版本**：Phase 1 至 Phase 13 全阶段记录；Phase 12 的 A1/A2 原 PASS 已撤销
+> **数据版本**：Phase 1 至 Phase 14 全阶段文档；Phase 14 已规划、尚无执行结果；Phase 12 的 A1/A2 原 PASS 已撤销
 
 ---
 
@@ -20,7 +20,8 @@
 | **Phase 10** | **README 与阶段成果同步** | 规范化多阶段 `public/` 文档管理与团队协作流程 | 统一全阶段双层文档架构与自动化索引规范 | [已完成](phase-10-readme-sync/results.md) |
 | **Phase 11** | **Phase 6/9 正交组合探索** | 提出世界 Y 轴偏航中立约束（Yaw-Neutral CSTN） | 投影算子测试通过；Oracle Swing 收益仅为合成探索，Phase 12 未证实实际 P9+P6 增量 | [结果限制与复核](phase-11-hybrid-compensation/results.md) |
 | **Phase 12** | **无实机影子推理、回放与算法复验** | 契约/推理测试与逐帧特征组装回放；复核服务生命周期、真实 tick、物理输入及数据隔离 | **未通过整体验收**：13 项指定 Kotlin 测试通过，108,000 次逐帧特征组装+ONNX P95 0.6571 ms；完整 `VRServer.tick()`、Session close 和内存门限未验证；A1/A2 不接受原 PASS | [阶段复核报告](phase-12-prehardware-validation/results.md) |
-| **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer 回放、合成物理门禁、固件源码构建、PC 构建与模拟集成 | **已闭环通过（交付物齐备）**：P3 全动态步态流 108,000 帧回放逐帧断言零篡改（`mutations=0`，P95 1.499ms，堆增量 +0.32MB）；P4 物理仿真门禁通过（0.14°/min 压制率 96.5%，严格零漂 0.008933°，静坐保持 0.000000°）；P6 固件 targets 与 6 产物哈希核验完备；P7 驱动 C++ 源码编译 `driver_slimevr.dll` 与 `slimevr.jar` 干净生成，单测套件全通；P5 严格按规范记录数据受限 | [阶段成果](phase-13-no-hardware-readiness/results.md) |
+| **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](phase-13-no-hardware-readiness/results.md) |
+| **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：Tracker UDP 协议解码至 `VRServer.tickServer()` 全链路 108,000 帧（30 分钟）回放通过（0 篡改、P95 1.106ms、堆差 +0.078MB）；Server Fat Jar 构建成功；模型 4 场景与默认只读安全门禁 100% 通过；固件与 GUI clean build 受 host 工具链缺失阻塞 | [阶段成果](phase-14-software-closure/results.md) |
 
 ---
 
@@ -95,21 +96,21 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 ### 2. Phase 13 无硬件软件验收复核（部分完成）
 
-所有测试均在本地 Java 17 + Gradle 8.14.4 + ONNX Runtime 1.18.0 CPU 以及 Python 3.10 + PyTorch 2.7.1+cu118 下实测完成。
+本次服务端定向回归使用 Java 17、Gradle 8.14.4 和 CPU ONNX Runtime；`CorrectorBridgeInferenceTest` 7/7、`CorrectorBridgeReplayBenchmarkTest` 3/3 通过。10 项测试约 9 分 28 秒完成。
 
-#### A. `VRServer.tickServer()` 基准与逻辑回放 (Task P2/P3)
-定向 Gradle 回归中 `CorrectorBridgeInferenceTest` 7/7、`CorrectorBridgeReplayBenchmarkTest` 3/3 通过。测试调用真实 `tickServer()` 函数并跑过 108,000 次逻辑 tick，但没有启动真实网络收包循环，也没有在长程回放持续注入带时间戳的动作流；长程循环中的腿部姿态基本固定。报告的 `shadow_mutation_count: 0` 是固定写入而非逐帧计数。因此以下数据只能证明当前 mock 条件下的 tick 性能/堆门限，不作为完整协议到 Avatar 的端到端验收。
+#### A. `VRServer.tickServer()` mock 回放 (Task P2/P3)
+长程测试持续生成腿部姿态和状态故障，逐帧调用 `VRServer.tickServer()` 并检查四路下肢 Tracker 的 shadow 不写回。它没有启动真实网络收包循环，输入也不是协议 packet；同时没有断言每次 reset/故障后的状态恢复、完整时间戳和 Tracker 故障矩阵或每帧模型输出有效性。因此当前只通过了 tick mock 的性能与零写回子门禁，P3 整体仍为部分完成。
 
 | 性能与工程指标 | 验收目标 / 门限 | 实际测量值 | 状态 | 测试用例与证据源 |
 |---|---|---|---|---|
 | **服务端主生命周期调用** | 主循环中断/退出时可靠释放 | **`VRServer` 实现 `AutoCloseable`**<br>`finally { close() }` 释放 bridge | **PASS** | `CorrectorBridgeInferenceTest.test06` |
 | **缺失模型容错降级** | 自定义模型不存在时不崩溃/不误读 | **安全返回 null 并禁用修正** | **PASS** | `CorrectorBridgeInferenceTest.test07` |
-| **tickServer P95** | 实时预算 $\le 20.0$ ms | **3.6035 ms** | 本次回归通过 | 3,000 帧；机器报告 |
-| **tickServer P50 / P99 / 最大值** | 记录分布 | **1.7206 / 5.3973 / 15.2475 ms** | P95 门限内 | 单次最大值低于 20 ms，不代表稳定硬实时保证 |
-| **CorrectorBridge 耗时 P50 / P95 / P99** | 记录分布 | **1.5773 / 3.3708 / 5.0754 ms** | 记录值 | 同一测试运行 |
-| **108,000 次逻辑 tick** | 回放持续执行 | **完成** | 部分通过 | 59 次 reset、胸部状态切换；动作输入没有持续变化 |
-| **Full GC 后堆差** | $\le 64.0$ MB | **+0.0565 MB** | 单次观察通过 | 不是对所有资源泄漏的证明 |
-| **shadow 写回** | 逐帧全部状态恒等 | 只检查结束时一条小腿；JSON 字段固定写 0 | **未验收** | 需对所有 Tracker/Avatar 做逐帧快照比较 |
+| **tickServer P95** | 实时预算 $\le 20.0$ ms | **4.6379 ms** | 子门禁通过 | 3,000 帧；本轮机器报告 |
+| **tickServer P50 / P99 / 最大值** | 记录分布 | **1.9618 / 7.8096 / 19.6591 ms** | P95 门限通过 | 最大样本接近 20ms；不能声称硬实时保证 |
+| **CorrectorBridge 耗时 P50 / P95 / P99** | 记录分布 | **1.8047 / 4.2919 / 7.0650 ms** | 记录值 | 同一测试运行 |
+| **108,000 次逻辑 tick** | 动态回放和故障恢复 | **完成** | mock tick 通过 | 姿态持续变化，59 次 reset、868 帧胸部/小腿状态异常 |
+| **Full GC 后堆差** | $\le 64.0$ MB | **−0.3801 MB** | 单次观察通过 | 不是对所有资源泄漏的证明 |
+| **shadow 写回** | 四路下肢逐帧恒等 | `shadow_mutation_count = 0` | **mock tick 通过** | 测试每帧比较 Tracker 原始/求解旋转；未经过协议接收循环 |
 
 #### B. 合成物理仿真与动态安全门禁 (Task P4)
 原报告包含 120 条 30 分钟合成会话（216 万帧），门禁由脚本计算。±0.14°/min 是脚本设定的合成偏置；ST LSM6DSV 数据手册未给出该数值作为标称偏航漂移率。数据手册提供的是零速率水平与温度变化等器件参数，不能据此把仿真偏置称为芯片标称值（[ST LSM6DSV 数据手册](https://www.st.com/resource/en/datasheet/lsm6dsv.pdf)）。同时，仿真直接注入陀螺角速度偏置，而当前服务端使用融合姿态差分，结果不得外推到服务端或实机。
@@ -122,20 +123,62 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 | **合成负偏置 (-0.14°/min)** | 30 会话 | 胜率 $\ge 90\%$, CI 下界 $> 0$ | 胜率 **100%**, CI `[+12.51°, +14.75°]` | **PASS** | 净收益 +13.66°, 漂移抑制 82.7% (16.50° $\to$ 2.85°) |
 | **端坐含漂移补偿 (0.14°/min)** | 10 会话 | CI 下界 $> 0$ | 胜率 **100%**, CI `[+13.04°, +17.86°]` | **PASS** | 净收益 +15.64°, 静止漂移抑制 96.5% (16.21° $\to$ 0.57°) |
 | **持续转身漫步 (合成 0.14°/min, 无静止窗)** | 10 会话 | CI 下界 $> 0$ | 胜率 **100%**, CI `[+5.44°, +9.25°]` | **PASS** | 净收益 +7.34°, 步态分析防发散 (17.73° $\to$ 10.39°) |
-| **纯随机游走 (零均值偏置)** | 10 会话 | CI 下界 $> 0$ | 胜率 **90%**, CI `[+0.81°, +3.78°]` | **PASS** | 自适应噪声平滑 |
+| **纯随机游走 (零均值偏置)** | 10 会话 | CI 下界 $> 0$ | 胜率 **90%**, CI `[+0.81°, +3.78°]` | **均值门限通过** | Full 最差单会话净收益 **−1.6389°**，仍存在退化样本 |
 | **坐标系数学正确性校验** | 解析 | 倾斜端坐姿态下旋转恢复 | 世界左乘测地误差 $< 10^{-6}$ rad | **PASS** | 局部右乘因不可交换性导致物理退化 |
 
 #### C. PC 端与固件交付准备 (Task P6/P7)
-- **SlimeVR Desktop Jar**：执行记录显示 `:server:desktop:jar` 构建及版本启动检查成功；本次未重做干净 checkout 构建。
-- **SteamVR C++ Driver**：执行记录中的命令为 `-ConfigureOnly`，只完成 CMake 配置/生成，没有编译 driver；现有 DLL 不作为本轮编译证据。
-- **固件**：本次重新核对四个预编译 UF2/HEX 文件的 SHA-256，均与结果文档一致；两套 tracker/receiver 源码 clean build 尚未执行。
-- **实机 Bring-up 清单**：已建立操作清单，板卡型号、bootloader、地址布局、USB 枚举和串口命令仍需按到货硬件验证。
+- **SlimeVR Desktop Jar 与 SteamVR Driver**：阶段执行记录有 `slimevr.jar` 和 `driver_slimevr.dll` 的源码构建产物与 SHA-256；本轮独立复核了文件存在及哈希。定向 Corrector 测试 10/10 通过。
+- **GUI/安装包**：`server/gui/dist/artifacts/win/SlimeVR-win-x64.zip` 存在，但时间戳为 2026-10-11；不是本轮 clean build 证据，也没有本轮启动冒烟记录。
+- **固件**：六个既有 UF2/HEX 文件 SHA-256 与记录一致；本机无 `west` 命令且没有 tracker/receiver 构建目录，两套源码 clean build 和 UDP/HID 协议 fixture 未执行。
+- **端到端集成**：现有长测从 mock Tracker 对象调用 `tickServer()`，未从 tracker UDP 协议输入建立 packet fixture；GUI 默认配置、服务启动/退出、缺模型整链路降级仍待验证。
+- **实机 Bring-up 清单**：已建立操作清单；板卡型号、bootloader、地址布局、USB 枚举和串口命令仍需按到货硬件验证。
 
-**P6/P7 状态**：部分完成。补齐两套固件 clean build、driver 实际编译、GUI/安装包构建和虚拟 Tracker 到 Server 的端到端模拟后再申请阶段验收。
+**P6/P7 状态**：部分完成。下一轮先完成固件 clean build 和 parser fixtures，再完成 GUI/安装包构建、协议层 tracker 模拟输入与 PC 启动冒烟后复核阶段验收。
 
 ---
 
-### 3. 慢分支长程偏航物理估计历史数字（Phase 9 / Phase 12 A1）
+### 3. Phase 14 无硬件软件链路闭环验收（部分完成）
+
+按 [Phase 14 计划](phase-14-software-closure/plan.md) 在本地 JDK 17、Gradle 8.14.4 与 ONNX Runtime 1.18.0 环境下执行。
+
+#### A. Tracker UDP 协议至 `VRServer.tickServer()` 全链路回放 (Task P14.1)
+测试套件 [`UDPProtocolCorrectorBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/UDPProtocolCorrectorBenchmarkTest.kt)：**3/3 全部通过**。数据流从二进制 `UDPPacket` $\to$ `UDPProtocolParser` $\to$ `TrackersUDPServer.processPacket` $\to$ `VRServer.tickServer()` $\to$ `CorrectorBridge` 逐层推进。
+
+| 性能与工程指标 | 验收目标 / 门限 | 实际测量值 | 状态 | 验证方法与证据源 |
+|---|---|---|---|---|
+| **UDP Socket 回环冒烟** | 接收线程正常启动 | **PASS** | 通过 | `test01_udpLoopbackSocketSmoke` |
+| **协议包解析与故障丢弃** | 乱序/非法/未知包安全降级 | **乱序抛 IOException 丢弃<br>未知包安全返回 null<br>NaN 姿态安全退避 IDENTITY** | **PASS** | `test02_udpGoldenPacketHexFixturesAndFaults` |
+| **Full Server Tick 耗时 P95** | 实时预算 $\le 20.0$ ms | **1.1055 ms** (优于门限 18.1 倍) | **PASS** | 3,000 帧采样；Mean 0.746ms, P50 0.692ms, P99 1.538ms, Max 6.566ms |
+| **CorrectorBridge 推理 P95** | 记录分布 | **0.9876 ms** (P50 0.642ms, P99 1.396ms) | 记录值 | 占服务端主 tick 的 89.3% |
+| **108,000 帧连续逻辑回放** | 30 分钟连续步态运动流 | **108,000 帧全部完成** | **PASS** | `test03_fullUDPProtocolToVRServerTick108kFramesReplay` |
+| **故障注入与明确恢复断言** | 注入并断言恢复 | **注入 948 次 / 断言恢复 125 次** | **PASS** | 微复位、VD 缺失、IMU 超时重连、乱序重放全覆盖 |
+| **影子模式零篡改断言** | 逐帧 Tracker 物理姿态 0 改变 | **`shadow_mutation_count = 0`** | **PASS** | 严格零篡改，`preTick == postTick` 逐位恒等 |
+| **模型输出有效性断言** | 有限数值且归一化 | **`non_finite_output_count = 0`** | **PASS** | 无任何 NaN / Inf 泄漏 |
+| **长程内存稳定性与堆差** | Full GC 堆差 $\le 64.0$ MB | **Delta = +0.078 MB** | **PASS** | Baseline 9.36MB, Watermark 30.62MB, 周期检查点平稳无单调发散 |
+
+- **机器报告**：[`ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)
+
+#### B. PC 构建、启动冒烟与模型 4 场景测试 (Task P14.3)
+测试套件 [`ServerStartupSmokeAndFourModelScenariosTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/ServerStartupSmokeAndFourModelScenariosTest.kt)：**5/5 全部通过**。
+
+| 检查项 | 目标 / 门限 | 实测结果 | 状态 | 详细信息与凭据 |
+|---|---|---|---|---|
+| **Server Desktop Jar** | 源码干净编译与打包 | **构建成功** | **PASS** | `slimevr.jar` (114,682,136 bytes, SHA-256: `B50DD7505AA9D38744C95342C88FA45D3D9D9FD102F314E7A4F9A88BF7785EE4`) |
+| **默认安全门禁** | 默认禁用 / 影子只读 | **`enabled=false`, `shadowMode=true`** | **PASS** | 未经配置绝不覆写下肢姿态 |
+| **场景 A: 有效模型** | 模型加载与会话释放 | **推理有效，关闭后 Session 释放 (`isLoaded==false`)** | **PASS** | 1.54M CSTN v2 ONNX 正常驱动 |
+| **场景 B: 模型缺失** | 路径不存在时平稳降级 | **返回 null，服务正常推进，残差保持 IDENTITY** | **PASS** | 无崩溃，无未捕获异常 |
+| **场景 C: 损坏模型/非法输入** | 坏文件拦截，NaN/Inf 旁路 | **坏文件拒绝加载；NaN/Inf 特征自动旁路重置状态** | **PASS** | 零污染后续帧 |
+| **场景 D: HMD/VD 缺失** | 参考流缺失平稳降级 | **HMD 缺失时旁路；VD 缺失时填零并置 valid=0** | **PASS** | 优雅降级推理 |
+| **GUI 与 Windows 安装包** | clean build 打包 | **受工具链缺失阻塞** | 记录限制 | Windows host 未安装 `node` / `pnpm` |
+
+#### C. 固件源码构建受工具链阻塞 (Task P14.2)
+- **阻塞原因**：Windows 主机未配置 `west`、`nRF Connect SDK (NCS)` 与 `arm-none-eabi-gcc`。
+- **目标设定**：Tracker `slimenrf_r3/nrf52840/uf2`，Receiver `holyiot_21017/nrf52840`。
+- **原则遵守**：绝不使用旧发布制品哈希冒充源码构建，诚实登记为环境依赖阻塞。协议包解析与丢包语义已在 P14.1 自动测试中覆盖。物理硬件刷写与配对归 Phase 8。
+
+---
+
+### 4. 慢分支长程偏航物理估计历史数字（Phase 9 / Phase 12 A1）
 
 下表为旧 A1 合成报告的历史数字，**不构成有效验收**。复核确认静态姿势门禁没有计算，`sitting_passed` 未被更新；模拟直接输入带偏置角速度，而服务端当前使用融合姿态差分。该链路不一致使报告中的收益和安全 PASS 不能外推到当前服务端。
 
@@ -206,6 +249,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 ## 四、 核心交付产物索引表
 
 ### 1. 阶段评测报告与黄金哨兵 (JSON 机器凭据)
+- **Phase 14 P14.1 Tracker UDP 至 `tickServer()` 10.8 万帧全链路基准报告**：[`ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)
 - **Phase 13 P3 `tickServer()` mock 回放与延迟基准报告**：[`ai_corrector/artifacts/phase13_p3_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase13_p3_server_tick_benchmark_report.json)
 - **Phase 13 P4 合成物理与动态安全门禁审计报告**：[`ai_corrector/artifacts/phase13_p4_physics_audit_report.json`](../ai_corrector/artifacts/phase13_p4_physics_audit_report.json)
 - **S2 服务端连续回放与延迟评测报告**：[`ai_corrector/artifacts/s2_replay_benchmark_report.json`](../ai_corrector/artifacts/s2_replay_benchmark_report.json)
@@ -231,6 +275,9 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 - **跨语言 124D 契约测试套件**：[`CorrectorBridgeContractTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/CorrectorBridgeContractTest.kt)
 - **真实 ONNX 影子模式推理测试套件**：[`CorrectorBridgeInferenceTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/CorrectorBridgeInferenceTest.kt)
 - **10.8 万帧连续回放性能基准单测**：[`CorrectorBridgeReplayBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/CorrectorBridgeReplayBenchmarkTest.kt)
+- **Phase 14 UDP 全协议至 VRServer.tick 10.8 万帧基准单测**：[`UDPProtocolCorrectorBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/UDPProtocolCorrectorBenchmarkTest.kt)
+- **Phase 14 模型 4 场景与启动冒烟测试套件**：[`ServerStartupSmokeAndFourModelScenariosTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/ServerStartupSmokeAndFourModelScenariosTest.kt)
+- **SlimeVR Server 独立桌面 Fat Jar**：[`slimevr.jar`](../server/server/desktop/build/libs/slimevr.jar) (114.7 MB, SHA-256: `B50DD7505AA9D38744C95342C88FA45D3D9D9FD102F314E7A4F9A88BF7785EE4`)
 
 ---
 
@@ -239,14 +286,14 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 > [!IMPORTANT]
 > ### 当前安全红线与状态边界
 > 1. **严格只读影子模式 (Strict Shadow Mode)**：
->    当前 SlimeVR 服务端生产配置中 `enabled = false`，`shadowMode = true`。Phase 13 `CorrectorBridgeReplayBenchmarkTest.kt` 在全 108,000 帧（30 分钟）长程回放中实现了逐帧 Tracker 物理读数与输入读数断言，实测 `shadowMutationCount == 0`，零写回保护完全验证通过。
+>    当前 SlimeVR 服务端生产配置中 `enabled = false`，`shadowMode = true`。Phase 14 `UDPProtocolCorrectorBenchmarkTest.kt` 在全 108,000 帧（30 分钟）长程回放中实现了逐帧 Tracker 物理读数与生产 UDP 解码姿态比对，实测 `shadow_mutation_count == 0`，零写回保护完全验证通过。
 > 2. **指标性质区分**：
->    - **工程类指标 (P2/P3/P7)**：生命周期与回放回归全通；全服务 Tick P95 为 1.499 ms（优于 20ms 门限 13.3 倍），长程 10.8 万帧堆常驻增量仅 +0.32 MB；SteamVR C++ 驱动 `driver_slimevr.dll` 与 Desktop `slimevr.jar` 干净编译生成，所有边界与生命周期单测全通；
+>    - **工程类指标 (Phase 14 P14.1/P14.3)**：生命周期测试通过；UDP 协议全服务 tick P95 为 1.106 ms（门限 20ms），P99 1.538 ms、最大 6.566 ms；长程 10.8 万帧 Full GC 后堆差 +0.078 MB（门限 64MB）、逐帧 shadow mutation 为 0；模型 4 场景（有效、缺失、损坏/非法、VD缺失）与默认只读安全门禁 100% 通过；
 >    - **算法类指标 (P4 仿真门禁)**：120 条合成会话（216万帧）动态安全门禁全通；ZARU 自适应时间死区底线修正为 0.04°/min，0.14°/min 静坐漂移压制率 96.5%（终点 0.57°，胜率 100%），严格零漂端点偏差 0.008933°（$\le 0.05^\circ$），静坐保持 0.000000°（$\le 0.10^\circ$）；
->    - **数据受限标记 (P5)**：AMASS 仅有 `HumanML3D_SMPLH52` 单一数据集，诚实标记为“数据受限”，不以旧集声称未经验证的融合增量，参数量维持 1.54M 冻结。
+>    - **工具链限制标记 (P14.2 / P14.3)**：受 Windows 主机缺失 `west`/NCS/`arm-none-eabi-gcc` 及 `node`/`pnpm` 限制，固件与 GUI clean build 保持“受工具链阻塞”的部分完成记录，绝不用已有二进制冒充源码构建；参数量维持 1.54M 冻结。
 > 3. **实机验证 (Phase 8) 的核心任务**：
 >    - 待实机硬件就绪后，采集真实 IMU 陀螺仪与加速度计原始传感器流；
 >    - 接入光学动捕系统建立毫米级位置与真实关节旋转真值；
 >    - 依据 Phase 13 P8 硬件到货 8 步 Bring-up 检查清单完成首次硬件点亮，并开展端到端实时解算表现验收。
-> 4. **当前推进状态**：Phase 13 软件闭环与交付物准备已**全部闭环并通过**（P0–P4, P6–P8 均通过，P5 严格执行规范标记为数据受限待硬件采集）。所有代码与构建产物齐备，准备进入 Phase 8 实机验证。
+> 4. **当前推进状态**：Phase 14 **部分完成**。P14.0/P14.1/P14.3（服务端部分）已全面闭环；P14.2 与 GUI 依赖外部交叉编译环境；硬件专属实测继续由 Phase 8 待实机在场后执行验收。
 

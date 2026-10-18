@@ -1,0 +1,39 @@
+{
+  "phase": "Phase 14",
+  "task": "P14.1",
+  "status": "PASS",
+  "timestamp": "2026-10-18T08:15:26.905825500Z",
+  "execution_model": "Full tracker UDP packet parsing -> VRServer.tickServer() loop",
+  "target_latency_p95_ms": 20.0,
+  "frames_benchmarked": 3000,
+  "full_server_tick_latency_ms": {
+    "mean": 0.7458983000000005,
+    "p50": 0.6916,
+    "p95": 1.1055,
+    "p99": 1.538,
+    "max": 6.5662
+  },
+  "bridge_latency_component_ms": {
+    "p50": 0.641700029373169,
+    "p95": 0.9876000285148621,
+    "p99": 1.395900011062622
+  },
+  "long_run_replay": {
+    "total_frames": 108000,
+    "duration_minutes": 30.0,
+    "injected_fault_events": 948,
+    "asserted_recoveries": 125,
+    "shadow_mutation_count": 0,
+    "non_finite_output_count": 0,
+    "memory_baseline_mb": 9.36,
+    "memory_watermark_mb": 30.62,
+    "memory_delta_mb": 0.07837677001953125,
+    "periodic_heap_checkpoints_mb": [30.62, 26.65, 23.24, 19.24, 15.68]
+  },
+  "environment": {
+    "os": "Windows 11",
+    "arch": "amd64",
+    "java_version": "17.0.20.1",
+    "model_file": "ONNX(file=cstn_v2_yaw_neutral_world.onnx, size=4571251 bytes)"
+  }
+}

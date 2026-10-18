@@ -1,6 +1,6 @@
 # Phase 13：无硬件软件闭环与可复现交付准备
 
-> **状态**：**整改已全部完成并通过**。针对“目前没有实体硬件”的条件，完成了全动态 108,000 帧服务 tick 回放（逐帧 0 篡改）、0.04°/min 自适应死区物理仿真门禁（100% 胜率，零漂与静坐严格通过）、固件规范与制品哈希核验、SteamVR C++ 驱动与 Desktop Fat Jar 源码干净编译及全场景安全模拟集成；硬件专属验收明确留给 Phase 8。
+> **状态**：**部分完成**。P0–P2 与 P4 有通过记录；P3 的动态 tick mock 回放、时延和 shadow 不写回通过，但时间/采样间隔异常、完整 tracker 故障矩阵、reset 后状态与输出有效性断言仍缺；P6 只完成固件配置/制品核验和 Runbook，尚无 tracker/receiver 源码 clean build 与协议 parser fixture；P7 完成 driver、Desktop Jar 和 Corrector 测试，但协议层模拟输入、GUI/安装包本轮构建及启动冒烟仍缺证据。硬件专属验收归 Phase 8。
 > **约束**：不增加模型参数或扩大网络；不启用姿态写回；不得把合成/回放结果表述为实机有效性。  
 > **规划日期**：2026-10-18
 
@@ -11,14 +11,14 @@
 | P0 | 通过 | 工具链与五大仓库差异冻结，基线测试全通。 |
 | P1 | 通过 | `contract_v2.py` 与 `CorrectorBridge.writeStream17d` 契约严格对齐（位置在前、旋转在后），124D 单测全通。 |
 | P2 | 通过 | `VRServer` 实现 `AutoCloseable`，模型缺失安全旁路，7 项生命周期单测全通。 |
-| P3 | 通过 | 全动态步态/摆动姿态流生成，注入周期重置与连续断连异常；108,000 帧逐帧断言 `shadowMutationCount == 0`；P95 耗时 1.499ms（$\le 20\text{ms}$），内存净增 0.32MB（$\le 64\text{MB}$）。 |
-| P4 | 通过 | 在 Python 锁定环境完成 120 条会话（216万帧）动态安全门禁；ZARU 死区底线调至 0.04°/min，0.14°/min 静坐漂移压制 96.5%（终点 0.57°，胜率 100%）；严格零漂端点 0.008933°（$\le 0.05^\circ$），静坐端点 0.000000°（$\le 0.10^\circ$）。 |
+| P3 | 部分完成（tick mock 回放） | 动态 108,000 帧、逐帧 shadow 零写回和性能门限通过；本次复跑 P95 4.638ms、P99 7.810ms、最大 19.659ms，Full GC 后堆差 −0.38MB。仍缺时间戳异常、HMD 与四路腿 tracker 故障矩阵，以及 reset/恢复后的状态和输出有效性断言。 |
+| P4 | 通过（合成条件） | 120 条会话（216万合成帧）；测试设定 ±0.14°/min 下静坐漂移压制 96.5%（终点 0.57°，胜率 100%）；严格零漂 endpoint 0.008933°、静坐保持 0.000000°。不能外推为硬件标称漂移或服务端精度。 |
 | P5 | 按计划延期 | 严格执行计划 P5.2，无全新独立 source/subject 隔离数据不做确认性评测；模型参数量维持 1.54M 冻结；待硬件到货采集。 |
-| P6 | 通过 | 两套固件 `west.yml`（sdk-nrf v3.1 / v3.3.0）、板卡 targets（`slimenrf_r3_nrf52840_uf2` 等）与 6 个预编译固件产物 SHA-256 全量核验，离线刷写与 SWD 救援 Runbook 完备。 |
-| P7 | 通过 | MSVC 14.51 + Ninja 源码干净编译生成 `driver_slimevr.dll`（SHA256: `6F8C4789...`）；Gradle 编译生成 `slimevr.jar`（114.6MB，SHA256: `CA589A2C...`）；Corrector 单元测试套件全部通过（含模型缺失、NaN/Inf 非法输入、严格影子零写回与服务器安全生命周期）。 |
+| P6 | 部分完成 | 已审阅两套 `west.yml`、targets、6 个既有固件制品哈希并整理 Runbook；当前环境无 `west` 命令/构建目录，两个固件源码 clean build 和 UDP/HID 协议 fixture 均未执行。 |
+| P7 | 部分完成 | driver 与 `slimevr.jar` 有源码构建记录，Corrector 10 项定向测试通过；本轮没有 GUI/安装包 clean build、真实协议层 tracker 输入或 GUI/服务启动冒烟证据。 |
 | P8 | 通过 | 已建立硬件到货 8 步 bring-up 验收清单；全局文档状态同步，硬件专属测试交接 Phase 8。 |
 
-**后续执行顺序**：先完成 P3 回放输入/写回断言，再补 P6 两套固件源码构建，随后完成 P7 干净环境 PC 构建与虚拟 Tracker 集成；P4 应先把 0.14°/min 明确为合成敏感度档并在有 NumPy 的锁定环境重跑。P5 等新隔离数据，硬件项归 Phase 8。
+**后续执行顺序**：后续闭环由 [Phase 14](../phase-14-software-closure/plan.md) 承接：1）从 tracker UDP 生产解析/派发入口建立协议回放，并按真实采样时钟语义验证重复、倒退和大间隔；JSON 区分注入事件与已断言恢复；2）配置两个 manifest 对应的隔离 NCS/west 环境，构建 tracker/receiver，并为服务端实际消费的 UDP 包建立 fixture；若发现 receiver HID 主机解码路径，再覆盖相应 HID fixture；3）clean build GUI/安装包，用协议 fixture 驱动 Server 启停、状态更新、缺失设备降级和资源释放；4）同步全局文档。P4 的 ±0.14°/min 只作为合成敏感度档；P5 等新隔离数据，实机项归 Phase 8。
 
 ## 目标
 
@@ -109,9 +109,9 @@
 2. 固定试做板卡—target 对照表（SuperMini、nice!nano、ProMicro、HolyIOT 接收器），核对 pin、I2C/SPI 变体、IMU INT、USB 和无线配置；不把板卡同名/兼容 target 当成引脚已实测。
 3. 在可重建环境中分别构建 tracker 和 receiver 的实际目标；保存命令、版本、日志摘要、产物格式、板卡 target、大小和 SHA-256。重复构建至少验证固件行为/配置一致；若二进制不可复现，记录非确定性来源。
 4. 对 `.uf2` 只做离线格式/target/文件名校验，并核对 bootloader/flash layout 是否匹配；对 HEX/其他格式记录对应 SWD 烧录路径。文档明确 UF2 bootloader 常提供 USB Mass Storage，但具体 SuperMini 必须到货后确认双击 Reset 是否枚举磁盘。
-5. 从固件命令行协议和服务端 parser 建立串口文本 fixture/模拟测试，覆盖设备 `info`、配对、丢包/重连、版本/IMU 标识解析；不声称已经完成真实 RF 配对或芯片 WHO_AM_I 验证。
+5. 从当前实际接口建立包 fixture：优先测试 tracker UDP parser/派发链路及固件 `info`、tracker 状态和包序号等字段；receiver HID 报文仅在核实存在对应 host decoder 后覆盖。不要把 tracker UDP/HID 报文称为串口文本命令，也不声称完成真实 RF 配对或芯片 WHO_AM_I 验证。
 
-**交付与验收**：两个固件 clean build 记录、target/接口矩阵、烧录 Runbook、产物 hash 与串口 fixture 测试。成功编译不等于设备能启动、传感器可识别或无线可配对。
+**交付与验收**：两个固件 clean build 记录、target/接口矩阵、烧录 Runbook、产物 hash 与适用的 UDP/HID fixture 测试。成功编译不等于设备能启动、传感器可识别或无线可配对。
 
 ### P7：PC 软件的干净构建与模拟数据集成
 
