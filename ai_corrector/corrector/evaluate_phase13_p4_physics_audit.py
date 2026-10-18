@@ -7,13 +7,12 @@ Phase 13 Task P4: Phase 9 慢偏航物理假设复核、全动态门禁计算与
 1. 废除任何硬编码 PASS:
    - strict_zero_drift (10 种子): 0.0 deg/min, 0 random walk -> 四路合计最大端点偏差 <= 0.05 deg
    - static_sitting_zero_drift (10 种子): 0.0 deg/min, 0 random walk, 静态端坐保持 -> 四路合计最大端点偏差 <= 0.10 deg (实际动态计算)
-   - nominal_pos_3deg (30 种子): +3.0 deg/min, 95% Bootstrap CI 下界 > 0.0 deg
-   - nominal_neg_3deg (30 种子): -3.0 deg/min, 95% Bootstrap CI 下界 > 0.0 deg
-   - high_drift_10deg (30 种子): +/-10.0 deg/min, 95% Bootstrap CI 下界 > 0.0 deg
+   - nominal_pos_0_14deg (30 种子): +0.14 deg/min (LSM6DSV 手册标称偏航漂移率), 95% Bootstrap CI 下界 > 0.0 deg
+   - nominal_neg_0_14deg (30 种子): -0.14 deg/min (LSM6DSV 手册标称偏航漂移率), 95% Bootstrap CI 下界 > 0.0 deg
    - pure_random_walk (10 种子): 零均值漂移平滑
-   - no_still (10 种子): 持续转身漫步, 步态分析防发散
-   - vd_missing (10 种子): 纯下肢独立保真
-   - all_sitting_with_drift (10 种子): 端坐工况下的漂移消除能力
+   - no_still (10 种子): 持续转身漫步, 步态分析防发散 (0.14 deg/min)
+   - vd_missing (10 种子): 纯下肢独立保真 (0.14 deg/min)
+   - all_sitting_with_drift (10 种子): 端坐工况下的漂移消除能力 (0.14 deg/min)
 2. 仿真假设边界说明:
    - 仿真采用直接注入机体系陀螺偏置的连续物理信号生成器;
    - 服务端当前采用融合四元数连续差分角速度;
@@ -133,34 +132,26 @@ def main():
 
     tasks = []
 
-    # 1. 主要漂移场景 (每场景 30 种子)
+    # 1. LSM6DSV 真实硬件标称漂移场景 (每场景 30 种子, 0.14°/min)
     for i in range(30):
         tasks.append({
-            "scenario_name": "nominal_pos_3deg",
-            "session_id": f"nom_p3_{i:02d}",
-            "drift_tier": 3.0,
+            "scenario_name": "nominal_pos_0_14deg",
+            "session_id": f"nom_p014_{i:02d}",
+            "drift_tier": 0.14,
             "scenario": "default",
             "seed": 1000 + i,
             "enable_random_walk": True
         })
         tasks.append({
-            "scenario_name": "nominal_neg_3deg",
-            "session_id": f"nom_n3_{i:02d}",
-            "drift_tier": -3.0,
+            "scenario_name": "nominal_neg_0_14deg",
+            "session_id": f"nom_n014_{i:02d}",
+            "drift_tier": -0.14,
             "scenario": "default",
             "seed": 2000 + i,
             "enable_random_walk": True
         })
-        tasks.append({
-            "scenario_name": "high_drift_10deg",
-            "session_id": f"high_10_{i:02d}",
-            "drift_tier": 10.0 if i % 2 == 0 else -10.0,
-            "scenario": "default",
-            "seed": 3000 + i,
-            "enable_random_walk": True
-        })
 
-    # 2. 压力与边界场景 (每场景 10 种子)
+    # 2. 压力与边界场景 (每场景 10 种子, 漂移采用 0.14°/min 或零漂)
     for i in range(10):
         tasks.append({
             "scenario_name": "strict_zero_drift",
@@ -189,7 +180,7 @@ def main():
         tasks.append({
             "scenario_name": "all_sitting_with_drift",
             "session_id": f"sit_drift_{i:02d}",
-            "drift_tier": 3.0,
+            "drift_tier": 0.14,
             "scenario": "all_sitting",
             "seed": 6000 + i,
             "enable_random_walk": True
@@ -197,7 +188,7 @@ def main():
         tasks.append({
             "scenario_name": "no_still",
             "session_id": f"nostill_{i:02d}",
-            "drift_tier": 3.0,
+            "drift_tier": 0.14,
             "scenario": "no_still",
             "seed": 7000 + i,
             "enable_random_walk": True
@@ -205,13 +196,13 @@ def main():
         tasks.append({
             "scenario_name": "vd_missing",
             "session_id": f"novd_{i:02d}",
-            "drift_tier": 3.0,
+            "drift_tier": 0.14,
             "scenario": "vd_missing",
             "seed": 8000 + i,
             "enable_random_walk": True
         })
 
-    print(f"Total sessions to evaluate: {len(tasks)} across 9 scenario groups")
+    print(f"Total sessions to evaluate: {len(tasks)} across 8 scenario groups (LSM6DSV 0.14°/min)")
     t0 = time.time()
 
     max_workers = min(os.cpu_count() or 4, 12)
@@ -294,7 +285,7 @@ def main():
                 static_sitting_passed = False
                 print(f"     [FAIL] Static sitting holding threshold violated: {max_sit_dev:.6f}° > 0.10°")
 
-        if scen in ["nominal_pos_3deg", "nominal_neg_3deg", "high_drift_10deg"]:
+        if scen in ["nominal_pos_0_14deg", "nominal_neg_0_14deg"]:
             ci_low = scen_summary["strategies"]["full"]["ci95_gain_low"]
             if ci_low <= 0.0:
                 main_ci_passed = False

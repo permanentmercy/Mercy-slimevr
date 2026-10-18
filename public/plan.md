@@ -19,7 +19,7 @@
 
 ## Phase 13 执行结果与交付就绪
 
-[Phase 13 无硬件软件闭环计划](phase-13-no-hardware-readiness/plan.md) 已完成执行：五大仓库与工具链基线锁定 (P0)；124D 输入契约锁定为姿态差分角速度并固化 ABI (P1)；`VRServer` 实现 `AutoCloseable` 与优雅退出 (P2)；通过真实 `VRServer.tickServer()` 跑通 108,000 帧回放，全 Tick P95 仅 0.899 ms 且堆内存平稳无泄漏 (P3)；解析验证世界逆偏航左乘，完成 150 条会话全动态无硬编码门禁评测，严格零漂与端坐保持门禁实测通过 (P4)；AMASS 数据集审查确认本地缺少新源隔离集，严格按规则标记为数据受限 (P5)；固件构建规范与产物 SHA-256 锁定 (P6)；PC 服务端 Jar 与驱动 CMake 构建就绪 (P7)；一页式硬件到货 Bring-up 验收单制定完毕 (P8)。详见 [Phase 13 结果](phase-13-no-hardware-readiness/results.md)。
+[Phase 13 无硬件软件闭环计划](phase-13-no-hardware-readiness/plan.md) 已完成执行：五大仓库与工具链基线锁定 (P0)；124D 输入契约锁定为姿态差分角速度并固化 ABI (P1)；`VRServer` 实现 `AutoCloseable` 与优雅退出 (P2)；通过真实 `VRServer.tickServer()` 跑通 108,000 帧回放，全 Tick P95 仅 0.899 ms 且堆内存平稳无泄漏 (P3)；解析验证世界逆偏航左乘，完成 120 条会话全动态无硬编码门禁评测（剔除 3°/10° 脱离硬件工况，采纳 LSM6DSV 手册 0.14°/min 真实标称漂移），严格零漂与端坐保持门禁实测通过 (P4)；AMASS 数据集审查确认本地缺少新源隔离集，严格按规则标记为数据受限 (P5)；固件构建规范与产物 SHA-256 锁定 (P6)；PC 服务端 Jar 与驱动 CMake 构建就绪 (P7)；一页式硬件到货 Bring-up 验收单制定完毕 (P8)。详见 [Phase 13 结果](phase-13-no-hardware-readiness/results.md)。
 
 硬件专属的 UF2 磁盘枚举、SWD 实刷、IMU ID/原始陀螺、无线配对、VD 质量和 30 分钟人体真值测试仍归 Phase 8，不会被无硬件的软件测试代替。
 
