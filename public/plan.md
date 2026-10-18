@@ -27,8 +27,8 @@
 
 [Phase 14 无硬件软件链路闭环](phase-14-software-closure/plan.md) **部分完成**：
 - **P14.0**：5 仓库审阅与工具版本登记完成；保留 `server/` 本地 4 项沙箱文件。
-- **P14.1**：Tracker UDP 协议解码至 `VRServer.tickServer()` 全链路 108,000 帧（30 分钟）全动态回放 100% 通过（3/3 测试）；注入 948 次协议故障（微复位、VD 断连、小腿超时、乱序报文）并明确断言 125 次恢复；**影子篡改数严格为 0**；Full Tick P95 为 1.106 ms（门限 $\le 20$ ms），堆差 +0.078 MB（门限 $\le 64$ MB）；产出机器可读报告 [`phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)。
-- **P14.2**：明确登记受 Windows host 缺失 `west`、NCS 与 `arm-none-eabi-gcc` 阻塞；按计划规则严禁使用旧制品冒充源码构建；协议 fixtures 已在 P14.1 覆盖。
+- **P14.1**：独立复跑 3/3 测试通过，UDP parser/派发 seam 到 `tickServer()` 的 108,000 帧回放、有限输出及 shadow 零写回成立；最新 Full Tick P95 4.733 ms、P99 7.090 ms、最大 20.436 ms、堆差 +0.128 MB。时间间隔异常、四路 tracker 故障矩阵和恢复计数语义仍有缺口，故子任务部分完成。
+- **P14.2**：明确登记受 Windows host 缺失 `west`、NCS 与 `arm-none-eabi-gcc` 阻塞；按计划规则严禁使用旧制品冒充源码构建；Tracker UDP fixtures 已在 P14.1 覆盖，receiver HID host 路径未确认。
 - **P14.3**：Server 桌面独立 Fat Jar 构建成功 (`slimevr.jar`, 114.7 MB, SHA-256 `B50DD7505AA9D38744C95342C88FA45D3D9D9FD102F314E7A4F9A88BF7785EE4`)；driver 沿用 MSVC 验证凭据；模型 4 类场景与默认只读安全门禁测试通过（5/5）；GUI/安装包受 `node`/`pnpm` 缺失阻塞。
 - **P14.4**：同步公共文档与看板；保持 Phase 8 实机验收待执行。详见 [Phase 14 结果](phase-14-software-closure/results.md)。
 
@@ -47,7 +47,7 @@
 | Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；组合增益待新隔离集与 Phase 8** |
 | Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **整体验收未通过；Session close 已由 Phase 13 补上，算法与数据隔离问题保留** |
 | Phase 13：无硬件软件闭环与可复现交付准备 | [plan.md](phase-13-no-hardware-readiness/plan.md) | [results.md](phase-13-no-hardware-readiness/results.md) | **部分完成：P6 固件源码构建/fixture、P7 协议输入与 GUI 冒烟待补；硬件专属项归 Phase 8** |
-| Phase 14：无硬件软件链路闭环 | [plan.md](phase-14-software-closure/plan.md) | [results.md](phase-14-software-closure/results.md) | **部分完成：UDP 协议全链路回放及 4 模型场景测试通过；固件/GUI 受工具链阻塞** |
+| Phase 14：无硬件软件链路闭环 | [plan.md](phase-14-software-closure/plan.md) | [results.md](phase-14-software-closure/results.md) | **部分完成：核心 UDP 回放与服务端场景通过；完整故障矩阵、固件构建和 GUI/package 未闭环** |
 
 ## 当前精度结论
 

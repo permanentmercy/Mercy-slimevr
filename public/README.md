@@ -18,6 +18,6 @@
 | Phase 11 | Phase 6/9 正交组合验证 | 4 项合成离线门禁 PASS；Phase 12 的复用集评测仅支持 P6 单模型探索收益，未证明 P9+P6 组合增益；H4 待 Phase 8 | [计划](phase-11-hybrid-compensation/plan.md) · [结果](phase-11-hybrid-compensation/results.md) |
 | Phase 12 | 无实机影子推理、回放与算法离线复验 | 未通过整体验收：13 项 Kotlin 测试通过；S2 逐帧 108,000 次推理、P95 0.657ms；S1 缺 Session 关闭调用；A1 静态门禁硬编码且观测链路不匹配；A2 复用旧 FinalConfirm 且 P9-only 等于 Raw | [计划](phase-12-prehardware-validation/plan.md) · [结果](phase-12-prehardware-validation/results.md) |
 | Phase 13 | 无硬件软件闭环与可复现交付准备 | **部分完成**：P3 mock tick 基础子门禁通过（108,000 帧逐帧零写回，P95 4.638ms），但时间、故障恢复及 reset 后状态检查不足；P4 合成门禁通过；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入和 GUI/服务冒烟；P5 数据受限待新数据 | [计划](phase-13-no-hardware-readiness/plan.md) · [结果](phase-13-no-hardware-readiness/results.md) |
-| Phase 14 | 无硬件软件链路闭环 | **部分完成**：从 tracker UDP 实际解析派发至 `tickServer()` 10.8 万帧回放及 4 模型场景测试 100% 通过（0 篡改、P95 1.106ms）；固件 clean build 与 GUI 构建受工具链阻塞 | [计划](phase-14-software-closure/plan.md) · [结果](phase-14-software-closure/results.md) |
+| Phase 14 | 无硬件软件链路闭环 | **部分完成**：UDP parser/派发至 `tickServer()` 的 10.8 万帧核心回放和模型场景测试通过（0 篡改、最新 P95 4.733ms）；时间间隔/完整故障矩阵未覆盖，固件 clean build 与 GUI/package 未完成 | [计划](phase-14-software-closure/plan.md) · [结果](phase-14-software-closure/results.md) |
 
 模型、数据集、评测脚本与 JSON 机器报告继续保存在 `ai_corrector/`；阶段 `results.md` 记录摘要并链接到这些原始产物，不复制二进制数据或报告内容。原先 `nextplan.md` 的待执行内容已并入 Phase 6 子计划。README 同步记录在 [Phase 10](phase-10-readme-sync/results.md)。

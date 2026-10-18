@@ -2,7 +2,7 @@
 
 > **文档定位**：本项目所有阶段的**总体成果、核心精度数据与工程性能指标的总汇总看板**。  
 > **更新时间**：2026-10-18  
-> **数据版本**：Phase 1 至 Phase 14 全阶段文档；Phase 14 已规划、尚无执行结果；Phase 12 的 A1/A2 原 PASS 已撤销
+> **数据版本**：Phase 1 至 Phase 14 全阶段文档；Phase 14 部分完成，最新测试复跑数据已更新；Phase 12 的 A1/A2 原 PASS 已撤销
 
 ---
 
@@ -21,7 +21,7 @@
 | **Phase 11** | **Phase 6/9 正交组合探索** | 提出世界 Y 轴偏航中立约束（Yaw-Neutral CSTN） | 投影算子测试通过；Oracle Swing 收益仅为合成探索，Phase 12 未证实实际 P9+P6 增量 | [结果限制与复核](phase-11-hybrid-compensation/results.md) |
 | **Phase 12** | **无实机影子推理、回放与算法复验** | 契约/推理测试与逐帧特征组装回放；复核服务生命周期、真实 tick、物理输入及数据隔离 | **未通过整体验收**：13 项指定 Kotlin 测试通过，108,000 次逐帧特征组装+ONNX P95 0.6571 ms；完整 `VRServer.tick()`、Session close 和内存门限未验证；A1/A2 不接受原 PASS | [阶段复核报告](phase-12-prehardware-validation/results.md) |
 | **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](phase-13-no-hardware-readiness/results.md) |
-| **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：Tracker UDP 协议解码至 `VRServer.tickServer()` 全链路 108,000 帧（30 分钟）回放通过（0 篡改、P95 1.106ms、堆差 +0.078MB）；Server Fat Jar 构建成功；模型 4 场景与默认只读安全门禁 100% 通过；固件与 GUI clean build 受 host 工具链缺失阻塞 | [阶段成果](phase-14-software-closure/results.md) |
+| **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：108,000 帧核心回放、shadow 零写回、模型场景定向测试通过；最新 P95 4.733ms、P99 7.090ms、最大 20.436ms、Full GC 后堆差 +0.128MB。完整时间异常/故障矩阵未验；固件源码、GUI/package 未构建 | [阶段成果](phase-14-software-closure/results.md) |
 
 ---
 
@@ -141,22 +141,23 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 按 [Phase 14 计划](phase-14-software-closure/plan.md) 在本地 JDK 17、Gradle 8.14.4 与 ONNX Runtime 1.18.0 环境下执行。
 
-#### A. Tracker UDP 协议至 `VRServer.tickServer()` 全链路回放 (Task P14.1)
-测试套件 [`UDPProtocolCorrectorBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/UDPProtocolCorrectorBenchmarkTest.kt)：**3/3 全部通过**。数据流从二进制 `UDPPacket` $\to$ `UDPProtocolParser` $\to$ `TrackersUDPServer.processPacket` $\to$ `VRServer.tickServer()` $\to$ `CorrectorBridge` 逐层推进。
+#### A. Tracker UDP 协议至 `VRServer.tickServer()` 核心回放 (Task P14.1，整体部分完成)
+测试套件 [`UDPProtocolCorrectorBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/UDPProtocolCorrectorBenchmarkTest.kt)：独立复跑 **3/3 全部通过**。108,000 帧由 `feedRawPacketForTesting` seam 进入生产 parser/派发和 `tickServer()`；没有经过 socket 接收线程。
 
 | 性能与工程指标 | 验收目标 / 门限 | 实际测量值 | 状态 | 验证方法与证据源 |
 |---|---|---|---|---|
-| **UDP Socket 回环冒烟** | 接收线程正常启动 | **PASS** | 通过 | `test01_udpLoopbackSocketSmoke` |
+| **UDP Socket 回环冒烟** | 接收线程接收并处理 handshake | **只断言接收线程存活** | 部分证据 | `test01_udpLoopbackSocketSmoke` 未断言 packet 被解析/注册 |
 | **协议包解析与故障丢弃** | 乱序/非法/未知包安全降级 | **乱序抛 IOException 丢弃<br>未知包安全返回 null<br>NaN 姿态安全退避 IDENTITY** | **PASS** | `test02_udpGoldenPacketHexFixturesAndFaults` |
-| **Full Server Tick 耗时 P95** | 实时预算 $\le 20.0$ ms | **1.1055 ms** (优于门限 18.1 倍) | **PASS** | 3,000 帧采样；Mean 0.746ms, P50 0.692ms, P99 1.538ms, Max 6.566ms |
-| **CorrectorBridge 推理 P95** | 记录分布 | **0.9876 ms** (P50 0.642ms, P99 1.396ms) | 记录值 | 占服务端主 tick 的 89.3% |
+| **Full Server Tick 耗时 P95** | 实时预算 $\le 20.0$ ms | **4.7331 ms** | **P95 门限通过** | 复跑 3,000 帧；Mean 2.502ms, P50 2.255ms, P99 7.090ms, Max 20.436ms（最大值超过 20ms） |
+| **CorrectorBridge 推理 P95** | 记录分布 | **4.4153 ms** (P50 2.097ms, P99 6.249ms) | 记录值 | 当前机器一次复跑 |
 | **108,000 帧连续逻辑回放** | 30 分钟连续步态运动流 | **108,000 帧全部完成** | **PASS** | `test03_fullUDPProtocolToVRServerTick108kFramesReplay` |
-| **故障注入与明确恢复断言** | 注入并断言恢复 | **注入 948 次 / 断言恢复 125 次** | **PASS** | 微复位、VD 缺失、IMU 超时重连、乱序重放全覆盖 |
+| **故障注入与明确恢复断言** | 计划规定的完整故障矩阵 | 计数为 948 / 125 | **部分完成** | 125 含 reset、状态赋值和乱序包拒绝，不全是 tracker 恢复；仅左小腿有恢复状态断言，缺 dt 异常和四路 tracker 矩阵 |
 | **影子模式零篡改断言** | 逐帧 Tracker 物理姿态 0 改变 | **`shadow_mutation_count = 0`** | **PASS** | 严格零篡改，`preTick == postTick` 逐位恒等 |
 | **模型输出有效性断言** | 有限数值且归一化 | **`non_finite_output_count = 0`** | **PASS** | 无任何 NaN / Inf 泄漏 |
-| **长程内存稳定性与堆差** | Full GC 堆差 $\le 64.0$ MB | **Delta = +0.078 MB** | **PASS** | Baseline 9.36MB, Watermark 30.62MB, 周期检查点平稳无单调发散 |
+| **长程内存稳定性与堆差** | Full GC 堆差 $\le 64.0$ MB | **Delta = +0.128 MB** | **堆差门限通过** | Baseline 9.79MB, Watermark 29.99MB, 检查点 `[28.97, 21.97, 14.55, 29.99, 24.98]`；代码趋势断言较宽松 |
 
 - **机器报告**：[`ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)
+- **范围限制**：测试故障条件实际产生 59 次 reset、30 个胸部断连窗口（629 个故障帧）、15 个左小腿超时窗口（239 个故障帧）及 21 次旧序号包。JSON 的 125 个 `asserted_recoveries` 混合了 reset 断言、胸部状态赋值、左小腿恢复断言和旧序号包拒绝，不能按 125 次 tracker 自愈解读。长回放固定 `sampleInterval=1/60`，没有 dt 异常和四路 tracker 全矩阵；P14.1 因此部分完成。
 
 #### B. PC 构建、启动冒烟与模型 4 场景测试 (Task P14.3)
 测试套件 [`ServerStartupSmokeAndFourModelScenariosTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/ServerStartupSmokeAndFourModelScenariosTest.kt)：**5/5 全部通过**。
@@ -286,14 +287,14 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 > [!IMPORTANT]
 > ### 当前安全红线与状态边界
 > 1. **严格只读影子模式 (Strict Shadow Mode)**：
->    当前 SlimeVR 服务端生产配置中 `enabled = false`，`shadowMode = true`。Phase 14 `UDPProtocolCorrectorBenchmarkTest.kt` 在全 108,000 帧（30 分钟）长程回放中实现了逐帧 Tracker 物理读数与生产 UDP 解码姿态比对，实测 `shadow_mutation_count == 0`，零写回保护完全验证通过。
+>    当前 SlimeVR 服务端生产配置中 `enabled = false`，`shadowMode = true`。Phase 14 `UDPProtocolCorrectorBenchmarkTest.kt` 在全 108,000 帧（30 分钟）长程回放中逐帧比较 Tracker 姿态，实测 `shadow_mutation_count == 0`。该回放经测试 seam 调用生产 UDP parser/派发及 `tickServer()`，未经过真实 socket 接收线程；保护断言适用于这条回放路径。
 > 2. **指标性质区分**：
->    - **工程类指标 (Phase 14 P14.1/P14.3)**：生命周期测试通过；UDP 协议全服务 tick P95 为 1.106 ms（门限 20ms），P99 1.538 ms、最大 6.566 ms；长程 10.8 万帧 Full GC 后堆差 +0.078 MB（门限 64MB）、逐帧 shadow mutation 为 0；模型 4 场景（有效、缺失、损坏/非法、VD缺失）与默认只读安全门禁 100% 通过；
+>    - **工程类指标 (Phase 14 P14.1/P14.3)**：两套定向测试共 8/8 通过；UDP-to-tick Full Tick P95 为 4.733 ms（门限 20ms），P99 7.090 ms、最大 20.436 ms；长程 10.8 万帧 Full GC 后堆差 +0.128 MB（门限 64MB），shadow mutation 为 0；模型场景测试与默认只读安全门禁通过。P14.1 的时间间隔异常和完整故障矩阵未覆盖，整体仍为部分完成；
 >    - **算法类指标 (P4 仿真门禁)**：120 条合成会话（216万帧）动态安全门禁全通；ZARU 自适应时间死区底线修正为 0.04°/min，0.14°/min 静坐漂移压制率 96.5%（终点 0.57°，胜率 100%），严格零漂端点偏差 0.008933°（$\le 0.05^\circ$），静坐保持 0.000000°（$\le 0.10^\circ$）；
 >    - **工具链限制标记 (P14.2 / P14.3)**：受 Windows 主机缺失 `west`/NCS/`arm-none-eabi-gcc` 及 `node`/`pnpm` 限制，固件与 GUI clean build 保持“受工具链阻塞”的部分完成记录，绝不用已有二进制冒充源码构建；参数量维持 1.54M 冻结。
 > 3. **实机验证 (Phase 8) 的核心任务**：
 >    - 待实机硬件就绪后，采集真实 IMU 陀螺仪与加速度计原始传感器流；
 >    - 接入光学动捕系统建立毫米级位置与真实关节旋转真值；
 >    - 依据 Phase 13 P8 硬件到货 8 步 Bring-up 检查清单完成首次硬件点亮，并开展端到端实时解算表现验收。
-> 4. **当前推进状态**：Phase 14 **部分完成**。P14.0/P14.1/P14.3（服务端部分）已全面闭环；P14.2 与 GUI 依赖外部交叉编译环境；硬件专属实测继续由 Phase 8 待实机在场后执行验收。
+> 4. **当前推进状态**：Phase 14 **部分完成**。P14.0 与 P14.4 通过；P14.1 的核心回放通过但完整验收项未闭环；P14.2 固件源码构建与 P14.3 GUI/package 构建受工具链阻塞，Server Jar 和服务端场景测试通过。硬件专属实测继续由 Phase 8 待实机在场后执行验收。
 
