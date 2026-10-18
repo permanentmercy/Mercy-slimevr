@@ -200,7 +200,7 @@ ONNX Runtime 使用单帧张量 \(x\in\mathbb{R}^{1\times1\times124}\)，输入�
   \item 当前 \texttt{applyCorrectionToTrackers()} 只计算局部变量 \texttt{corrected}，没有将它写回 tracker 或骨架求解器。因此实际在线姿态修正路径尚未完成；不可将启用配置等同于完整模型已生效。
   \item ONNX 引擎实现了 \texttt{close()}，但 Phase 12 复核未发现 \texttt{VRServer} 关闭生命周期调用桥接器关闭方法；Session 资源释放仍待补齐。
 \end{enumerate}
-完整本机验证状态见 \texttt{public/phase-12-prehardware-validation/results.md}。13 项指定 Kotlin 测试通过，S2 回放逐帧推理和延迟结果通过其局部门槛；Phase 12 整体验收尚未通过。
+完整本机验证状态见 \texttt{public/system-validation/phase-12-prehardware-validation/results.md}。13 项指定 Kotlin 测试通过，S2 回放逐帧推理和延迟结果通过其局部门槛；Phase 12 整体验收尚未通过。
 
 \section{端到端软硬件流程清单与执行方案}
 \label{sec:end_to_end_plan}

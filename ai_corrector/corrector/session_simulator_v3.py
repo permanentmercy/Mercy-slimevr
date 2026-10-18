@@ -74,16 +74,40 @@ class ContinuousSessionSynthesizer:
         self.enable_dynamic_tilt = enable_dynamic_tilt
 
     def generate(self, session_id: str) -> ContinuousSessionStream:
-        t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
+        if self.scenario == "non_uniform_dt_jitter":
+            # Add jitter: dt fluctuates between 0.08s and 0.12s
+            dts = self.dt + self.rng.uniform(-0.02, 0.02, size=self.num_frames).astype(np.float64)
+            t = np.cumsum(dts) - dts[0]
+        else:
+            t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
         
         # 1. 为四路 IMU 分配真实线性漂移率 (以 drift_tier 为基准波动)
         true_drift_rates_deg_min = {}
-        for j in LOWER_BODY_JOINTS:
-            if abs(self.drift_tier) < 1e-9:
-                true_drift_rates_deg_min[j] = 0.0
-            else:
-                factor = self.rng.uniform(0.6, 1.4) * self.rng.choice([-1.0, 1.0])
-                true_drift_rates_deg_min[j] = self.drift_tier * factor
+        if self.scenario == "multi_rate_asymmetric":
+            rates = {
+                "left_thigh": 0.14,
+                "right_thigh": -0.10,
+                "left_calf": 0.18,
+                "right_calf": -0.12,
+            }
+            for j in LOWER_BODY_JOINTS:
+                factor = self.rng.uniform(0.85, 1.15)
+                true_drift_rates_deg_min[j] = rates[j] * factor
+        elif self.scenario == "nominal_pos_0_14deg":
+            for j in LOWER_BODY_JOINTS:
+                factor = self.rng.uniform(0.7, 1.3)
+                true_drift_rates_deg_min[j] = abs(self.drift_tier) * factor
+        elif self.scenario == "nominal_neg_0_14deg":
+            for j in LOWER_BODY_JOINTS:
+                factor = self.rng.uniform(0.7, 1.3)
+                true_drift_rates_deg_min[j] = -abs(self.drift_tier) * factor
+        else:
+            for j in LOWER_BODY_JOINTS:
+                if abs(self.drift_tier) < 1e-9:
+                    true_drift_rates_deg_min[j] = 0.0
+                else:
+                    factor = self.rng.uniform(0.6, 1.4) * self.rng.choice([-1.0, 1.0])
+                    true_drift_rates_deg_min[j] = self.drift_tier * factor
             
         true_rates_rad_s = {
             j: math.radians(true_drift_rates_deg_min[j] / 60.0) for j in LOWER_BODY_JOINTS
@@ -269,7 +293,15 @@ class ContinuousSessionSynthesizer:
                 omega_raw = leg_omega_motion[j] + b_body + noise_w
                 ang_acc = np.zeros(3, dtype=np.float32)
                 
-                s_imu = pack_stream_14d(R_raw, ang_acc, omega_raw, valid=1.0, age=0.0)
+                is_valid = 1.0
+                age_val = 0.0
+                if self.scenario == "tracker_timeout_drop" and j == "left_calf":
+                    # Temporary packet dropout between t=600s and t=720s (2 minutes)
+                    if 600.0 <= t[i] <= 720.0:
+                        is_valid = 0.0
+                        age_val = 999.0
+
+                s_imu = pack_stream_14d(R_raw, ang_acc, omega_raw, valid=is_valid, age=age_val)
                 imu_streams.append(s_imu)
                 
                 if i == 0:

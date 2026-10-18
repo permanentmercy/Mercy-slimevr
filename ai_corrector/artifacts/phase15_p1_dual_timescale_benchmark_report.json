@@ -1,0 +1,1213 @@
+{
+  "phase": "Phase 15",
+  "tasks": [
+    "P15.1",
+    "P15.3"
+  ],
+  "timestamp": "2026-10-18T09:38:16Z",
+  "status": "PASS",
+  "parameter_budget_audit": {
+    "frozen_ceiling": 1102066,
+    "fast_branch_params": 1102066,
+    "slow_branch_params": 0,
+    "hybrid_total_params": 1102066,
+    "budget_compliance": true
+  },
+  "safety_vetoes": {
+    "strict_zero_drift_limit_deg": 0.05,
+    "strict_zero_drift_passed": true,
+    "static_sitting_holding_limit_deg": 0.1,
+    "static_sitting_passed": true,
+    "nominal_scenarios_ci_passed": true,
+    "unobservable_no_still_safe": true
+  },
+  "evaluation_config": {
+    "total_sessions": 150,
+    "duration_sec_per_session": 1800.0,
+    "sample_rate_hz": 10.0,
+    "frames_per_session": 18000,
+    "total_frames_evaluated": 2700000,
+    "primary_metric": "D_raw - D_corr = G > 0 (Endpoint Accumulated Yaw Drift Growth)",
+    "benchmark_runtime_sec": 466.83,
+    "parallel_workers": 16
+  },
+  "scenarios": {
+    "strict_zero_drift": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": -0.0001,
+          "ci95_gain_low": -0.0001,
+          "ci95_gain_high": -0.0001,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0927,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0001
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": -0.0001,
+          "ci95_gain_low": -0.0001,
+          "ci95_gain_high": -0.0001,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0927,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0001
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0089,
+          "mean_gain_deg": -0.0089,
+          "ci95_gain_low": -0.0089,
+          "ci95_gain_high": -0.0089,
+          "worst_gain_deg": -0.0089,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0152,
+          "max_endpoint_est_deg": 0.008933,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0045,
+            "right_thigh": -0.0045,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.009,
+          "mean_gain_deg": -0.009,
+          "ci95_gain_low": -0.009,
+          "ci95_gain_high": -0.009,
+          "worst_gain_deg": -0.009,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0929,
+          "max_endpoint_est_deg": 0.008933,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0045,
+            "right_thigh": -0.0045,
+            "left_calf": 0.0,
+            "right_calf": -0.0001
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": -0.0001,
+          "ci95_gain_low": -0.0001,
+          "ci95_gain_high": -0.0001,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0927,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0001
+          }
+        }
+      }
+    },
+    "static_sitting_zero_drift": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 0.0,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": 0.0,
+          "win_rate": 0.0,
+          "mean_3d_geodesic_err_deg": 0.0,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        }
+      }
+    },
+    "nominal_pos_0_14deg": {
+      "num_sessions": 30,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 16.4635,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.6667,
+          "mean_3d_geodesic_err_deg": 4.1168,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 16.4634,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0001,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": 0.0001,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 4.1194,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0001
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 16.4634,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0001,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": 0.0001,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 4.1194,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0001
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 2.7769,
+          "mean_gain_deg": 13.6866,
+          "ci95_gain_low": 12.1945,
+          "ci95_gain_high": 15.3593,
+          "worst_gain_deg": 6.4594,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.6937,
+          "max_endpoint_est_deg": 28.877019,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8342,
+            "right_thigh": 4.4359,
+            "left_calf": 2.6733,
+            "right_calf": 2.7432
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 2.7769,
+          "mean_gain_deg": 13.6866,
+          "ci95_gain_low": 12.1945,
+          "ci95_gain_high": 15.3593,
+          "worst_gain_deg": 6.4594,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.7211,
+          "max_endpoint_est_deg": 28.877019,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8342,
+            "right_thigh": 4.4359,
+            "left_calf": 2.6733,
+            "right_calf": 2.7432
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 16.4635,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 16.4634,
+          "ci95_gain_low": 15.1388,
+          "ci95_gain_high": 17.9055,
+          "worst_gain_deg": 9.5581,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0922,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8994,
+            "right_thigh": 4.4979,
+            "left_calf": 4.1619,
+            "right_calf": 3.9042
+          }
+        }
+      }
+    },
+    "nominal_neg_0_14deg": {
+      "num_sessions": 30,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 17.4012,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.3667,
+          "mean_3d_geodesic_err_deg": 4.3494,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": -0.0,
+            "left_calf": -0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 17.4012,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 4.3519,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 17.4012,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 4.3519,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 2.7157,
+          "mean_gain_deg": 14.6855,
+          "ci95_gain_low": 13.2576,
+          "ci95_gain_high": 16.164,
+          "worst_gain_deg": 6.6195,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.6821,
+          "max_endpoint_est_deg": 25.717698,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 4.5036,
+            "right_thigh": 4.3662,
+            "left_calf": 3.0026,
+            "right_calf": 2.8132
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 2.7157,
+          "mean_gain_deg": 14.6855,
+          "ci95_gain_low": 13.2576,
+          "ci95_gain_high": 16.164,
+          "worst_gain_deg": 6.6195,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.7127,
+          "max_endpoint_est_deg": 25.717698,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 4.5036,
+            "right_thigh": 4.3662,
+            "left_calf": 3.0026,
+            "right_calf": 2.8132
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 17.4012,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 17.4011,
+          "ci95_gain_low": 16.2371,
+          "ci95_gain_high": 18.649,
+          "worst_gain_deg": 10.6781,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0935,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 4.5519,
+            "right_thigh": 4.4287,
+            "left_calf": 4.3691,
+            "right_calf": 4.0514
+          }
+        }
+      }
+    },
+    "all_sitting_with_drift": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 16.9145,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": -0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.3,
+          "mean_3d_geodesic_err_deg": 4.2289,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": -0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 16.9145,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": -0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.1,
+          "mean_3d_geodesic_err_deg": 4.229,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 16.9145,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": -0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.1,
+          "mean_3d_geodesic_err_deg": 4.229,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 0.5105,
+          "mean_gain_deg": 16.404,
+          "ci95_gain_low": 14.557,
+          "ci95_gain_high": 18.0555,
+          "worst_gain_deg": 10.635,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.1263,
+          "max_endpoint_est_deg": 20.887251,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.9895,
+            "right_thigh": 4.5721,
+            "left_calf": 4.4829,
+            "right_calf": 3.3596
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 0.5105,
+          "mean_gain_deg": 16.404,
+          "ci95_gain_low": 14.557,
+          "ci95_gain_high": 18.0555,
+          "worst_gain_deg": 10.635,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.1263,
+          "max_endpoint_est_deg": 20.887251,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.9895,
+            "right_thigh": 4.5721,
+            "left_calf": 4.4829,
+            "right_calf": 3.3596
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 16.9145,
+          "mean_D_corr_deg": 0.0,
+          "mean_gain_deg": 16.9145,
+          "ci95_gain_low": 15.3278,
+          "ci95_gain_high": 18.4286,
+          "worst_gain_deg": 12.075,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.006,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 4.1719,
+            "right_thigh": 4.6392,
+            "left_calf": 4.5739,
+            "right_calf": 3.5295
+          }
+        }
+      }
+    },
+    "no_still": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 16.2101,
+          "mean_gain_deg": -0.0002,
+          "ci95_gain_low": -0.0009,
+          "ci95_gain_high": 0.0004,
+          "worst_gain_deg": -0.0028,
+          "win_rate": 0.6,
+          "mean_3d_geodesic_err_deg": 4.0687,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0001,
+            "right_thigh": 0.0002,
+            "left_calf": -0.0001,
+            "right_calf": -0.0001
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 16.2101,
+          "mean_gain_deg": -0.0002,
+          "ci95_gain_low": -0.0009,
+          "ci95_gain_high": 0.0004,
+          "worst_gain_deg": -0.0028,
+          "win_rate": 0.6,
+          "mean_3d_geodesic_err_deg": 4.0687,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0001,
+            "right_thigh": 0.0002,
+            "left_calf": -0.0001,
+            "right_calf": -0.0001
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 16.2101,
+          "mean_gain_deg": -0.0002,
+          "ci95_gain_low": -0.0009,
+          "ci95_gain_high": 0.0004,
+          "worst_gain_deg": -0.0028,
+          "win_rate": 0.6,
+          "mean_3d_geodesic_err_deg": 4.0687,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0001,
+            "right_thigh": 0.0002,
+            "left_calf": -0.0001,
+            "right_calf": -0.0001
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 8.767,
+          "mean_gain_deg": 7.443,
+          "ci95_gain_low": 5.5025,
+          "ci95_gain_high": 9.346,
+          "worst_gain_deg": 2.2755,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 2.2875,
+          "max_endpoint_est_deg": 13.34711,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8454,
+            "right_thigh": 3.5978,
+            "left_calf": -0.0001,
+            "right_calf": -0.0001
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 8.767,
+          "mean_gain_deg": 7.443,
+          "ci95_gain_low": 5.5025,
+          "ci95_gain_high": 9.346,
+          "worst_gain_deg": 2.2755,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 2.2875,
+          "max_endpoint_est_deg": 13.34711,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8454,
+            "right_thigh": 3.5978,
+            "left_calf": -0.0001,
+            "right_calf": -0.0001
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 16.2099,
+          "mean_D_corr_deg": 0.0012,
+          "mean_gain_deg": 16.2087,
+          "ci95_gain_low": 13.9118,
+          "ci95_gain_high": 18.2642,
+          "worst_gain_deg": 9.0296,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.2839,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 4.0365,
+            "right_thigh": 3.7469,
+            "left_calf": 4.765,
+            "right_calf": 3.6602
+          }
+        }
+      }
+    },
+    "vd_missing": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 17.7261,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.5,
+          "mean_3d_geodesic_err_deg": 4.4349,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 17.726,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0002,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.5,
+          "mean_3d_geodesic_err_deg": 4.4432,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 17.726,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0002,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.5,
+          "mean_3d_geodesic_err_deg": 4.4432,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 5.5375,
+          "mean_gain_deg": 12.1886,
+          "ci95_gain_low": 9.1607,
+          "ci95_gain_high": 14.9395,
+          "worst_gain_deg": 4.4985,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 1.3876,
+          "max_endpoint_est_deg": 22.974727,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 1.3341,
+            "right_thigh": 3.0172,
+            "left_calf": 4.4107,
+            "right_calf": 3.4267
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 5.5374,
+          "mean_gain_deg": 12.1886,
+          "ci95_gain_low": 9.1607,
+          "ci95_gain_high": 14.9395,
+          "worst_gain_deg": 4.4987,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 1.4196,
+          "max_endpoint_est_deg": 22.974727,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 1.3341,
+            "right_thigh": 3.0172,
+            "left_calf": 4.4107,
+            "right_calf": 3.4266
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 17.7261,
+          "mean_D_corr_deg": 0.0002,
+          "mean_gain_deg": 17.7259,
+          "ci95_gain_low": 14.7972,
+          "ci95_gain_high": 20.3683,
+          "worst_gain_deg": 9.2139,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.1359,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.0497,
+            "right_thigh": 4.575,
+            "left_calf": 5.6809,
+            "right_calf": 4.4203
+          }
+        }
+      }
+    },
+    "pure_random_walk": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 4.9685,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.4,
+          "mean_3d_geodesic_err_deg": 1.2435,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 4.9685,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.3,
+          "mean_3d_geodesic_err_deg": 1.2549,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 4.9685,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0001,
+          "win_rate": 0.3,
+          "mean_3d_geodesic_err_deg": 1.2549,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 3.0365,
+          "mean_gain_deg": 1.9321,
+          "ci95_gain_low": 0.5644,
+          "ci95_gain_high": 3.1626,
+          "worst_gain_deg": -2.4704,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 0.7596,
+          "max_endpoint_est_deg": 9.219612,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 1.43,
+            "right_thigh": 0.7478,
+            "left_calf": -0.3334,
+            "right_calf": 0.0877
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 3.0365,
+          "mean_gain_deg": 1.9321,
+          "ci95_gain_low": 0.5644,
+          "ci95_gain_high": 3.1626,
+          "worst_gain_deg": -2.4704,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 0.7846,
+          "max_endpoint_est_deg": 9.219612,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 1.43,
+            "right_thigh": 0.7478,
+            "left_calf": -0.3334,
+            "right_calf": 0.0877
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 4.9685,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 4.9685,
+          "ci95_gain_low": 3.9768,
+          "ci95_gain_high": 6.0717,
+          "worst_gain_deg": 3.0956,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0936,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 1.5077,
+            "right_thigh": 0.8028,
+            "left_calf": 0.913,
+            "right_calf": 1.7449
+          }
+        }
+      }
+    },
+    "multi_rate_asymmetric": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 15.7548,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.4,
+          "mean_3d_geodesic_err_deg": 3.9389,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": -0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 15.7549,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.3,
+          "mean_3d_geodesic_err_deg": 3.9422,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 15.7549,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.3,
+          "mean_3d_geodesic_err_deg": 3.9422,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": -0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 2.6006,
+          "mean_gain_deg": 13.1542,
+          "ci95_gain_low": 11.3695,
+          "ci95_gain_high": 14.6726,
+          "worst_gain_deg": 8.1418,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.6526,
+          "max_endpoint_est_deg": 18.659274,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.4449,
+            "right_thigh": 3.8711,
+            "left_calf": 4.0084,
+            "right_calf": 1.8298
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 2.6006,
+          "mean_gain_deg": 13.1542,
+          "ci95_gain_low": 11.3695,
+          "ci95_gain_high": 14.6726,
+          "worst_gain_deg": 8.1419,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.6868,
+          "max_endpoint_est_deg": 18.659274,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.4449,
+            "right_thigh": 3.8711,
+            "left_calf": 4.0084,
+            "right_calf": 1.8298
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 15.7548,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 15.7548,
+          "ci95_gain_low": 13.8312,
+          "ci95_gain_high": 17.507,
+          "worst_gain_deg": 9.7803,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0942,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.5146,
+            "right_thigh": 3.9037,
+            "left_calf": 5.1986,
+            "right_calf": 3.1379
+          }
+        }
+      }
+    },
+    "tracker_timeout_drop": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 16.3332,
+          "mean_gain_deg": 0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.5,
+          "mean_3d_geodesic_err_deg": 4.0836,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": -0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 16.3331,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 4.0868,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0001
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 16.3331,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.7,
+          "mean_3d_geodesic_err_deg": 4.0868,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0001
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 3.837,
+          "mean_gain_deg": 12.4962,
+          "ci95_gain_low": 11.0983,
+          "ci95_gain_high": 13.8932,
+          "worst_gain_deg": 7.9975,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.9631,
+          "max_endpoint_est_deg": 22.996051,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.4231,
+            "right_thigh": 4.28,
+            "left_calf": 2.6772,
+            "right_calf": 2.1159
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 3.837,
+          "mean_gain_deg": 12.4962,
+          "ci95_gain_low": 11.0983,
+          "ci95_gain_high": 13.8933,
+          "worst_gain_deg": 7.9975,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.9823,
+          "max_endpoint_est_deg": 22.996051,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.4231,
+            "right_thigh": 4.28,
+            "left_calf": 2.6772,
+            "right_calf": 2.1159
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 16.3332,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 16.3331,
+          "ci95_gain_low": 14.8717,
+          "ci95_gain_high": 17.7813,
+          "worst_gain_deg": 12.3439,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0936,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.4737,
+            "right_thigh": 4.3638,
+            "left_calf": 4.4639,
+            "right_calf": 4.0317
+          }
+        }
+      }
+    },
+    "non_uniform_dt_jitter": {
+      "num_sessions": 10,
+      "candidates": {
+        "raw": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 17.4902,
+          "mean_gain_deg": -0.0,
+          "ci95_gain_low": -0.0,
+          "ci95_gain_high": 0.0,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.6,
+          "mean_3d_geodesic_err_deg": 4.3703,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": -0.0,
+            "right_calf": 0.0
+          }
+        },
+        "fast_only": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 17.4902,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.9,
+          "mean_3d_geodesic_err_deg": 4.3723,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "predict_only": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 17.4902,
+          "mean_gain_deg": 0.0001,
+          "ci95_gain_low": 0.0,
+          "ci95_gain_high": 0.0001,
+          "worst_gain_deg": -0.0,
+          "win_rate": 0.9,
+          "mean_3d_geodesic_err_deg": 4.3723,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": -0.0,
+            "right_thigh": 0.0,
+            "left_calf": 0.0,
+            "right_calf": 0.0
+          }
+        },
+        "slow_only": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 2.8387,
+          "mean_gain_deg": 14.6515,
+          "ci95_gain_low": 13.5503,
+          "ci95_gain_high": 15.7744,
+          "worst_gain_deg": 11.7009,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.713,
+          "max_endpoint_est_deg": 21.05288,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8895,
+            "right_thigh": 4.7572,
+            "left_calf": 3.068,
+            "right_calf": 2.9368
+          }
+        },
+        "hybrid": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 2.8387,
+          "mean_gain_deg": 14.6516,
+          "ci95_gain_low": 13.5503,
+          "ci95_gain_high": 15.7745,
+          "worst_gain_deg": 11.7009,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.7393,
+          "max_endpoint_est_deg": 21.05288,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.8895,
+            "right_thigh": 4.7572,
+            "left_calf": 3.068,
+            "right_calf": 2.9369
+          }
+        },
+        "oracle": {
+          "mean_D_raw_deg": 17.4902,
+          "mean_D_corr_deg": 0.0001,
+          "mean_gain_deg": 17.4901,
+          "ci95_gain_low": 16.4619,
+          "ci95_gain_high": 18.6194,
+          "worst_gain_deg": 15.0429,
+          "win_rate": 1.0,
+          "mean_3d_geodesic_err_deg": 0.0936,
+          "max_endpoint_est_deg": 0.0,
+          "per_tracker_mean_gain_deg": {
+            "left_thigh": 3.9432,
+            "right_thigh": 4.8181,
+            "left_calf": 4.3883,
+            "right_calf": 4.3405
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "phase": "Phase 15",
+  "task": "P15.0",
+  "status": "PASS",
+  "timestamp": "2026-10-18T09:11:01Z",
+  "baseline_deployable_model": {
+    "onnx_file": "cstn_v2_yaw_neutral_world.onnx",
+    "onnx_size_bytes": 4571251,
+    "onnx_sha256": "7bc5d04e2ecfb9e7b0d416a72ef3a96303f7f9e7f7bef4a320f106a4712c891c",
+    "onnx_opset": 14,
+    "pytorch_checkpoint": "cstn_v2_yaw_neutral_world_best.pt",
+    "pytorch_size_bytes": 4453630,
+    "pytorch_sha256": "b0c32acaa6898a89ea5cdbc2176638fdad95feacc45e3698380ccde048e2c4fc"
+  },
+  "parameter_budget_audit": {
+    "verified_deployed_parameters": 1102066,
+    "verified_checkpoint_parameters": 1102066,
+    "exact_frozen_parameter_ceiling": 1102066,
+    "architecture_specs": {
+      "hidden_dim": 96,
+      "transformer_layers": 3,
+      "attention_heads": 8,
+      "decoder_type": "joint_decoupled",
+      "streams": 8,
+      "input_features": 124,
+      "output_joints": 4
+    },
+    "historical_discrepancy_resolution": {
+      "acceptance_report_record": 972466,
+      "acceptance_report_explanation": "Corresponds to early Phase 2/3 mean_pooling decoder without joint-decoupled heads.",
+      "deployed_record": 1102066,
+      "deployed_explanation": "Corresponds to Phase 6/11 joint-decoupled decoder with 4 separate pose heads and gate heads (+129,600 parameters).",
+      "results_md_historical_record": 1539472,
+      "results_md_explanation": "Unverified clerical entry in historical table. No physical model or checkpoint in repo matches 1,539,472. Per P15.0 rules, larger historical record cannot be used as expansion space.",
+      "frozen_ceiling_decision": "Strictly locked at 1,102,066 parameters (1.10M)."
+    }
+  },
+  "single_thread_cpu_latency": {
+    "frames": 1000,
+    "mean_ms": 0.5357024000404635,
+    "p50_ms": 0.5170500007807277,
+    "p95_ms": 0.6802249990869313,
+    "p99_ms": 0.7743119994120203,
+    "max_ms": 1.333299995167181
+  },
+  "environment": {
+    "python": "3.12.13",
+    "torch": "2.7.1+cu118",
+    "onnx": "1.23.2",
+    "onnxruntime": "1.18.1"
+  }
+}

@@ -2,7 +2,7 @@
 
 > **文档定位**：本项目所有阶段的**总体成果、核心精度数据与工程性能指标的总汇总看板**。  
 > **更新时间**：2026-10-18  
-> **数据版本**：Phase 1 至 Phase 14 全阶段文档；Phase 14 部分完成，最新测试复跑数据已更新；Phase 12 的 A1/A2 原 PASS 已撤销
+> **数据版本**：Phase 1 至 Phase 15 文档；Phase 14 部分完成，Phase 15 已执行完成并通过门禁；Phase 12 的 A1/A2 原 PASS 已撤销
 
 ---
 
@@ -10,18 +10,19 @@
 
 | 阶段 | 阶段主题 | 核心职责 | 交付成果与关键指标 | 当前状态与裁定 |
 |---|---|---|---|---|
-| **Phase 1–3** | **v1 原型与 ONNX 工程基线** | 60Hz 采样契约建立，初始 112 维特征流定义与模型骨架打通 | 完成初始数据流定义与 PyTorch 到 ONNX 导出基础链路 | [已完成并归档](phase-01-03-v1-prototype/results.md) |
-| **Phase 4** | **v2 数据契约与调研** | 确立 124 维分层流式契约（上身 4 路视觉 68 维 + 下肢 4 路 IMU 56 维） | 锁定 124 维流式特征协议，定义 6D 连续旋转与传感器元数据 | [已完成契约锁定](phase-04-v2-contract-research/results.md) |
-| **Phase 5** | **服务端影子桥接工程** | 在 SlimeVR Kotlin 服务端 `server:core` 实现采样拦截与桥接骨架 | 已有采样/推理原型；服务关闭释放与完整服务端回放待验收 | [仍有工程待办](phase-05-server-shadow-mode/results.md) |
-| **Phase 6** | **序列隔离与补偿精度基线** | 建立 796 条时序集对旧 CSTN 全量残差模型审计 | 揭示旧模型世界偏航局部右乘导致的物理退化，确立正交分频解耦路线 | [已完成审计复核](phase-06-accuracy-baseline/results.md) |
-| **Phase 7** | **合成回放与离线验收** | 构建 60Hz 合成时序回放机制，制定延迟与稳定性评测规范 | 建立 10.8 万帧连续回放评测标准，由 Phase 12 落地实测 | [由 Phase 12 承接落地](phase-07-replay-validation/results.md) |
-| **Phase 8** | **实机采集与在线迁移** | 规划实机硬件日志采集协议、独立动捕真值环境对照与在线姿态应用 | 规划硬件部署、光学动捕对照方案与在线姿态解算 | [待硬件就绪后启动](phase-08-device-validation/plan.md) |
-| **Phase 9** | **四路偏航状态模型研究** | 设计显式偏航状态卡尔曼滤波原型 `DeployableBiasEstimatorV3` | 合成 30 分钟会话曾显示抑制信号；零漂安全、真实观测语义和实机效果未证实 | [结果限制与复核](phase-09-stateful-bias-model/results.md) |
-| **Phase 10** | **README 与阶段成果同步** | 规范化多阶段 `public/` 文档管理与团队协作流程 | 统一全阶段双层文档架构与自动化索引规范 | [已完成](phase-10-readme-sync/results.md) |
-| **Phase 11** | **Phase 6/9 正交组合探索** | 提出世界 Y 轴偏航中立约束（Yaw-Neutral CSTN） | 投影算子测试通过；Oracle Swing 收益仅为合成探索，Phase 12 未证实实际 P9+P6 增量 | [结果限制与复核](phase-11-hybrid-compensation/results.md) |
-| **Phase 12** | **无实机影子推理、回放与算法复验** | 契约/推理测试与逐帧特征组装回放；复核服务生命周期、真实 tick、物理输入及数据隔离 | **未通过整体验收**：13 项指定 Kotlin 测试通过，108,000 次逐帧特征组装+ONNX P95 0.6571 ms；完整 `VRServer.tick()`、Session close 和内存门限未验证；A1/A2 不接受原 PASS | [阶段复核报告](phase-12-prehardware-validation/results.md) |
-| **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](phase-13-no-hardware-readiness/results.md) |
-| **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：108,000 帧核心回放、shadow 零写回、模型场景定向测试通过；最新 P95 4.733ms、P99 7.090ms、最大 20.436ms、Full GC 后堆差 +0.128MB。完整时间异常/故障矩阵未验；固件源码、GUI/package 未构建 | [阶段成果](phase-14-software-closure/results.md) |
+| **Phase 1–3** | **v1 原型与 ONNX 工程基线** | 60Hz 采样契约建立，初始 112 维特征流定义与模型骨架打通 | 完成初始数据流定义与 PyTorch 到 ONNX 导出基础链路 | [已完成并归档](model-development/phase-01-03-v1-prototype/results.md) |
+| **Phase 4** | **v2 数据契约与调研** | 确立 124 维分层流式契约（上身 4 路视觉 68 维 + 下肢 4 路 IMU 56 维） | 锁定 124 维流式特征协议，定义 6D 连续旋转与传感器元数据 | [已完成契约锁定](model-development/phase-04-v2-contract-research/results.md) |
+| **Phase 5** | **服务端影子桥接工程** | 在 SlimeVR Kotlin 服务端 `server:core` 实现采样拦截与桥接骨架 | 已有采样/推理原型；服务关闭释放与完整服务端回放待验收 | [仍有工程待办](runtime-integration/phase-05-server-shadow-mode/results.md) |
+| **Phase 6** | **序列隔离与补偿精度基线** | 建立 796 条时序集对旧 CSTN 全量残差模型审计 | 揭示旧模型世界偏航局部右乘导致的物理退化，确立正交分频解耦路线 | [已完成审计复核](model-development/phase-06-accuracy-baseline/results.md) |
+| **Phase 7** | **合成回放与离线验收** | 构建 60Hz 合成时序回放机制，制定延迟与稳定性评测规范 | 建立 10.8 万帧连续回放评测标准，由 Phase 12 落地实测 | [由 Phase 12 承接落地](runtime-integration/phase-07-replay-validation/results.md) |
+| **Phase 8** | **实机采集与在线迁移** | 规划实机硬件日志采集协议、独立动捕真值环境对照与在线姿态应用 | 规划硬件部署、光学动捕对照方案与在线姿态解算 | [待硬件就绪后启动](hardware-validation/phase-08-device-validation/plan.md) |
+| **Phase 9** | **四路偏航状态模型研究** | 设计显式偏航状态卡尔曼滤波原型 `DeployableBiasEstimatorV3` | 合成 30 分钟会话曾显示抑制信号；零漂安全、真实观测语义和实机效果未证实 | [结果限制与复核](model-development/phase-09-stateful-bias-model/results.md) |
+| **Phase 10** | **README 与阶段成果同步** | 规范化多阶段 `public/` 文档管理与团队协作流程 | 统一全阶段双层文档架构与自动化索引规范 | [已完成](project-documentation/phase-10-readme-sync/results.md) |
+| **Phase 11** | **Phase 6/9 正交组合探索** | 提出世界 Y 轴偏航中立约束（Yaw-Neutral CSTN） | 投影算子测试通过；Oracle Swing 收益仅为合成探索，Phase 12 未证实实际 P9+P6 增量 | [结果限制与复核](model-development/phase-11-hybrid-compensation/results.md) |
+| **Phase 12** | **无实机影子推理、回放与算法复验** | 契约/推理测试与逐帧特征组装回放；复核服务生命周期、真实 tick、物理输入及数据隔离 | **未通过整体验收**：13 项指定 Kotlin 测试通过，108,000 次逐帧特征组装+ONNX P95 0.6571 ms；完整 `VRServer.tick()`、Session close 和内存门限未验证；A1/A2 不接受原 PASS | [阶段复核报告](system-validation/phase-12-prehardware-validation/results.md) |
+| **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](system-validation/phase-13-no-hardware-readiness/results.md) |
+| **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：108,000 帧核心回放、shadow 零写回、模型场景定向测试通过；最新 P95 4.733ms、P99 7.090ms、最大 20.436ms、Full GC 后堆差 +0.128MB。完整时间异常/故障矩阵未验；固件源码、GUI/package 未构建 | [阶段成果](system-validation/phase-14-software-closure/results.md) |
+| **Phase 15** | **固定参数预算的双时间尺度模型架构** | 将短时 swing 补偿与长期偏航状态估计分离，并以可信锚点连接 | **已完成**：严格锁定 1.10M 参数预算上限（1,102,066 参数），150 条 30 分钟独立会话（270 万帧）消融通过；LSM6DSV 标称漂移下端点误差消除 83.2%~84.4%，严格零漂与静坐门禁 100% PASS | [阶段成果](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
 
 ---
 
@@ -55,7 +56,7 @@
                        不写入求解器；实机效果尚待验证
 ```
 
-`omega*` 可能是姿态差分代理量，当前不能当作原始陀螺读数；完整角速度数据来源和 ZARU 可部署性列入 [Phase 13 P1](phase-13-no-hardware-readiness/plan.md)。
+`omega*` 可能是姿态差分代理量，当前不能当作原始陀螺读数；完整角速度数据来源和 ZARU 可部署性列入 [Phase 13 P1](system-validation/phase-13-no-hardware-readiness/plan.md)。
 
 ### 正交分频算子性质（不等于整体模型精度通过）
 世界竖直轴偏航分解为四元数 Swing-Twist：
@@ -139,7 +140,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 ### 3. Phase 14 无硬件软件链路闭环验收（部分完成）
 
-按 [Phase 14 计划](phase-14-software-closure/plan.md) 在本地 JDK 17、Gradle 8.14.4 与 ONNX Runtime 1.18.0 环境下执行。
+按 [Phase 14 计划](system-validation/phase-14-software-closure/plan.md) 在本地 JDK 17、Gradle 8.14.4 与 ONNX Runtime 1.18.0 环境下执行。
 
 #### A. Tracker UDP 协议至 `VRServer.tickServer()` 核心回放 (Task P14.1，整体部分完成)
 测试套件 [`UDPProtocolCorrectorBenchmarkTest.kt`](../server/server/core/src/test/java/dev/slimevr/tracking/processor/corrector/UDPProtocolCorrectorBenchmarkTest.kt)：独立复跑 **3/3 全部通过**。108,000 帧由 `feedRawPacketForTesting` seam 进入生产 parser/派发和 `tickServer()`；没有经过 socket 接收线程。
@@ -166,7 +167,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 |---|---|---|---|---|
 | **Server Desktop Jar** | 源码干净编译与打包 | **构建成功** | **PASS** | `slimevr.jar` (114,682,136 bytes, SHA-256: `B50DD7505AA9D38744C95342C88FA45D3D9D9FD102F314E7A4F9A88BF7785EE4`) |
 | **默认安全门禁** | 默认禁用 / 影子只读 | **`enabled=false`, `shadowMode=true`** | **PASS** | 未经配置绝不覆写下肢姿态 |
-| **场景 A: 有效模型** | 模型加载与会话释放 | **推理有效，关闭后 Session 释放 (`isLoaded==false`)** | **PASS** | 1.54M CSTN v2 ONNX 正常驱动 |
+| **场景 A: 有效模型** | 模型加载与会话释放 | **推理有效，关闭后 Session 释放 (`isLoaded==false`)** | **PASS** | CSTN v2 ONNX 正常驱动；参数计数待 Phase 15 对齐 |
 | **场景 B: 模型缺失** | 路径不存在时平稳降级 | **返回 null，服务正常推进，残差保持 IDENTITY** | **PASS** | 无崩溃，无未捕获异常 |
 | **场景 C: 损坏模型/非法输入** | 坏文件拦截，NaN/Inf 旁路 | **坏文件拒绝加载；NaN/Inf 特征自动旁路重置状态** | **PASS** | 零污染后续帧 |
 | **场景 D: HMD/VD 缺失** | 参考流缺失平稳降级 | **HMD 缺失时旁路；VD 缺失时填零并置 valid=0** | **PASS** | 优雅降级推理 |
@@ -220,7 +221,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 | **传感器安装偏差 ($\pm 3^\circ$)** | **+1.352°** | **+12.37 mm** | **+11.52 mm/s** | 角度安装容差极佳 |
 
 > [!NOTE]
-> **有效范围**：Swing 数字仅支持旧合成条件下的 P6-only 探索；FK 使用固定骨长，脚滑未叠加根骨世界位移，均为代理指标。新隔离集上的 P9+P6 增量、真实骨架误差和世界足滑尚未确认，见 [Phase 13 P5](phase-13-no-hardware-readiness/plan.md)。
+> **有效范围**：Swing 数字仅支持旧合成条件下的 P6-only 探索；FK 使用固定骨长，脚滑未叠加根骨世界位移，均为代理指标。新隔离集上的 P9+P6 增量、真实骨架误差和世界足滑尚未确认，见 [Phase 13 P5](system-validation/phase-13-no-hardware-readiness/plan.md)。
 
 ---
 
@@ -228,8 +229,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 | 架构参数 | 设计指标 / 规格 | 说明 |
 |---|---|---|
-| **网络主干结构** | 8 层因果流式 LSTM + 密集残差全连接头 | 严格因果时序，无未来帧反向传播泄漏 |
-| **总参数量** | **1,539,472 参数 ($\sim 1.54\text{ M}$)** | 严格控制在 $< 2.0\text{ M}$ 轻量化门限内 |
+| **总参数量** | **严格冻结为 1,102,066 (1.10M)** | 彻底厘清：972,466 为早期 mean_pooling 解码器，1,102,066 为可部署 joint_decoupled 架构（4 pose heads + 4 gate heads），1,539,472 确认为历史文档估算笔误。慢分支新增 0 神经网络参数，总预算严格封顶于 1,102,066。 |
 | **导出 ONNX 权重体积** | **4.57 MB** (Opset 14) | 优于 $\le 8.0\text{ MB}$ 规范，便于跨平台分发 |
 | **流式隐状态张量** | $h, c \in \mathbb{R}^{8 \times 1 \times 1 \times 96}$ | 内存常驻占用极小（仅 12.3 KB） |
 | **输入流特征维度** | $1 \times 1 \times 124$ 单帧流式 | 68 维上身参考 + 56 维下肢 IMU 物理量 |
@@ -250,6 +250,8 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 ## 四、 核心交付产物索引表
 
 ### 1. 阶段评测报告与黄金哨兵 (JSON 机器凭据)
+- **Phase 15 P15.1/P15.3 双时间尺度架构 150 会话终极评测报告**：[`ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json`](../ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json)
+- **Phase 15 P15.0 模型基线与参数预算终极审计报告**：[`ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json`](../ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json)
 - **Phase 14 P14.1 Tracker UDP 至 `tickServer()` 10.8 万帧全链路基准报告**：[`ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase14_p1_udp_server_tick_benchmark_report.json)
 - **Phase 13 P3 `tickServer()` mock 回放与延迟基准报告**：[`ai_corrector/artifacts/phase13_p3_server_tick_benchmark_report.json`](../ai_corrector/artifacts/phase13_p3_server_tick_benchmark_report.json)
 - **Phase 13 P4 合成物理与动态安全门禁审计报告**：[`ai_corrector/artifacts/phase13_p4_physics_audit_report.json`](../ai_corrector/artifacts/phase13_p4_physics_audit_report.json)
@@ -260,6 +262,8 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 - **124D 契约跨语言黄金哨兵 Fixture**：[`ai_corrector/artifacts/fixture_124d_sentinel.json`](../ai_corrector/artifacts/fixture_124d_sentinel.json)
 
 ### 2. 核心算法、状态机与模型资产
+- **Phase 15 双时间尺度基准测试套件**：[`ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py`](../ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py)
+- **Phase 15 基线审计与预算锁定脚本**：[`ai_corrector/corrector/execute_phase15_p0_baseline_audit.py`](../ai_corrector/corrector/execute_phase15_p0_baseline_audit.py)
 - **世界轴偏航中立流式 ONNX 模型**：[`ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx`](../ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx)
 - **可部署偏航卡尔曼滤波器**：[`ai_corrector/corrector/bias_estimator_v3.py`](../ai_corrector/corrector/bias_estimator_v3.py)
 - **四路显式卡尔曼偏置状态机**：[`ai_corrector/corrector/bias_state_v3.py`](../ai_corrector/corrector/bias_state_v3.py)
@@ -291,7 +295,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 > 2. **指标性质区分**：
 >    - **工程类指标 (Phase 14 P14.1/P14.3)**：两套定向测试共 8/8 通过；UDP-to-tick Full Tick P95 为 4.733 ms（门限 20ms），P99 7.090 ms、最大 20.436 ms；长程 10.8 万帧 Full GC 后堆差 +0.128 MB（门限 64MB），shadow mutation 为 0；模型场景测试与默认只读安全门禁通过。P14.1 的时间间隔异常和完整故障矩阵未覆盖，整体仍为部分完成；
 >    - **算法类指标 (P4 仿真门禁)**：120 条合成会话（216万帧）动态安全门禁全通；ZARU 自适应时间死区底线修正为 0.04°/min，0.14°/min 静坐漂移压制率 96.5%（终点 0.57°，胜率 100%），严格零漂端点偏差 0.008933°（$\le 0.05^\circ$），静坐保持 0.000000°（$\le 0.10^\circ$）；
->    - **工具链限制标记 (P14.2 / P14.3)**：受 Windows 主机缺失 `west`/NCS/`arm-none-eabi-gcc` 及 `node`/`pnpm` 限制，固件与 GUI clean build 保持“受工具链阻塞”的部分完成记录，绝不用已有二进制冒充源码构建；参数量维持 1.54M 冻结。
+>    - **工具链限制标记 (P14.2 / P14.3)**：受 Windows 主机缺失 `west`/NCS/`arm-none-eabi-gcc` 及 `node`/`pnpm` 限制，固件与 GUI clean build 保持“受工具链阻塞”的部分完成记录，绝不用已有二进制冒充源码构建；模型容量不扩大，精确参数上限待 Phase 15 核实。
 > 3. **实机验证 (Phase 8) 的核心任务**：
 >    - 待实机硬件就绪后，采集真实 IMU 陀螺仪与加速度计原始传感器流；
 >    - 接入光学动捕系统建立毫米级位置与真实关节旋转真值；
