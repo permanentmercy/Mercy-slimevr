@@ -14,7 +14,7 @@
 - **Phase 7**：合成回放已有记录；依赖 Phase 5 真实服务端工程打通后进行全链路 ≤20 ms 延迟验收。**（紧跟 Phase 5）**
 - **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
 - **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：M1r/M1r-F 在合成会话报告 96.6% Full 均值改善，但 Full 零漂安全未证实，压力集零漂档含随机游走；真实硬件有效性未验收，不进入在线修正。
-- **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：完成世界竖直 Y 轴 Swing-Twist 正交分解算子、Yaw-Neutral CSTN 重训与 8 路多因子消融。30 分钟连续长会话获得 **+141.72° (71.0%)** 净增益，严格零漂直通安全 (**0.0000° 误改**)，偏航串扰零泄漏，已通过离线全案验收。
+- **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：H0–H3 离线执行完成，正交算子测试通过；但 P6 短时姿态指标无增益、组合收益几乎完全来自 P9，整体验收未通过；H4 影子/实机待执行。
 
 ## 阶段目录
 
@@ -28,11 +28,11 @@
 | Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
 | Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成信号积极；Full 零漂安全未证实，实机待验** |
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
-| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **已通过验收 (PASS)** |
+| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **离线执行完成；模型增益未通过，H4 待执行** |
 
 ## 当前精度结论
 
-- **Phase 11 正交组合裁定 (PASS)**：通过世界竖直 Y 轴 Swing-Twist 分解，将 Phase 6 快速姿态残差强制约束在非偏航摆动自由度（Twist 偏航分量为严格数值零），消除了快分支对 Phase 9 慢偏航估计的串扰覆盖。在 10 条 30 分钟连续会话上取得 **+141.72° (71.0%)** 净增益（胜率 90.0%）；在严格 0°/min 零漂工况下输出变化为 **+0.0000°**（旧 CSTN 为 +0.22° 误改）；通过离线验收，准入 Phase 5 服务端影子模式探针运行。
+- **Phase 11 正交组合复核**：H0/H1 坐标与算子门禁通过，确认输出自由度可隔离；但 P6-only 短时 swing 误差由 0.3076°升至 0.3090°，端点收益为 -0.0085°且区间跨零。Hybrid 端点收益与 P9 ZARU 几乎一致，未证明 P6 增加精度。H3 报告的 PASS 没有检查该短时增益条件；H4 服务端影子/实机验证未执行。当前 Phase 11 整体验收未通过，详见[结果](phase-11-hybrid-compensation/results.md)。
 - **Phase 9 最新 M1r/M1r-F 复核**：合成报告的 96.6% 是 10 条 30 分钟模拟会话的 Full 均值结果，能作为后续研究信号，不是硬件精度结论。零漂报告状态只覆盖 ZARU，Full 在标称 0°/min 会话明显改变端点姿态；压力集零漂档还含随机游走。真实 SlimeVR 30 分钟终点收益、Full 零漂安全性均未知，详见[复核结果](phase-09-stateful-bias-model/results.md)。
 - **D3c 连续模型 B**：在 796 条完整逐帧序列（约 16.3 万帧）上训练；反事实方向一致率为 **48.97%**（开发集）与 **51.16%**（新源序列），中位数预测/真值差值比约 **0.006%**。该模型在当前短片段未展示可用补偿，不能外推为分钟级或所有长期估计器均无效。
 - **C 评测无效的关键原因**：世界坐标注入的偏航漂移应由世界逆旋转左乘修正；现代码把世界慢偏航右乘到局部残差，并用脚接触/小腿阈值更新大腿与小腿。10°/min 退化约 0.19°、零漂移退化约 0.08° 是当前实现的结果，不能归因于正确坐标的偏置滤波器。
