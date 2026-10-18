@@ -60,7 +60,8 @@ class ContinuousSessionSynthesizer:
                  sample_rate_hz: float = 10.0,
                  drift_tier_deg_min: float = 3.0,
                  seed: int = 123,
-                 scenario: str = "default"):
+                 scenario: str = "default",
+                 enable_random_walk: bool = True):
         self.duration_sec = float(duration_sec)
         self.sample_rate_hz = float(sample_rate_hz)
         self.dt = 1.0 / self.sample_rate_hz
@@ -68,6 +69,7 @@ class ContinuousSessionSynthesizer:
         self.drift_tier = float(drift_tier_deg_min)
         self.rng = np.random.RandomState(seed)
         self.scenario = scenario
+        self.enable_random_walk = enable_random_walk
 
     def generate(self, session_id: str) -> ContinuousSessionStream:
         t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
@@ -75,8 +77,11 @@ class ContinuousSessionSynthesizer:
         # 1. 为四路 IMU 分配真实线性漂移率 (以 drift_tier 为基准波动)
         true_drift_rates_deg_min = {}
         for j in LOWER_BODY_JOINTS:
-            factor = self.rng.uniform(0.6, 1.4) * self.rng.choice([-1.0, 1.0])
-            true_drift_rates_deg_min[j] = self.drift_tier * factor
+            if abs(self.drift_tier) < 1e-9:
+                true_drift_rates_deg_min[j] = 0.0
+            else:
+                factor = self.rng.uniform(0.6, 1.4) * self.rng.choice([-1.0, 1.0])
+                true_drift_rates_deg_min[j] = self.drift_tier * factor
             
         true_rates_rad_s = {
             j: math.radians(true_drift_rates_deg_min[j] / 60.0) for j in LOWER_BODY_JOINTS
@@ -87,7 +92,10 @@ class ContinuousSessionSynthesizer:
         for j in LOWER_BODY_JOINTS:
             rate = true_rates_rad_s[j]
             lin = rate * t
-            rw = np.cumsum(self.rng.normal(0.0, 0.0002, size=self.num_frames))
+            if self.enable_random_walk:
+                rw = np.cumsum(self.rng.normal(0.0, 0.0002, size=self.num_frames))
+            else:
+                rw = np.zeros(self.num_frames, dtype=np.float64)
             true_drift_curves[j] = lin + rw
 
         # 3. 构造宏观行为状态时间线 (按分段循环)

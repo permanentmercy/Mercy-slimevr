@@ -1,11 +1,11 @@
 # Phase 9 执行结果
 
-> **2026-10-18 M1r/M1r-F 高精状态滤波与零漂安全实测结论**：
-> 1. **30 分钟连续会话高精压制**：[`m1r_deployable_bias_model_report.json`](../../ai_corrector/artifacts/m1r_deployable_bias_model_report.json) 记录跨 10 条 30 分钟连续会长会话（总计 300 分钟 / 180,000 帧时序），$D_{\text{raw}} = 199.46^\circ$ 下，M1r-ZARU 纠正后仅残余 **$9.30^\circ$**（改善率 **$95.3\%$**，Bootstrap CI `[+92.01°, +287.06°]`）；M1r-Full 融合后残余降至 **$6.67^\circ$**（改善率 **$96.6\%$**，会话胜率 **100.0%**）。
-> 2. **零漂移安全直通门禁彻底攻克**：针对早期由于短窗死区过大及白噪声均值泄漏问题，本轮引入时间不确定度自适应死区（$\max(0.6^\circ/\text{min}, 1.8 \times \text{uncertainty})$），在 0°/min 真实零漂移会话中 $D_{\text{raw}} = 4.12^\circ \to D_{\text{corr}} = 4.15^\circ$（差值仅 $+0.03^\circ$），**严格满足零漂无损伤直通门禁（Gate 3 PASS）**。
-> 3. **极限消融与 3D 姿态突变门禁全部通过**：在 5 组极限压力测试场景（涵盖侧坐、无静止、VD 丢失、复杂步态与零漂基线）中，3D 姿态单步突变断门禁有效阻断起坐过渡伪漂移，侧坐静止漂移消除率达 **$99.95\%$**（$371.6^\circ \to 0.2^\circ$），全部通过三大安全门禁（Gate 1、Gate 2、Gate 3 全部 PASS）。
-> 4. **多核心并行调度优化**：采用 `ProcessPoolExecutor` 多进程池，充分调动 CPU 多物理核心，全量 10 条会话评估时间从单核 3 分钟直接降至 **68.8 秒**。
-> 5. **当前状态与后续**：离线仿真与压力基准已全面达标；根据阶段计划，当前模型严禁在线盲目覆写姿态，后续按 M2 进行实机四路原始日志与独立端点真值验收。
+> **2026-10-18 M1r/M1r-F 审计后结论（本段优先于下方历史记录）**：
+> 1. 主报告 [m1r_deployable_bias_model_report.json](../../ai_corrector/artifacts/m1r_deployable_bias_model_report.json) 的 10×30 分钟合成会话显示 ZARU D_raw=199.455° → D_corr=9.284°（均值改善 95.3%），Full D_corr=6.683°（均值改善 96.6%，胜率 100%）。这是当前仿真条件下的积极信号，不是实机效果。
+> 2. 报告的零漂安全状态只检查 ZARU。两条 0°/min 会话 Raw 为 4.760°、3.482°；ZARU 为 4.831°、3.461°；Full 为 1.643°、1.249°。Full 显著移动标称零漂会话的姿态，因此 Full 零漂直通/无损伤没有证据支持。
+> 3. 压力集 drift_tier=0 仍由 [session_simulator_v3.py](../../ai_corrector/corrector/session_simulator_v3.py) 注入随机游走；其 Full 5.489°→2.364° 不能用作纯零漂误改检验。压力机器报告的 PASS 不替代严格零漂验收。
+> 4. ZARU 的模拟角速度由世界偏航率反投影生成，且静止判定没有使用定义好的加速度方差门槛；当前估计是融合姿态残余偏航率代理，不是实机裸陀螺零偏验证。实机端点真值、真实协议数据源和服务端回放仍未验收，禁止在线覆写姿态。
+> 5. 代码与消融完整复核、Phase 6/9 可组合架构见 [Phase 11 结果](../phase-11-hybrid-compensation/results.md)。
 
 > **2026-10-17 M1r/M1r-F 独立复核（优先于下方原执行结论）**：[`m1r_deployable_bias_model_report.json`](../../ai_corrector/artifacts/m1r_deployable_bias_model_report.json) 的实际均值为 `D_raw=199.455°`、`D_corr=31.853°`、`G=+167.602°`（84.03%，10 条合成会话，胜率 70%，bootstrap CI `[+70.021°, +263.651°]`）。这是有利仿真假设下的探索性正收益，**不能判定 M1r 或 M1r-F 通过安全/实机验收**：两条 0°/min 会话分别从 `4.76°→35.86°`、`3.48°→28.50°`，报告自己记录 `zero_drift_safe=false`；步态事件全为 0，故 Full 与 ZARU 完全相同。机器 `PASS` 只检查平均收益 CI 下界，遗漏零漂安全否决项。下方原执行表及“PASS/零漂无损伤/频域有效”说法保留作历史记录，以上述复核为准。
 
