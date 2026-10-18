@@ -4,16 +4,15 @@ ai_corrector/corrector/yaw_neutral_cstn.py
 Phase 11 任务 H2: Yaw-Neutral 非偏航 Phase 6 神经网络封装与重训模块
 
 核心特性:
-1. 神经网络内生或封装级世界 Y 轴 Swing-Twist 正交投影:
-   dq_swing, dq_twist = torch_swing_twist_decomposition_y(pred_dq)
-   强制 dq 输出中的世界竖直 Y 轴扭转分量恒为 0, 杜绝向骨架输出偏航漂移;
+1. 局部右乘残差先共轭到世界系，再做世界 Y 轴 Swing-Twist 正交投影；输出再变回局部右乘约定。
+   这样投影的轴与 hybrid_composer 的世界坐标定义一致。
 2. 可微正交分解损失函数:
    L_total = 10.0 * L_swing + 15.0 * L_twist_penalty + L_gate + L_contact
    - L_swing: 仅在非偏航摆动分量上监督预测姿态与真值姿态;
    - L_twist_penalty: 显式惩罚网络预测任何 Y 轴偏航扭转分量;
 3. 训练与选模:
-   - 在 database/d3c_continuous 连续数据集上训练/微调;
-   - 产出归档模型: artifacts/cstn_v2_yaw_neutral_best.pt
+   - 在 database/p11_continuous 合成 Swing 数据集上训练/微调;
+   - 产出归档模型: artifacts/cstn_v2_yaw_neutral_world_best.pt
 """
 
 import math
@@ -76,10 +75,57 @@ def compute_smooth_geodesic_distance(p: torch.Tensor, q: torch.Tensor) -> torch.
     return torch.sqrt(theta.square() + 1e-4) - 0.01
 
 
+LOWER_BODY_ROT6D_OFFSETS = (68, 82, 96, 110)
+
+
+def torch_lower_body_rotmat_from_features(x: torch.Tensor) -> torch.Tensor:
+    """从 124D 特征中还原四路下肢原始世界姿态矩阵 [B,T,4,3,3]。"""
+    r6 = torch.stack([x[..., offset:offset + 6] for offset in LOWER_BODY_ROT6D_OFFSETS], dim=-2)
+    x_raw, y_raw = r6[..., :3], r6[..., 3:6]
+    x_axis = F.normalize(x_raw, dim=-1, eps=1e-8)
+    z_axis = F.normalize(torch.cross(x_axis, y_raw, dim=-1), dim=-1, eps=1e-8)
+    y_axis = torch.cross(z_axis, x_axis, dim=-1)
+    return torch.stack([x_axis, y_axis, z_axis], dim=-1)
+
+
+def torch_world_swing_local_delta(
+    x: torch.Tensor,
+    delta_local: torch.Tensor,
+) -> Tuple[torch.Tensor, torch.Tensor]:
+    """将局部右乘 delta 转到世界系拆分；返回局部 Swing 和世界 Twist。"""
+    raw_rot = torch_lower_body_rotmat_from_features(x)
+    delta_local = F.normalize(delta_local, dim=-1)
+    delta_world_vec = torch.matmul(raw_rot, delta_local[..., 1:].unsqueeze(-1)).squeeze(-1)
+    delta_world = F.normalize(torch.cat([delta_local[..., :1], delta_world_vec], dim=-1), dim=-1)
+    swing_world, twist_world = torch_swing_twist_decomposition_y(delta_world)
+    swing_local_vec = torch.matmul(
+        raw_rot.transpose(-1, -2), swing_world[..., 1:].unsqueeze(-1)
+    ).squeeze(-1)
+    swing_local = F.normalize(torch.cat([swing_world[..., :1], swing_local_vec], dim=-1), dim=-1)
+    return swing_local, twist_world
+
+
+def torch_slerp_from_identity(q: torch.Tensor, weight: torch.Tensor, threshold: float = 0.3) -> torch.Tensor:
+    """Apply the runtime confidence gate using the same identity-to-correction SLERP as HybridComposer."""
+    q = F.normalize(q, dim=-1)
+    q = torch.where(q[..., :1] < 0, -q, q)
+    weight = torch.where(weight >= threshold, weight, torch.zeros_like(weight)).clamp(0.0, 1.0).unsqueeze(-1)
+    vec = q[..., 1:]
+    vec_norm = torch.linalg.vector_norm(vec, dim=-1, keepdim=True)
+    half_angle = torch.atan2(vec_norm, q[..., :1].clamp(min=0.0))
+    gated_half_angle = half_angle * weight
+    axis = vec / vec_norm.clamp_min(1e-8)
+    gated = torch.cat([torch.cos(gated_half_angle), axis * torch.sin(gated_half_angle)], dim=-1)
+    identity = torch.zeros_like(gated)
+    identity[..., 0] = 1.0
+    return torch.where(vec_norm < 1e-8, identity, gated)
+
+
 class YawNeutralCSTN(nn.Module):
     """
     Yaw-Neutral Phase 6 CSTN 模型包装器。
-    在网络输出层之后接入严格世界 Y 轴 Swing-Twist 投影，使得输出 dq 绝不包含任何偏航漂移。
+    网络输出是局部右乘残差。先用输入中的原始姿态将其共轭到世界系，投影掉世界 Y Twist，
+    然后转换回局部右乘残差供服务端和 HybridComposer 使用。
     """
     def __init__(self, base_model: Corrector):
         super().__init__()
@@ -90,12 +136,12 @@ class YawNeutralCSTN(nn.Module):
         out, next_state = self.base_model(x, state)
         raw_dq = out["dq"]  # [b, t, 4, 4]
         
-        # 对每颗下肢关节的预测四元数进行世界 Y 轴 Swing-Twist 分解
-        dq_swing, dq_twist = torch_swing_twist_decomposition_y(raw_dq)
+        # 原始输出是局部右乘残差；不能直接把其局部 Y 分量当成世界偏航。
+        dq_swing, dq_twist_world = torch_world_swing_local_delta(x, raw_dq)
         
         out["dq_raw"] = raw_dq
         out["dq"] = dq_swing
-        out["dq_twist"] = dq_twist
+        out["dq_twist"] = dq_twist_world
         return out, next_state
 
 
@@ -140,8 +186,8 @@ def train_yaw_neutral_cstn_model(
     contact_val = torch.from_numpy(val_npz["contact"]).float().to(device)
     mask_val = torch.from_numpy(val_npz["mask"]).bool().to(device)
 
-    # 预先对验证集目标四元数提取真值 swing 分量
-    dq_val_swing, _ = torch_swing_twist_decomposition_y(dq_val)
+    # 局部修正先转世界系拆分，再转回局部右乘形式作为 Swing 真值。
+    dq_val_swing, _ = torch_world_swing_local_delta(x_val, dq_val)
 
     dataset = TensorDataset(x_train, dq_train, gate_train, contact_train, mask_train)
     loader = DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -179,7 +225,7 @@ def train_yaw_neutral_cstn_model(
             bmask = bmask.to(device)
 
             # 目标真值同样提取 swing 分量
-            bdq_swing, _ = torch_swing_twist_decomposition_y(bdq)
+            bdq_swing, _ = torch_world_swing_local_delta(bx, bdq)
 
             optimizer.zero_grad()
             out, _ = yaw_neutral_model(bx, state=None)

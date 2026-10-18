@@ -1,14 +1,13 @@
 """
 ai_corrector/corrector/prepare_p11_dataset.py
 ============================================
-Phase 11: 包含真实动态加速度倾斜失真 (Dynamic AHRS Tilt Artifact) 的时序数据集生成器
+Phase 11: 合成动作相关 Swing 扰动的时序数据集生成器
 
-物理背景:
-在低成本 6-DoF IMU (SlimeVR) 中，板载 AHRS 滤波器依赖重力向量估计俯仰/滚转 (Pitch/Roll, 即 Swing)。
-当肢体做剧烈动态运动时 (大腿/小腿摆动、跑步、跳跃、蹲起)，肢体线加速度与向心加速度与重力矢量叠加，
-导致 AHRS 产生暂态倾斜估计失真 (瞬时摆动误差 2°~5°)。
-该失真完全属于非偏航自由度 (Swing)，且与肢体角速度/加速度强相关，正是 Phase 6 快速神经网络应当学习和补偿的目标。
-在静态/低速时，失真自动衰减为 0，门控降低为 0，实现严格静态姿态保护。
+建模边界:
+真实 AHRS 的动态倾斜误差可能受线加速度、重力观测、融合器参数和传感器安装影响；本生成器没有从加速度计比力运行 AHRS，
+也没有用实机数据标定误差分布。它只构造一个可控的合成 Swing 扰动：轴取 omega × up，角度取
+clip(0.040 * ||omega × up||, 0, 6°)。其中 0.040 是启发式比例系数（omega 用 rad/s 时量纲为秒），不是经实测拟合的传感器常数。
+因此数据可用于验证网络能否学习这一类动作相关扰动，不能证明模型已学会校正真实 SlimeVR AHRS 的动态加速度误差。
 
 产出目录:
 database/p11_continuous/
@@ -131,19 +130,19 @@ def synthesize_p11_sequence(
 
     u_world = np.array([0.0, 1.0, 0.0], dtype=np.float32)
 
-    # 为四路下肢生成真实的动态加速度倾斜失真 (Dynamic AHRS Tilt Distortion)
+    # 为四路下肢生成可控的合成动作相关 Swing 扰动；该启发式未经过真实 AHRS/加速度计标定。
     for k, joint in enumerate(TARGET_LOWER_JOINTS):
         omega_k = angular_velocity(clean_world[:, joint])  # (N, 3)
-        # 倾斜轴为角速度与重力竖直轴的叉乘 (严格处于水平面 X-Z, 纯 Swing 无 Twist)
+        # 倾斜轴取角速度与重力竖直轴的叉乘 (处于水平面 X-Z, 作为纯 Swing 扰动)
         tilt_axis = np.cross(omega_k, u_world)  # (N, 3)
         norm_tilt = np.linalg.norm(tilt_axis, axis=-1, keepdims=True)
         unit_tilt_axis = np.where(norm_tilt > 1e-6, tilt_axis / np.maximum(norm_tilt, 1e-6), np.zeros_like(tilt_axis))
-        # 动态倾斜角度与动作剧烈度成比例 (通常 1.5° ~ 4.5°, 静态时严格为 0°)
+        # 合成扰动幅值随角速度线性增长并截断；不是从线加速度或 AHRS 状态估计得到。
         tilt_angle = np.clip(0.040 * norm_tilt, 0.0, np.deg2rad(6.0)).astype(np.float32)
         tilt_rotvec = unit_tilt_axis * tilt_angle
         R_dyn_tilt = Rotation.from_rotvec(tilt_rotvec).as_matrix()  # (N, 3, 3)
 
-        # 组合真实传感器观测: R_raw = R_yaw_drift @ R_dyn_tilt @ R_clean @ R_mounting
+        # 组合合成观测: R_raw = R_yaw_drift @ R_dyn_tilt @ R_clean @ R_mounting
         temp = np.einsum("nij,njk->nik", R_dyn_tilt, clean_world[:, joint])
         temp_yaw = np.einsum("nij,njk->nik", drift_rot[:, k], temp)
         raw_world[:, joint] = np.einsum("nij,jk->nik", temp_yaw, mounting_rot[k])
@@ -194,7 +193,7 @@ def synthesize_p11_sequence(
     clean_target = clean_world[:, TARGET_LOWER_JOINTS]
     raw_target = raw_world[:, TARGET_LOWER_JOINTS]
 
-    # 计算局部残差并提取世界 Swing 目标
+    # 保存局部右乘真值残差；训练时根据原始姿态转换到世界系提取 Swing。
     dq_mat = np.einsum("ntji,ntjk->ntik", raw_target, clean_target)
     dq = rotmat_to_quat_wxyz(dq_mat)
 
@@ -348,7 +347,7 @@ def generate_p11_datasets(source_root: Path, output_dir: Path, seed: int = 20261
 
     manifest = {
         "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-        "role": "Phase 11 Dynamic AHRS Tilt & Swing Compensation Dataset",
+        "role": "Phase 11 Synthetic Motion-Correlated Swing Perturbation Dataset",
         "train_sequences": len(train_data),
         "val_sequences": len(val_data),
         "final_confirm_sequences": len(conf_data),

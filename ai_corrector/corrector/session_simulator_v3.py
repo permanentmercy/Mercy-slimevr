@@ -239,7 +239,7 @@ class ContinuousSessionSynthesizer:
             for j in LOWER_BODY_JOINTS:
                 e_t = float(true_drift_curves[j][i])
                 
-                # 动态 AHRS 倾斜失真 (只在肢体运动时产生，静态为 0)
+                # 合成动作相关 Swing 扰动；仅供可控仿真，不代表经过实机标定的 AHRS 误差。
                 norm_omega = float(np.linalg.norm(leg_omega_motion[j]))
                 if self.enable_dynamic_tilt and norm_omega > 0.05:
                     tilt_axis = np.cross(leg_omega_motion[j], np.array([0.0, 1.0, 0.0], dtype=np.float32))

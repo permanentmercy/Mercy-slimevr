@@ -14,7 +14,7 @@
 - **Phase 7**：合成回放已有记录；依赖 Phase 5 真实服务端工程打通后进行全链路 ≤20 ms 延迟验收。**（紧跟 Phase 5）**
 - **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
 - **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：M1r/M1r-F 在合成会话报告 96.6% Full 均值改善，但 Full 零漂安全未证实，压力集零漂档含随机游走；真实硬件有效性未验收，不进入在线修正。
-- **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：H0–H3 离线任务全部攻克并通过验收 (PASS)；重训后的 Yaw-Neutral CSTN 成功消除动态 AHRS 倾斜失真，在独立未见集取得 +1.4102° (70.2%) 短时姿态增益，四路门禁全通；H4 实机/影子任务暂缓待 Phase 8 实机真值采集。
+- **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：4 项合成离线机器门禁 PASS；Oracle P9 Twist 条件下，世界系 Swing 残差在 190 条序列上改善 +1.4538° (66.7%)。收益只验证角速度启发式合成任务；实际 P9 在线估计状态下的组合姿态收益仍未测量；运行时字段、受试者隔离、FK/脚滑和实机有效性未验收，H4 待 Phase 8。
 
 ## 阶段目录
 
@@ -28,11 +28,11 @@
 | Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
 | Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成信号积极；Full 零漂安全未证实，实机待验** |
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
-| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **H0–H3 离线验收全案通过 (PASS)，实机 H4 暂缓待 Phase 8** |
+| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；完整计划仍有服务端、FK/脚滑和实机验收缺口** |
 
 ## 当前精度结论
 
-- **Phase 11 正交组合验收 (PASS)**：经物理建模注入低成本 6-DoF IMU 的板载 AHRS 动态倾斜失真（Dynamic AHRS Tilt Artifact）后，端到端重训的 Yaw-Neutral CSTN 在 190 条独立未见序列上取得 **+1.4102° (70.2%)** 的短时姿态误差削减（95% Bootstrap CI `[+1.2555°, +1.5531°]`，胜率 95.3%）；30 分钟会话端点偏航收益为 **+141.72° (71.0%)**；严格零漂误差仅 $+0.0001^\circ$；偏航串扰严格受控（$0.0027^\circ$）。离线门禁 Gate 1–4 全部通过，H4 实机/影子任务暂缓待 Phase 8 硬件接入，详见[结果](phase-11-hybrid-compensation/results.md)。
+- **Phase 11 合成离线结果**：先修正局部右乘残差与世界 Y 轴投影不一致，再训练世界系投影版模型。Oracle P9-only 的合成 Swing 残差由 2.1799° 降至 0.7261° (Hybrid)，改善 **+1.4538° (66.7%)**（95% CI `[+1.2911°, +1.6028°]`，胜率 96.8%）；30 分钟合成会话端点收益 **+141.7191°**，与 P9 ZARU 的 +141.7188° 几乎相同。注入扰动使用角速度启发式，VD 输入为干净 AMASS 姿态；H0 运行时字段、subject-level 隔离、FK/脚滑和实机仍未验证。详见[结果](phase-11-hybrid-compensation/results.md)。
 - **Phase 9 最新 M1r/M1r-F 复核**：合成报告的 96.6% 是 10 条 30 分钟模拟会话的 Full 均值结果，能作为后续研究信号，不是硬件精度结论。零漂报告状态只覆盖 ZARU，Full 在标称 0°/min 会话明显改变端点姿态；压力集零漂档还含随机游走。真实 SlimeVR 30 分钟终点收益、Full 零漂安全性均未知，详见[复核结果](phase-09-stateful-bias-model/results.md)。
 - **D3c 连续模型 B**：在 796 条完整逐帧序列（约 16.3 万帧）上训练；反事实方向一致率为 **48.97%**（开发集）与 **51.16%**（新源序列），中位数预测/真值差值比约 **0.006%**。该模型在当前短片段未展示可用补偿，不能外推为分钟级或所有长期估计器均无效。
 - **C 评测无效的关键原因**：世界坐标注入的偏航漂移应由世界逆旋转左乘修正；现代码把世界慢偏航右乘到局部残差，并用脚接触/小腿阈值更新大腿与小腿。10°/min 退化约 0.19°、零漂移退化约 0.08° 是当前实现的结果，不能归因于正确坐标的偏置滤波器。
