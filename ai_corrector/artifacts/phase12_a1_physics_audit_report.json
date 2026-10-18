@@ -1,12 +1,12 @@
 {
   "phase": "Phase 12",
   "task": "A1",
-  "verdict": "PASS",
+  "verdict": "NOT_ACCEPTED",
   "timestamp": "2026-10-18T03:42:53Z",
   "safety_vetoes": {
     "strict_zero_drift_dev_limit_deg": 0.05,
     "strict_zero_drift_passed": true,
-    "static_holding_passed": true,
+    "static_holding_passed": null,
     "main_scenarios_ci_passed": true
   },
   "scenarios": {
@@ -402,5 +402,11 @@
         }
       }
     }
-  }
+  },
+  "script_verdict": "PASS",
+  "review_findings": [
+    "Static holding gate was initialized true and never evaluated.",
+    "The all_sitting scenario includes nonzero injected drift and does not test zero-drift posture preservation.",
+    "Simulator supplies gyro-like biased angular velocity while the current SlimeVR production path derives angular velocity from fused quaternion differences."
+  ]
 }

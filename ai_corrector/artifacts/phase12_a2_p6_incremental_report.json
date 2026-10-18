@@ -1,14 +1,14 @@
 {
   "phase": "Phase 12",
   "task": "A2",
-  "verdict": "PASS",
+  "verdict": "EXPLORATORY_ONLY",
   "evaluation_basis": "Actual Causal P9 Estimator (DeployableBiasEstimatorV3) without Oracle",
   "isolation_manifest": {
-    "type": "source-level sequence isolation",
+    "type": "Reused Phase 11 FinalConfirm; not a fresh Phase 12 confirmatory split",
     "num_sequences": 190,
     "frames_per_sequence": 300,
     "total_frames": 57000,
-    "dataset_file": "H:\\program\\slimevr\\ai_corrector\\database\\p11_continuous\\final_confirm_continuous.npz"
+    "dataset_file": "ai_corrector/database/p11_continuous/final_confirm_continuous.npz"
   },
   "gates": {
     "actual_causal_p9_swing_ci_lower_gt_zero": true,
@@ -231,5 +231,14 @@
         ]
       }
     }
+  },
+  "script_verdict": "PASS",
+  "confirmatory_review": {
+    "p9_observable_effect": "P9-only metrics equal Raw in the nominal report; P9+P6 equals P6-only.",
+    "reason": "Reuses Phase 11 FinalConfirm; no new locked source-level manifest or source IDs are recorded.",
+    "zero_drift_static_safety": "NOT_EVALUATED",
+    "fk_and_foot_slide": "Simplified fixed-bone geometry proxy; not SMPL-H FK or world-space foot sliding.",
+    "valid": false,
+    "pressure_condition_gates": "NOT_EVALUATED"
   }
 }
