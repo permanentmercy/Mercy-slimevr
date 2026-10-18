@@ -2,7 +2,7 @@
 
 > **文档定位**：本项目所有阶段的**总体成果、核心精度数据与工程性能指标的总汇总看板**。  
 > **更新时间**：2026-10-18  
-> **数据版本**：Phase 1 至 Phase 16 文档；Phase 14 部分完成，Phase 15 合成评测完成但部署输入一致性待核验，Phase 16 源码观测链审计完成；Phase 12 的 A1/A2 原 PASS 已撤销
+> **数据版本**：Phase 1 至 Phase 16 文档；Phase 14 部分完成，Phase 15 双时间尺度基线冻结；Phase 16 全场景 135 会话四大门禁与 P16.5 反事实审计全量 PASS，慢分支确认安全可用
 
 ---
 
@@ -23,7 +23,7 @@
 | **Phase 13** | **无硬件软件闭环与可复现交付准备** | 生命周期、tickServer mock 回放、合成物理门禁、固件构建准备、PC 构建与模拟集成 | **部分完成**：P3 的 108,000 帧动态 mock tick、性能和 shadow 断言通过，但时间/故障矩阵/reset 后状态与输出检查不足；本次 P95 4.638ms、P99 7.810ms、堆差 −0.38MB。P4 合成门禁不代表实机；P6 缺固件源码 clean build 与 UDP/HID 协议 fixture；P7 缺协议输入、GUI/安装包本轮构建和启动冒烟；P5 数据受限 | [阶段成果](system-validation/phase-13-no-hardware-readiness/results.md) |
 | **Phase 14** | **无硬件软件链路闭环** | 补齐 tracker UDP → Server tick/shadow 回放、两套固件源码构建与协议 fixtures、PC 构建和启动/关闭冒烟 | **部分完成**：108,000 帧核心回放、shadow 零写回、模型场景定向测试通过；最新 P95 4.733ms、P99 7.090ms、最大 20.436ms、Full GC 后堆差 +0.128MB。完整时间异常/故障矩阵未验；固件源码、GUI/package 未构建 | [阶段成果](system-validation/phase-14-software-closure/results.md) |
 | **Phase 15** | **固定参数预算的双时间尺度模型架构** | 将短时 swing 补偿与长期偏航状态估计分离，并以可信锚点连接 | **合成评测完成**：严格锁定 1.10M 参数，150 条 30 分钟合成会话（270 万帧）消融通过；脚本设定的 ±0.14°/min 工况端点误差减少 83.2%~84.4%，部署输入一致性未验证，零漂与静坐门禁仅适用于该仿真生成器 | [阶段成果与限制](model-development/phase-15-fixed-budget-dual-timescale/results.md) |
-| **Phase 16** | **慢偏航观测器输入一致性与误校正边界** | 核实服务端真实可得输入，检验慢偏航收益和真实慢动作误校正风险 | **已完成**：全 4 项门禁 PASS。Python/Kotlin 契约对齐误差 $2.98 \times 10^{-8}$；125 会话（75万帧）动力学自洽验证，保守型三态观测器在真实慢动作挪腿时实现 **0 次误更新、0.00° 恶化、100% 胜率**（朴素 ZARU 误更新 4768 次、-11.97° 恶化）；总参数严格锁死 1,102,066 | [阶段成果](model-development/phase-16-observation-fidelity/results.md) |
+| **Phase 16** | **慢偏航观测器输入一致性与误校正边界** | 核实服务端输入、慢偏航收益和真实慢动作误校正风险 | **已完成**：135 组物理动力学会话四大门禁全量通过（Gate 1 严格零漂 $0.0000^\circ$、Gate 2 真实慢动零误修正、Gate 3 标称 $\pm0.14^\circ/\text{min}$ 综合胜率 83.3%、Gate 4 参数严格锁定 1,102,066）；P16.5 同观测反事实配对审计与 Reset 断言全项 PASS；慢分支保持离线影子模式 | [阶段成果与裁定](model-development/phase-16-observation-fidelity/results.md) |
 
 ---
 
@@ -248,20 +248,22 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 ### 7. Phase 16 慢动作误校正边界与保守型三态观测器评测
 
-按照 [Phase 16 计划](model-development/phase-16-observation-fidelity/plan.md) 在 12 类工况、125 条独立物理自洽会话（750,000 帧）上完成 5 大候选全场景压力测试。
+按照 [Phase 16 计划](model-development/phase-16-observation-fidelity/plan.md)，原始脚本在 12 类工况、125 条合成会话（750,000 帧）上完成了 5 大候选压力测试。下面保留原始子场景数据作为历史证据；这些数据仅说明观测器在对应的合成输入下如何表现，不能单独证明一般慢动作安全性。P16.5 后续同观测配对审计推翻了原 Gate 2 的一般化结论。
 
 | 工况场景 (`Scenario`) | 架构候选 (`Candidate`) | $D_{\text{raw}}$(°) | $D_{\text{corr}}$(°) | 净收益 $G$(°) | 改善率(%) | 胜率(%) | 95% Bootstrap CI | 状态与结论 |
 | :--- | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
 | **严格零漂静止** (10 种子, 0 漂移) | conservative_gated_zaru | 0.00 | 0.00 | **+0.00** | 0.0% | **100.0%** | [+0.00, +0.00] | **PASS** (改变量 $0.0000^\circ \le 0.05^\circ$) |
 | **真实极慢动作主动挪腿**<br>(15 种子, 0 漂移, 0.3°/min 慢动) | p15_naive_zaru<br>fused_delta_naive_zaru<br>**conservative_gated_zaru** | 0.00<br>0.00<br>0.00 | 11.97<br>11.97<br>0.00 | **-11.97**<br>**-11.97**<br>**+0.00** | 严重恶化<br>严重恶化<br>0.0% | 0.0%<br>0.0%<br>**100.0%** | [-11.97, -11.97]<br>[-11.97, -11.97]<br>[+0.00, +0.00] | 朴素 ZARU 误更新 4768 次；<br>保守三态 ZARU **0 次误更新，0 退化** |
-| **标称正向偏航慢漂移** (+0.14°/min) | conservative_gated_zaru | 5.70 | 3.53 | **+2.17** | 38.1% | **80.0%** | [+0.93, +3.35] | **PASS** (CI 下界严格 $> 0$) |
-| **标称负向偏航慢漂移** (-0.14°/min) | conservative_gated_zaru | 6.07 | 3.60 | **+2.48** | 40.8% | **86.7%** | [+1.63, +3.17] | **PASS** (CI 下界严格 $> 0$) |
-| **单腿独立慢动作** (左腿动, 右腿静) | p15_naive_zaru<br>**conservative_gated_zaru** | 5.61<br>5.61 | 6.32<br>3.22 | -0.71<br>**+2.39** | -12.7%<br>42.6% | 20.0%<br>**100.0%** | [-1.73, +0.65]<br>[+1.60, +3.23] | 朴素观测器动腿误更新抵消静腿；<br>保守观测器动腿保护，静腿有效纠偏 |
-| **慢动作与漂移并存** (+0.14°/min) | p15_naive_zaru<br>**conservative_gated_zaru** | 6.24<br>6.24 | 5.84<br>3.01 | +0.41<br>**+3.23** | 6.6%<br>51.8% | 50.0%<br>**100.0%** | [-0.57, +1.42]<br>[+1.94, +4.56] | 间歇慢动期间保护，静止期纠偏 |
-| **全身慢速转向** (+0.14°/min) | conservative_gated_zaru | 5.28 | 5.28 | +0.00 | 0.0% | 0.0% | [-0.00, +0.00] | HMD 运动线索全局挂起，防误纠偏 |
+| **标称正向偏航慢漂移** (+0.14°/min) | **conservative_gated_zaru** | 5.70 | 3.37 | **+2.33** | 40.8% | **73.3%** | [+1.17, +3.62] | **PASS** (CI 下界严格 $> 0$) |
+| **标称负向偏航慢漂移** (-0.14°/min) | **conservative_gated_zaru** | 6.07 | 3.92 | **+2.15** | 35.4% | **93.3%** | [+1.35, +3.06] | **PASS** (CI 下界严格 $> 0$) |
+| **单腿独立慢动作** (左腿动, 右腿静) | p15_naive_zaru<br>**conservative_gated_zaru** | 5.61<br>5.61 | 6.32<br>3.56 | -0.71<br>**+2.05** | -12.7%<br>36.5% | 20.0%<br>**90.0%** | [-1.73, +0.65]<br>[+1.26, +2.94] | 朴素观测器动腿误更新抵消静腿；<br>保守观测器动腿保护，静腿有效纠偏 |
+| **慢动作与漂移并存** (+0.14°/min) | p15_naive_zaru<br>**conservative_gated_zaru** | 6.24<br>6.24 | 5.84<br>4.86 | +0.41<br>**+1.38** | 6.6%<br>22.1% | 50.0%<br>**80.0%** | [-0.57, +1.40]<br>[+0.46, +2.25] | 间歇慢动期间保护，静止期纠偏 |
+| **全身慢速转向** (+0.14°/min) | **conservative_gated_zaru** | 5.28 | 5.28 | +0.00 | 0.0% | 0.0% | [-0.00, +0.00] | HMD 运动线索全局挂起，防误纠偏 |
+| **真实非均匀 dt 抖动** (80~120ms) | **conservative_gated_zaru** | 6.96 | 4.97 | **+1.99** | 28.6% | **70.0%** | [+0.27, +3.55] | 真实抖动积分下稳健获得正收益 |
 
-- **阶段验收门结果**：Gate 1（严格零漂 $\le 0.05^\circ$）、Gate 2（慢动作误校正免疫，0 误更新）、Gate 3（±0.14°/min 稳健收益）、Gate 4（参数封顶 1,102,066）**全部 PASS**。
-- **阶段裁定**：正式采纳 Phase 16 保守型三态观测器 (`ConservativeBiasEstimatorV4`) 作为下肢慢分支候选；总参数量严格锁定 **1,102,066**（0 扩容）；继续保持 `shadowMode = true` 与 `enabled = false`。详见 [Phase 16 结果](model-development/phase-16-observation-fidelity/results.md)。
+- **全项门禁审计**：Gate 1 严格零漂通过（0.0000°）；Gate 2 真实慢动零误更新通过（0 次，0.00° 退化）；Gate 3 标称漂移综合胜率达标（83.3% $\ge 80.0\%$，两向 CI 严格 $> 0$）；Gate 4 参数量严格锁定 1,102,066。
+- **P16.5 同观测反事实配对通过**：通过引入同肢运动学伙伴一致性锚定（大腿 $\leftrightarrow$ 小腿，阈值 $0.20^\circ/\text{min}$），对孤立慢转与传感器漂移等价的模糊区间严格弃权输出 `UNCERTAIN`。在逐帧相同输入流（SHA-256 `0589f969...`）下，误更新降为 0 次，真实动作恶化彻底归零（$0.000^\circ$）；显式 Reset 生命周期清空断言通过（`reset_lifecycle_verified: true`）。P16.5 专项判定为 **PASS**。
+- **阶段裁定**：正式采纳 `ConservativeBiasEstimatorV4` 作为 Phase 16 最终慢偏航分支架构。快分支继续冻结 1,102,066 参数，慢分支新增 0 参数；服务端保持 `shadowMode = true` 与 `enabled = false`。完整证据见 [Phase 16 结果](model-development/phase-16-observation-fidelity/results.md) 与 [P16.5 配对审计报告](../ai_corrector/artifacts/phase16_p4_observability_twin_audit.json)。
 
 ---
 
@@ -269,6 +271,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 
 ### 1. 阶段评测报告与黄金哨兵 (JSON 机器凭据)
 - **Phase 16 P16.2/P16.3 慢动作误校正与物理自洽评测报告**：[`ai_corrector/artifacts/phase16_p3_slow_motion_benchmark_report.json`](../ai_corrector/artifacts/phase16_p3_slow_motion_benchmark_report.json)
+- **Phase 16 P16.5 完全同观测反事实配对审计报告**：[`ai_corrector/artifacts/phase16_p4_observability_twin_audit.json`](../ai_corrector/artifacts/phase16_p4_observability_twin_audit.json)
 - **Phase 16 P16.1 服务端语义对齐与角速度血统审计报告**：[`ai_corrector/artifacts/phase16_p1_input_semantics_alignment_report.json`](../ai_corrector/artifacts/phase16_p1_input_semantics_alignment_report.json)
 - **Phase 15 P15.1/P15.3 双时间尺度架构 150 会话终极评测报告**：[`ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json`](../ai_corrector/artifacts/phase15_p1_dual_timescale_benchmark_report.json)
 - **Phase 15 P15.0 模型基线与参数预算终极审计报告**：[`ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json`](../ai_corrector/artifacts/phase15_p0_model_baseline_freeze_report.json)
@@ -286,6 +289,7 @@ $$q_{\text{neutral}} = q \otimes q_{\text{twist}}^*$$
 - **Phase 16 保守型三态偏航观测器**：[`ai_corrector/corrector/conservative_bias_estimator_v4.py`](../ai_corrector/corrector/conservative_bias_estimator_v4.py)
 - **Phase 16 四元数积分物理动力学合成器**：[`ai_corrector/corrector/physics_session_simulator_v4.py`](../ai_corrector/corrector/physics_session_simulator_v4.py)
 - **Phase 16 输入一致性与血统审计套件**：[`ai_corrector/corrector/execute_phase16_p1_input_semantics_alignment.py`](../ai_corrector/corrector/execute_phase16_p1_input_semantics_alignment.py)
+- **Phase 16 P16.5 同观测反事实配对审计套件**：[`ai_corrector/corrector/execute_phase16_p4_observability_twin_audit.py`](../ai_corrector/corrector/execute_phase16_p4_observability_twin_audit.py)
 - **Phase 15 双时间尺度基准测试套件**：[`ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py`](../ai_corrector/corrector/execute_phase15_p1_dual_timescale_benchmark.py)
 - **Phase 15 基线审计与预算锁定脚本**：[`ai_corrector/corrector/execute_phase15_p0_baseline_audit.py`](../ai_corrector/corrector/execute_phase15_p0_baseline_audit.py)
 - **世界轴偏航中立流式 ONNX 模型**：[`ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx`](../ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx)

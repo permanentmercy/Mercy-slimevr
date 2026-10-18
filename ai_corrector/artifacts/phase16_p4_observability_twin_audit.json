@@ -1,0 +1,40 @@
+{
+  "phase": "Phase 16",
+  "task": "P16.5 exact observation-twin audit",
+  "status": "PASS",
+  "sample_rate_hz": 10.0,
+  "duration_sec": 600.0,
+  "frame_count": 6000,
+  "rate_deg_min": 0.3,
+  "acceleration_variance_m2_s4": 0.0,
+  "input_sha256": "0589f96926924a9765fec39655de179369f7d32a91c5b2b5965ff397ad8a69a0",
+  "counterfactuals": {
+    "real_slow_thigh_yaw_without_sensor_drift": {
+      "raw_endpoint_error_deg": 0.0,
+      "corrected_endpoint_error_deg": 0.0,
+      "gain_deg": -0.0
+    },
+    "stationary_thigh_with_equal_sensor_yaw_drift": {
+      "raw_endpoint_error_deg": 3.0,
+      "corrected_endpoint_error_deg": 2.9999999999999916,
+      "gain_deg": 8.43769498715119e-15
+    }
+  },
+  "observer_output_for_both_counterfactuals": {
+    "observations_identical": true,
+    "predictions_must_be_identical": true,
+    "left_thigh_update_count": 0,
+    "left_thigh_uncertain_count": 6000,
+    "left_thigh_reject_count": 0,
+    "estimated_yaw_correction_deg": 0.0
+  },
+  "reset_lifecycle_audit": {
+    "reset_lifecycle_verified": true,
+    "pre_reset_still_count": 36,
+    "post_reset_still_count": 0,
+    "post_reset_still_start_R_is_none": true,
+    "post_reset_kalman_e_rad": 0.0
+  },
+  "criterion": "Ambiguous observations must not be automatically corrected. An UPDATE on this shared stream proves that the observer cannot safely distinguish the two hidden causes from available inputs.",
+  "hardware_validation": false
+}

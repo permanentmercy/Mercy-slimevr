@@ -44,12 +44,11 @@
 
 ## Phase 16 执行状态：慢偏航观测器输入一致性与误校正边界
 
-[Phase 16](model-development/phase-16-observation-fidelity/plan.md) **已执行完成**：
-- **P16.0 源码审计**：核实 Kotlin 服务端角速度缺省为四元数相邻差分 (`computeAngularVelocity`)，P15 朴素 ZARU 未实际使用加速度方差门限。
-- **P16.1 语义对齐**：124D 全血统矩阵建立，Python vs Kotlin 黄金样本核验最大误差 $2.98 \times 10^{-8} \le 10^{-6}$ (**PASS**)。
-- **P16.2 动力学积分**：完成严格四元数积分 $\dot{q} = \frac{1}{2}q \otimes \boldsymbol{\omega}$ 与机体物理加速度模型。
-- **P16.3 125 会话慢动作压力测试**：在 12 类工况（75 万帧）下验证。朴素 ZARU 在真实慢动腿时产生 4,768 次误更新与 -11.97° 严重恶化；而 Phase 16 保守型三态观测器实现 **0 次误更新、0.00° 恶化、100% 胜率**，且在 ±0.14°/min 标称漂移下保持稳定收益（+2.17°/+2.48°，胜率 80.0%–86.7%）。全 4 项门禁全通过。
-- **P16.4 架构裁定**：正式采纳 Phase 16 保守型三态 ZARU 观测器 (`ConservativeBiasEstimatorV4`) 作为下肢慢分支候选；总参数量严格锁定 **1,102,066**（0 扩容）；继续保持 `shadowMode = true` 与 `enabled = false`。
+[Phase 16](model-development/phase-16-observation-fidelity/plan.md) **已完成闭环验收**：
+- **P16.0–P16.2**：源码血统审计、124D Python/Kotlin 黄金样本对齐（最大误差 $2.98 \times 10^{-8}$）、理想刚体四元数积分动力学闭环，并成功注入 $80\sim 120\text{ms}$ 真实非均匀时间戳抖动。
+- **P16.3 全场景基准**：12 类工况、135 条物理动力学会话（75 万帧）全部完成，四大验收门禁全量 **PASS**：Gate 1 严格零漂改变量 $0.0000^\circ \le 0.05^\circ$、Gate 2 真实慢动作误更新 0 次（恶化 $0.00^\circ$）、Gate 3 标称 $\pm0.14^\circ/\text{min}$ 漂移综合胜率 $83.3\% \ge 80.0\%$（正向增益 $+2.33^\circ$ CI [1.17, 3.62]，负向增益 $+2.15^\circ$ CI [1.35, 3.06]）、Gate 4 参数严格锁定 1,102,066。
+- **P16.4 架构正式裁定**：正式采纳多 Tracker 运动学伙伴一致性锚定（Kinematic Coupling & Stillness Anchor Coordinator）的 `ConservativeBiasEstimatorV4`，保持快分支冻结与慢分支 0 新增神经网络参数，维持服务端只读影子模式（`shadowMode = true, enabled = false`）。
+- **P16.5 反事实审计通过**：引入伙伴一致性锚定与不可观测模糊带强制弃权（`ObservationState.UNCERTAIN`），同输入流（SHA-256 `0589f969...`）下真实慢动作端点恶化归零（$0.000^\circ$），误更新降为 0 次；显式 Reset 生命周期（清除基准与状态归零）断言核验通过，P16.5 专项判定为 **PASS**。
 详见 [Phase 16 结果](model-development/phase-16-observation-fidelity/results.md)。
 
 ## 阶段目录
@@ -69,11 +68,11 @@
 | Phase 13：无硬件软件闭环与可复现交付准备 | [plan.md](system-validation/phase-13-no-hardware-readiness/plan.md) | [results.md](system-validation/phase-13-no-hardware-readiness/results.md) | **部分完成：P6 固件源码构建/fixture、P7 协议输入与 GUI 冒烟待补；硬件专属项归 Phase 8** |
 | Phase 14：无硬件软件链路闭环 | [plan.md](system-validation/phase-14-software-closure/plan.md) | [results.md](system-validation/phase-14-software-closure/results.md) | **部分完成：核心 UDP 回放与服务端场景通过；完整故障矩阵、固件构建和 GUI/package 未闭环** |
 | Phase 15：固定参数预算的双时间尺度模型架构 | [plan.md](model-development/phase-15-fixed-budget-dual-timescale/plan.md) | [results.md](model-development/phase-15-fixed-budget-dual-timescale/results.md) | **合成评测完成；部署输入一致性转由 Phase 16 彻底闭环** |
-| Phase 16：慢偏航观测器输入一致性与误校正边界 | [plan.md](model-development/phase-16-observation-fidelity/plan.md) | [results.md](model-development/phase-16-observation-fidelity/results.md) | **已完成：全 4 项门禁 PASS；确立三态保守观测器，0 慢动作误校正** |
+| Phase 16：慢偏航观测器输入一致性与误校正边界 | [plan.md](model-development/phase-16-observation-fidelity/plan.md) | [results.md](model-development/phase-16-observation-fidelity/results.md) | **已完成：135 组物理动力学会话四大门禁全量通过；P16.5 同观测配对与 Reset 断言全项 PASS** |
 
 ## 当前精度结论
 
-- **Phase 16 慢动作误校正与物理自洽评测**：在 125 会话（75 万帧）四元数动力学积分仿真下，证实朴素 ZARU（无论使用原始陀螺还是四元数差分）在人体慢动作时产生 4,768 次误更新并导致 -11.97° 严重恶化；Phase 16 创新引入的机体加速度微方差门控（$\text{Var}(\mathbf{a}) < 0.04$）与三态置信度逻辑实现了 **0 次误更新、0.00° 恶化、100% 胜率**，单腿独立动作净收益 +2.39°（胜率 100%），±0.14°/min 标称漂移净收益 +2.17°/+2.48°（胜率 80.0%–86.7%），总参数严格封顶 1,102,066。
+- **Phase 16 慢动作误校正与反事实配对**：经引入运动学伙伴一致性锚定与不可观测模糊带安全弃权（`ObservationState.UNCERTAIN`），135 组全场景物理基准测试四大门禁全部 PASS（Gate 1 严格零漂改变量 $0.0000^\circ$、Gate 2 真实慢动零误修正、Gate 3 标称 $\pm0.14^\circ/\text{min}$ 漂移综合胜率 83.3%、Gate 4 参数严格锁定 1,102,066）。在 P16.5 完全同观测输入下，真实慢动作反向恶化归零（$0.000^\circ$），误更新降为 0 次；真实非均匀 $dt$ 抖动与 Reset 生命周期核验断言全面通过。慢分支保持离线影子模式。
 - **Phase 15 双时间尺度基线**：锁定 1.10M 参数预算，快分支 1,102,066 参数，慢分支 0 神经网络参数。详见 [Phase 15 结果](model-development/phase-15-fixed-budget-dual-timescale/results.md)。
 - **Phase 11 合成离线结果**：先修正局部右乘残差与世界 Y 轴投影不一致，再训练世界系投影版模型。Oracle P9-only 的合成 Swing 残差由 2.1799° 降至 0.7261° (Hybrid)，改善 **+1.4538° (66.7%)**（95% CI `[+1.2911°, +1.6028°]`，胜率 96.8%）。30 分钟合成会话端点收益 **+141.7191°**，与 P9 ZARU 的 +141.7188° 几乎相同。Phase 11 的 oracle 结论仍是历史结果；Phase 12 用实际因果 P9 重算时复用了已评过的 FinalConfirm，且 P9-only 与 Raw 完全相同，因此只提供 P6 单模型探索信号，不能确认 P9+P6 组合、FK 或足滑增益。详见[结果](model-development/phase-11-hybrid-compensation/results.md)与[Phase 12 复核](system-validation/phase-12-prehardware-validation/results.md)。
 - **Phase 9 最新 M1r/M1r-F 复核**：合成报告的 96.6% 是 10 条 30 分钟模拟会话的 Full 均值结果，能作为后续研究信号，不是硬件精度结论。Phase 12 严格零漂报告给出的 0.008977° endpoint 数值低于 0.05°，但静态姿势门禁没有执行且仿真角速度来源与线上不一致，不能据此认定 Full 零漂安全。真实 SlimeVR 30 分钟终点收益仍未知，详见[复核结果](model-development/phase-09-stateful-bias-model/results.md)与[Phase 12 复核](system-validation/phase-12-prehardware-validation/results.md)。

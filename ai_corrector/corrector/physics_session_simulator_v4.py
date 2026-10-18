@@ -76,6 +76,7 @@ class PhysicsSessionStreamV4:
     features_124: np.ndarray                # (N, 124) 纯在线可部署特征矩阵
     angular_velocity_sources: Dict[str, np.ndarray]  # {"raw_gyro": (N,4,3), "fused_rotation_delta": (N,4,3)}
     ground_truth_eval: dict                 # 离线真值字典
+    dts: Optional[np.ndarray] = None        # (N,) 每帧具体 dt (含真实传输抖动)
 
 
 class PhysicsSessionSynthesizerV4:
@@ -99,8 +100,15 @@ class PhysicsSessionSynthesizerV4:
         self.enable_accel_noise = enable_accel_noise
 
     def generate(self, session_id: str) -> PhysicsSessionStreamV4:
-        t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
-        dt = self.dt
+        if self.scenario == "non_uniform_dt_jitter":
+            # 真实非均匀时间戳抖动 (80ms ~ 120ms, 均值 100ms)
+            jitter_factors = self.rng.uniform(0.80, 1.20, self.num_frames)
+            dts = (self.dt * jitter_factors).astype(np.float64)
+            t = np.zeros(self.num_frames, dtype=np.float64)
+            t[1:] = np.cumsum(dts[:-1])
+        else:
+            dts = np.full(self.num_frames, self.dt, dtype=np.float64)
+            t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
 
         # 1. 分配陀螺零偏向量 b_gyro (绕世界竖直 Y 轴投影为主)
         b_gyro_world = {}
@@ -154,10 +162,8 @@ class PhysicsSessionSynthesizerV4:
                 behavior_states[i] = 1 if (i // int(30.0 * self.sample_rate_hz)) % 2 == 0 else 3
         else:
             # 标准混合工况 (循环: 静止 60s -> 行走 90s -> 静坐 90s -> 转身漫步 60s)
-            cycle_len = int(300.0 * self.sample_rate_hz)
             for i in range(self.num_frames):
-                c_pos = i % cycle_len
-                t_in = c_pos * dt
+                t_in = float(t[i] % 300.0)
                 if t_in < 60.0:
                     behavior_states[i] = 0  # 站立静止
                 elif t_in < 150.0:
@@ -185,6 +191,7 @@ class PhysicsSessionSynthesizerV4:
         features_124 = np.zeros((self.num_frames, TOTAL_INPUT_DIM_V2), dtype=np.float32)
 
         for i in range(self.num_frames):
+            dt_i = float(dts[i])
             state = behavior_states[i]
 
             # 生成肢体真实主动运动
@@ -201,7 +208,7 @@ class PhysicsSessionSynthesizerV4:
 
             elif state == 1:
                 # 步态行走
-                walk_phase += 2.0 * math.pi * 1.2 * dt
+                walk_phase += 2.0 * math.pi * 1.2 * dt_i
                 swing_l = 1.2 * math.sin(walk_phase)
                 swing_r = 1.2 * math.sin(walk_phase + math.pi)
                 omega_body["left_thigh"] = np.array([swing_l, 0.0, 0.0], dtype=np.float64)
@@ -211,7 +218,7 @@ class PhysicsSessionSynthesizerV4:
                 for j in LOWER_BODY_JOINTS:
                     acc_body[j] = np.array([0.0, 0.3 * math.sin(walk_phase * 2), 0.5 * math.cos(walk_phase)], dtype=np.float64)
                 hmd_lin_vel = np.array([0.0, 0.0, 1.0], dtype=np.float32)
-                hmd_pos[2] += 1.0 * dt
+                hmd_pos[2] += 1.0 * dt_i
                 hmd_ang_vel = np.zeros(3, dtype=np.float32)
 
             elif state == 4:
@@ -242,7 +249,7 @@ class PhysicsSessionSynthesizerV4:
             elif state == 6:
                 # 全身慢速同向转向 (Whole body turn, HMD 角速度 > 0.08)
                 turn_rate = 0.10  # rad/s (~5.7°/s)
-                hmd_heading += turn_rate * dt
+                hmd_heading += turn_rate * dt_i
                 hmd_ang_vel = np.array([0.0, turn_rate, 0.0], dtype=np.float32)
                 hmd_lin_vel = np.zeros(3, dtype=np.float32)
                 for j in LOWER_BODY_JOINTS:
@@ -251,7 +258,7 @@ class PhysicsSessionSynthesizerV4:
 
             elif state == 7:
                 # 静坐抖腿 (微小角速度摆动 < 0.03 rad/s，但高加速度颤动方差 > 0.08)
-                fidget_w = 0.02 * math.sin(2.0 * math.pi * 3.0 * i * dt)
+                fidget_w = 0.02 * math.sin(2.0 * math.pi * 3.0 * t[i])
                 hmd_lin_vel = np.zeros(3, dtype=np.float32)
                 hmd_ang_vel = np.zeros(3, dtype=np.float32)
                 for j in LOWER_BODY_JOINTS:
@@ -270,18 +277,18 @@ class PhysicsSessionSynthesizerV4:
 
             else:
                 # 转身漫步
-                hmd_heading += 0.2 * dt
+                hmd_heading += 0.2 * dt_i
                 for j in LOWER_BODY_JOINTS:
                     omega_body[j] = self.rng.normal(0.0, 0.1, 3).astype(np.float64)
                     acc_body[j] = self.rng.normal(0.0, 0.2, 3).astype(np.float64)
                 hmd_lin_vel = np.array([0.3 * math.sin(hmd_heading), 0.0, 0.3 * math.cos(hmd_heading)], dtype=np.float32)
-                hmd_pos += hmd_lin_vel * dt
+                hmd_pos += hmd_lin_vel * dt_i
                 hmd_ang_vel = np.array([0.0, 0.2, 0.0], dtype=np.float32)
 
             # 4. 动力学四元数积分
             for j in LOWER_BODY_JOINTS:
                 # (A) 干净姿态演化
-                dq_clean = quat_exp_so3(omega_body[j] * dt)
+                dq_clean = quat_exp_so3(omega_body[j] * dt_i)
                 q_clean[j] = quat_mult(q_clean[j], dq_clean)
                 q_clean[j] /= np.linalg.norm(q_clean[j])
                 R_clean_arr[j][i] = quat_to_rotmat(q_clean[j])
@@ -295,7 +302,7 @@ class PhysicsSessionSynthesizerV4:
                 omega_imu_physical = omega_body[j] + b_body + noise_gyro
 
                 # (C) 真实原始姿态动力学积分
-                dq_raw = quat_exp_so3(omega_imu_physical * dt)
+                dq_raw = quat_exp_so3(omega_imu_physical * dt_i)
                 q_raw[j] = quat_mult(q_raw[j], dq_raw)
                 q_raw[j] /= np.linalg.norm(q_raw[j])
                 R_raw = quat_to_rotmat(q_raw[j])
@@ -331,7 +338,7 @@ class PhysicsSessionSynthesizerV4:
                         if norm < 1e-6:
                             omega_derived_arr[j][i] = np.zeros(3, dtype=np.float32)
                         else:
-                            omega_derived_arr[j][i] = (theta / dt) * (axis / norm)
+                            omega_derived_arr[j][i] = (theta / dt_i) * (axis / norm)
 
             # 5. 组装 124D 特征
             hmd_rot = rot_y_matrix(hmd_heading).astype(np.float32)
@@ -399,5 +406,6 @@ class PhysicsSessionSynthesizerV4:
                 "raw_gyro": omega_raw_arr,
                 "fused_rotation_delta": omega_derived_arr
             },
-            ground_truth_eval=gt_eval
+            ground_truth_eval=gt_eval,
+            dts=dts
         )
