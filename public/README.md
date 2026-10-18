@@ -17,6 +17,6 @@
 | Phase 10 | README 与阶段成果同步 | 已完成 | [计划](phase-10-readme-sync/plan.md) · [结果](phase-10-readme-sync/results.md) |
 | Phase 11 | Phase 6/9 正交组合验证 | 4 项合成离线门禁 PASS；Phase 12 的复用集评测仅支持 P6 单模型探索收益，未证明 P9+P6 组合增益；H4 待 Phase 8 | [计划](phase-11-hybrid-compensation/plan.md) · [结果](phase-11-hybrid-compensation/results.md) |
 | Phase 12 | 无实机影子推理、回放与算法离线复验 | 未通过整体验收：13 项 Kotlin 测试通过；S2 逐帧 108,000 次推理、P95 0.657ms；S1 缺 Session 关闭调用；A1 静态门禁硬编码且观测链路不匹配；A2 复用旧 FinalConfirm 且 P9-only 等于 Raw | [计划](phase-12-prehardware-validation/plan.md) · [结果](phase-12-prehardware-validation/results.md) |
-| Phase 13 | 无硬件软件闭环与可复现交付准备 | 已规划、待执行：服务端生命周期与完整 tick 回放、有效离线门禁、双固件可重复构建、PC 模拟集成和到货检查包；不扩容模型 | [计划](phase-13-no-hardware-readiness/plan.md) · [结果](phase-13-no-hardware-readiness/results.md) |
+| Phase 13 | 无硬件软件闭环与可复现交付准备 | 已完成并通过软件整体验收：VRServer AutoCloseable 生命周期与 108k 帧完整 tick 回放（P95 0.899ms、堆增量 0.21MB）、真实物理仿真门禁全绿（严格零漂 0.008977°、静坐 0.000000°）、PC 端双套件构建通过、双固件构建环境与到货检查包就绪；AMASS 按规诚实标记数据受限 | [计划](phase-13-no-hardware-readiness/plan.md) · [结果](phase-13-no-hardware-readiness/results.md) |
 
 模型、数据集、评测脚本与 JSON 机器报告继续保存在 `ai_corrector/`；阶段 `results.md` 记录摘要并链接到这些原始产物，不复制二进制数据或报告内容。原先 `nextplan.md` 的待执行内容已并入 Phase 6 子计划。README 同步记录在 [Phase 10](phase-10-readme-sync/results.md)。

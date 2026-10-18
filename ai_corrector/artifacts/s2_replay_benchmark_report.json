@@ -2,25 +2,25 @@
   "phase": "Phase 12",
   "task": "S2",
   "status": "PASS",
-  "timestamp": "2026-10-18T04:19:51.118674100Z",
+  "timestamp": "2026-10-18T05:41:29.905982400Z",
   "target_latency_p95_ms": 20.0,
   "frames_benchmarked": 3000,
   "measured_latency": {
     "total_end_to_end_ms": {
-      "mean": 0.5409957666666657,
-      "p50": 0.5234,
-      "p95": 0.6571,
-      "p99": 0.7697999999999999,
-      "max": 1.3693
+      "mean": 0.6306956666666679,
+      "p50": 0.5903999999999999,
+      "p95": 0.8687,
+      "p99": 1.0997999999999999,
+      "max": 3.1412
     },
     "onnx_inference_ms": {
-      "p50": 0.5211,
-      "p95": 0.6538999999999999,
-      "p99": 0.7657999999999999
+      "p50": 0.5872999999999999,
+      "p95": 0.86,
+      "p99": 1.0916
     },
     "feature_assembly_us": {
-      "p50": 1.7,
-      "p95": 5.7
+      "p50": 2.4,
+      "p95": 8.3
     }
   },
   "bypass_count": 0,
@@ -29,7 +29,7 @@
     "logical_frames": 108000,
     "model_inferences": 108000,
     "resets_executed": 59,
-    "memory_delta_mb": -0.5173568725585938,
+    "memory_delta_mb": -0.08209991455078125,
     "memory_check": "post-GC observation; no explicit threshold"
   },
   "environment": {
