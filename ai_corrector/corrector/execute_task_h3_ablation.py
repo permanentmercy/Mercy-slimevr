@@ -332,9 +332,11 @@ def _worker_evaluate_session(args: Tuple[str, float, int, str, bool]) -> Tuple[s
 
 def evaluate_holdout_short_term_fk(device: torch.device) -> dict:
     """
-    在独立未见源序列 FinalConfirm (36..40) 上评测短时姿态与偏航串扰
+    在独立未见源序列 FinalConfirm (36..40, 190 序列) 上评测短时非偏航 Swing 姿态补偿增益与偏航串扰
     """
-    fc_path = BASE_DIR / "ai_corrector" / "database" / "d3c_continuous" / "final_confirm_continuous.npz"
+    fc_path = BASE_DIR / "ai_corrector" / "database" / "p11_continuous" / "final_confirm_continuous.npz"
+    if not fc_path.exists():
+        fc_path = BASE_DIR / "ai_corrector" / "database" / "d3c_continuous" / "final_confirm_continuous.npz"
     if not fc_path.exists():
         return {"status": "skipped", "reason": "final_confirm_continuous.npz not found"}
 
@@ -350,54 +352,84 @@ def evaluate_holdout_short_term_fk(device: torch.device) -> dict:
     neutral_model = load_yaw_neutral_cstn(neutral_pt, device)
     old_model = None
     if old_pt.exists():
-        ckpt = torch.load(old_pt, map_location=device, weights_only=False)
-        cfg_dict = ckpt.get("config", {})
-        cfg = Config(**cfg_dict) if isinstance(cfg_dict, dict) and cfg_dict else Config(
-            stream_dims=(17, 17, 17, 17, 14, 14, 14, 14), num_joints=4, decoder_type="joint_decoupled"
-        )
-        old_model = Corrector(cfg).to(device)
-        sd = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
-        old_model.load_state_dict(sd)
-        old_model.eval()
+        try:
+            ckpt = torch.load(old_pt, map_location=device, weights_only=False)
+            cfg_dict = ckpt.get("config", {})
+            cfg = Config(**cfg_dict) if isinstance(cfg_dict, dict) and cfg_dict else Config(
+                stream_dims=(17, 17, 17, 17, 14, 14, 14, 14), num_joints=4, decoder_type="joint_decoupled"
+            )
+            old_model = Corrector(cfg).to(device)
+            sd = ckpt["state_dict"] if "state_dict" in ckpt else ckpt
+            old_model.load_state_dict(sd)
+            old_model.eval()
+        except Exception:
+            pass
 
     identity_q = torch.tensor([1.0, 0.0, 0.0, 0.0], device=device).expand_as(dq_target)
     target_swing, target_twist = torch_swing_twist_decomposition_y(dq_target)
 
-    # 1. Raw baseline
-    raw_geodesic = compute_smooth_geodesic_distance(identity_q, dq_target)[mask].mean().item()
-    raw_swing = compute_smooth_geodesic_distance(identity_q, target_swing)[mask].mean().item()
+    # 1. 逐帧误差计算
+    raw_swing_frame = compute_smooth_geodesic_distance(identity_q, target_swing)
+    raw_geo_frame = compute_smooth_geodesic_distance(identity_q, dq_target)
 
-    # 2. Old CSTN
-    old_geodesic = 0.0
+    # 2. 运行模型推断
+    old_geo_frame = None
     old_twist_crosstalk = 0.0
     if old_model is not None:
         with torch.no_grad():
             out_old, _ = old_model(x)
-            old_geodesic = compute_smooth_geodesic_distance(out_old["dq"], dq_target)[mask].mean().item()
+            old_geo_frame = compute_smooth_geodesic_distance(out_old["dq"], dq_target)
             _, old_twist = torch_swing_twist_decomposition_y(out_old["dq"])
-            old_twist_crosstalk = compute_smooth_geodesic_distance(old_twist, identity_q)[mask].mean().item()
+            old_twist_crosstalk = float(np.degrees(compute_smooth_geodesic_distance(old_twist, identity_q)[mask].mean().item()))
 
-    # 3. Yaw-Neutral CSTN
-    neutral_geodesic = 0.0
-    neutral_swing = 0.0
+    neutral_swing_frame = None
+    neutral_geo_frame = None
     neutral_twist_crosstalk = 0.0
     if neutral_model is not None:
         with torch.no_grad():
             out_n, _ = neutral_model(x)
-            neutral_geodesic = compute_smooth_geodesic_distance(out_n["dq"], dq_target)[mask].mean().item()
-            neutral_swing = compute_smooth_geodesic_distance(out_n["dq"], target_swing)[mask].mean().item()
-            neutral_twist_crosstalk = compute_smooth_geodesic_distance(out_n["dq_twist"], identity_q)[mask].mean().item()
+            neutral_swing_frame = compute_smooth_geodesic_distance(out_n["dq"], target_swing)
+            neutral_geo_frame = compute_smooth_geodesic_distance(out_n["dq"], dq_target)
+            neutral_twist_crosstalk = float(np.degrees(compute_smooth_geodesic_distance(out_n["dq_twist"], identity_q)[mask].mean().item()))
+
+    # 3. 逐序列统计与 Bootstrap 置信区间
+    num_seqs = x.shape[0]
+    raw_swing_seqs = []
+    neutral_swing_seqs = []
+    swing_gains = []
+
+    for s in range(num_seqs):
+        m_s = mask[s]
+        r_deg = float(np.degrees(raw_swing_frame[s][m_s].mean().item()))
+        raw_swing_seqs.append(r_deg)
+        if neutral_swing_frame is not None:
+            n_deg = float(np.degrees(neutral_swing_frame[s][m_s].mean().item()))
+            neutral_swing_seqs.append(n_deg)
+            swing_gains.append(r_deg - n_deg)
+
+    mean_raw_swing = float(np.mean(raw_swing_seqs))
+    mean_neutral_swing = float(np.mean(neutral_swing_seqs)) if neutral_swing_seqs else mean_raw_swing
+    mean_swing_gain = float(np.mean(swing_gains)) if swing_gains else 0.0
+
+    # 2000 次 Bootstrap 抽样计算置信区间
+    rng = np.random.RandomState(42)
+    boot_gains = [float(np.mean(rng.choice(swing_gains, size=len(swing_gains), replace=True))) for _ in range(2000)]
+    ci_low = float(np.percentile(boot_gains, 2.5))
+    ci_high = float(np.percentile(boot_gains, 97.5))
+    win_rate = float(sum(1 for g in swing_gains if g > 0.0) / len(swing_gains)) if swing_gains else 0.0
+    gain_ratio = (mean_swing_gain / mean_raw_swing * 100.0) if mean_raw_swing > 1e-4 else 0.0
 
     return {
-        "num_sequences": int(x.shape[0]),
+        "num_sequences": int(num_seqs),
         "total_frames": int(mask.sum().item()),
-        "raw_geodesic_deg": float(np.degrees(raw_geodesic)),
-        "raw_swing_deg": float(np.degrees(raw_swing)),
-        "old_cstn_geodesic_deg": float(np.degrees(old_geodesic)),
-        "old_cstn_twist_crosstalk_deg": float(np.degrees(old_twist_crosstalk)),
-        "neutral_cstn_geodesic_deg": float(np.degrees(neutral_geodesic)),
-        "neutral_cstn_swing_deg": float(np.degrees(neutral_swing)),
-        "neutral_cstn_twist_crosstalk_deg": float(np.degrees(neutral_twist_crosstalk)),
+        "mean_raw_swing_deg": mean_raw_swing,
+        "mean_neutral_swing_deg": mean_neutral_swing,
+        "mean_swing_gain_deg": mean_swing_gain,
+        "swing_gain_ratio_pct": gain_ratio,
+        "swing_95_ci": [ci_low, ci_high],
+        "swing_win_rate": win_rate,
+        "old_cstn_twist_crosstalk_deg": old_twist_crosstalk,
+        "neutral_cstn_twist_crosstalk_deg": neutral_twist_crosstalk,
     }
 
 
@@ -542,25 +574,31 @@ def main():
     cand_win = summary_standard["hybrid_candidate"]["win_rate"]
     p9_zaru_gain = summary_standard["p9_zaru"]["mean_gain_deg"]
 
-    # 严格零漂恶化容限 <= 0.05 度
+    # Gate 1: 严格零漂恶化容限 <= 0.05 度
     strict_zero_delta = summary_strict_zero["hybrid_candidate"]["mean_delta_from_raw_deg"]
     zero_safe = bool(abs(strict_zero_delta) <= 0.05)
 
-    # 组合正收益且不显著劣于 P9 ZARU (恶化不超过 0.5 度)
+    # Gate 2: 组合正收益且不显著劣于 P9 ZARU (恶化不超过 0.5 度)
     hybrid_valid = bool(cand_gain > 0.0 and (cand_gain >= p9_zaru_gain - 0.5))
 
-    # 快分支偏航串扰严格受控
+    # Gate 3: 快分支偏航串扰严格受控 (< 0.05 度)
     twist_crosstalk = holdout_report.get("neutral_cstn_twist_crosstalk_deg", 999.0)
     twist_safe = bool(twist_crosstalk < 0.05)
 
-    gate_verdict = "PASS" if (hybrid_valid and zero_safe and twist_safe) else "FAIL"
+    # Gate 4: Phase 6 在未见确认集上具有严格统计显著的非偏航 Swing 姿态补偿增益 (CI 下界 > 0)
+    p6_swing_gain = holdout_report.get("mean_swing_gain_deg", -999.0)
+    p6_ci_low = holdout_report.get("swing_95_ci", [-999.0, 999.0])[0]
+    p6_win_rate = holdout_report.get("swing_win_rate", 0.0)
+    p6_swing_gain_safe = bool(p6_swing_gain > 0.0 and p6_ci_low > 0.0 and p6_win_rate >= 0.80)
+
+    gate_verdict = "PASS" if (hybrid_valid and zero_safe and twist_safe and p6_swing_gain_safe) else "FAIL"
 
     print("\n" + "=" * 80)
     print(f"  [Task H3 验收裁定]: {gate_verdict}")
-    print(f"  - 候选组合 30 分钟平均增益: {cand_gain:+.2f}° (改善率: {cand_ratio:.1f}%, 胜率: {cand_win*100:.1f}%)")
-    print(f"  - 相对 P9 ZARU 增益差异: {cand_gain - p9_zaru_gain:+.2f}° (无显著恶化)")
-    print(f"  - 严格零漂偏差 (Delta): {strict_zero_delta:+.4f}° (门限: <= 0.05° -> {'SAFE' if zero_safe else 'UNSAFE'})")
-    print(f"  - 快速分支偏航串扰: {twist_crosstalk:.4f}° (门限: < 0.05° -> {'SAFE' if twist_safe else 'UNSAFE'})")
+    print(f"  - Gate 1 (组合 30 分钟增益): {cand_gain:+.2f}° (改善率: {cand_ratio:.1f}%, 胜率: {cand_win*100:.1f}%) -> {'PASS' if hybrid_valid else 'FAIL'}")
+    print(f"  - Gate 2 (严格零漂偏差 Delta): {strict_zero_delta:+.4f}° (门限: <= 0.05°) -> {'SAFE' if zero_safe else 'UNSAFE'}")
+    print(f"  - Gate 3 (快速分支偏航串扰): {twist_crosstalk:.4f}° (门限: < 0.05°) -> {'SAFE' if twist_safe else 'UNSAFE'}")
+    print(f"  - Gate 4 (P6 短时 Swing 姿态增益): {p6_swing_gain:+.4f}° (95% CI: [{p6_ci_low:+.4f}°, {holdout_report.get('swing_95_ci', [0, 0])[1]:+.4f}°], 胜率: {p6_win_rate*100:.1f}%) -> {'PASS' if p6_swing_gain_safe else 'FAIL'}")
     print("=" * 80)
 
     # 7. 保存归档机器报告
@@ -571,6 +609,7 @@ def main():
             "hybrid_valid": hybrid_valid,
             "zero_safe": zero_safe,
             "twist_safe": twist_safe,
+            "p6_swing_gain_safe": p6_swing_gain_safe,
         },
         "summary_standard_10_sessions": summary_standard,
         "summary_strict_zero_drift": summary_strict_zero,

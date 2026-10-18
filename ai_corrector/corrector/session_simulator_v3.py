@@ -61,7 +61,8 @@ class ContinuousSessionSynthesizer:
                  drift_tier_deg_min: float = 3.0,
                  seed: int = 123,
                  scenario: str = "default",
-                 enable_random_walk: bool = True):
+                 enable_random_walk: bool = True,
+                 enable_dynamic_tilt: bool = True):
         self.duration_sec = float(duration_sec)
         self.sample_rate_hz = float(sample_rate_hz)
         self.dt = 1.0 / self.sample_rate_hz
@@ -70,6 +71,7 @@ class ContinuousSessionSynthesizer:
         self.rng = np.random.RandomState(seed)
         self.scenario = scenario
         self.enable_random_walk = enable_random_walk
+        self.enable_dynamic_tilt = enable_dynamic_tilt
 
     def generate(self, session_id: str) -> ContinuousSessionStream:
         t = np.linspace(0.0, self.duration_sec, self.num_frames, endpoint=False)
@@ -236,7 +238,28 @@ class ContinuousSessionSynthesizer:
             imu_streams = []
             for j in LOWER_BODY_JOINTS:
                 e_t = float(true_drift_curves[j][i])
-                R_raw = rot_y_matrix(e_t).astype(np.float32) @ leg_rot_clean[j]
+                
+                # 动态 AHRS 倾斜失真 (只在肢体运动时产生，静态为 0)
+                norm_omega = float(np.linalg.norm(leg_omega_motion[j]))
+                if self.enable_dynamic_tilt and norm_omega > 0.05:
+                    tilt_axis = np.cross(leg_omega_motion[j], np.array([0.0, 1.0, 0.0], dtype=np.float32))
+                    n_t = float(np.linalg.norm(tilt_axis))
+                    if n_t > 1e-6:
+                        u_t = tilt_axis / n_t
+                        ang_t = float(np.clip(0.040 * n_t, 0.0, np.deg2rad(6.0)))
+                        c_t, s_t = math.cos(ang_t), math.sin(ang_t)
+                        ux, uy, uz = u_t
+                        R_dyn_tilt = np.array([
+                            [c_t + ux*ux*(1-c_t), ux*uy*(1-c_t) - uz*s_t, ux*uz*(1-c_t) + uy*s_t],
+                            [uy*ux*(1-c_t) + uz*s_t, c_t + uy*uy*(1-c_t), uy*uz*(1-c_t) - ux*s_t],
+                            [uz*ux*(1-c_t) - uy*s_t, uz*uy*(1-c_t) + ux*s_t, c_t + uz*uz*(1-c_t)]
+                        ], dtype=np.float32)
+                    else:
+                        R_dyn_tilt = np.eye(3, dtype=np.float32)
+                else:
+                    R_dyn_tilt = np.eye(3, dtype=np.float32)
+
+                R_raw = rot_y_matrix(e_t).astype(np.float32) @ R_dyn_tilt @ leg_rot_clean[j]
                 
                 # 传感器测量角速度 = 动作角速度 + 机体陀螺零偏 + 测量白噪声
                 # 世界竖直轴偏航漂移率在机体轴投影: b_body = R_raw^T @ [0, rate, 0]

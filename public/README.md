@@ -15,6 +15,6 @@
 | Phase 8 | 实机采集与在线迁移 | 待硬件就绪 | [计划](phase-08-device-validation/plan.md) · [结果](phase-08-device-validation/results.md) |
 | Phase 9 | 四路下肢偏航状态模型重构 | 合成结果积极；Full 零漂安全未证实，实机待验收 | [计划](phase-09-stateful-bias-model/plan.md) · [结果](phase-09-stateful-bias-model/results.md) |
 | Phase 10 | README 与阶段成果同步 | 已完成 | [计划](phase-10-readme-sync/plan.md) · [结果](phase-10-readme-sync/results.md) |
-| Phase 11 | Phase 6/9 正交组合验证 | 算子验证通过；P6 精度增益未通过，H4 待执行 | [计划](phase-11-hybrid-compensation/plan.md) · [结果](phase-11-hybrid-compensation/results.md) |
+| Phase 11 | Phase 6/9 正交组合验证 | H0–H3 离线验收全案通过 (PASS)，实机 H4 暂缓待 Phase 8 | [计划](phase-11-hybrid-compensation/plan.md) · [结果](phase-11-hybrid-compensation/results.md) |
 
 模型、数据集、评测脚本与 JSON 机器报告继续保存在 `ai_corrector/`；阶段 `results.md` 记录摘要并链接到这些原始产物，不复制二进制数据或报告内容。原先 `nextplan.md` 的待执行内容已并入 Phase 6 子计划。README 同步记录在 [Phase 10](phase-10-readme-sync/results.md)。

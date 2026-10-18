@@ -171,6 +171,8 @@ htmlcov/
 /ai_corrector/database/amass/
 /ai_corrector/database/smplh/
 /ai_corrector/database/processed*/
+/ai_corrector/database/*continuous*/
+/ai_corrector/database/*sessions*/
 
 # 根目录兼容规则
 /.model-deps/
@@ -179,6 +181,8 @@ htmlcov/
 /database/amass/
 /database/smplh/
 /database/processed*/
+/database/*continuous*/
+/database/*sessions*/
 *.npz
 
 # ===================== 深度学习模型权重与导出推理文件 =====================
