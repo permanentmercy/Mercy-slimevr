@@ -17,6 +17,12 @@
 - **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：4 项合成离线机器门禁 PASS；Oracle P9 Twist 条件下，P6 将世界系 Swing 残差在 190 条序列上从 2.1799° 降至 0.7261°，改善 +1.4538° (66.7%)。30 分钟合成端点收益与 P9 ZARU 单独几乎相同。Phase 12 复用已使用过的 FinalConfirm，且 P9-only 与 Raw 完全相同；其 +1.352° Swing 结果只说明 P6 在该合成扰动上的探索收益，不能证明 P9+P6 组合、FK 或世界足滑改善，H4 仍待新隔离集与 Phase 8。
 - **Phase 12**：[无实机影子推理、回放与算法离线复验](phase-12-prehardware-validation/plan.md)：**整体验收未通过**。契约 6 项、推理 5 项、回放 2 项 Kotlin 测试通过；最新回放逐帧推理 108,000 次，特征组装加推理 P95 0.657 ms，但未经过完整 `VRServer.tick()`，GC 后内存 delta -0.517 MB 也没有门限。S1 缺服务关闭时释放 Session 的调用；A1 静态安全门禁硬编码通过且仿真输入不匹配服务端角速度来源；A2 复用旧 FinalConfirm、无新隔离 manifest，P9-only 与 Raw 相同，FK/足滑为简化代理。待办见 [Phase 12 R1](phase-12-prehardware-validation/plan.md)。
 
+## Phase 13 执行方向
+
+[Phase 13 无硬件软件闭环计划](phase-13-no-hardware-readiness/plan.md)已建立，尚未执行。按 P0–P8 顺序推进：先保护独立仓库现有改动并冻结工具链；统一 124D 字段和模型 ABI；补 ONNX Session 关闭与故障旁路；用虚拟 tracker 穿过完整 `VRServer.tick()` 做 108,000 帧回放；重做真实计算的 Phase 9 零漂/静态安全门禁；仅在有全新 source/subject 隔离数据时确认 Phase 11 增量；分别 clean build tracker/receiver 固件；完成 PC 模拟集成、文档和硬件到货检查包。模型参数量不扩大，corrector 仍保持 shadow-only。
+
+硬件专属的 UF2 磁盘枚举、SWD 实刷、IMU ID/原始陀螺、无线配对、VD 质量和 30 分钟人体真值测试仍归 Phase 8，不会被无硬件的软件测试代替。
+
 ## 阶段目录
 
 | 阶段 | 子计划 | 执行结果 | 状态 |
@@ -31,6 +37,7 @@
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
 | Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；Phase 12 后续结果仅为探索，组合收益未证实** |
 | Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **未通过整体验收；S0–S2 有本机通过项，A1/A2 需重做** |
+| Phase 13：无硬件软件闭环与可复现交付准备 | [plan.md](phase-13-no-hardware-readiness/plan.md) | [results.md](phase-13-no-hardware-readiness/results.md) | **已规划、待执行；P5 取决于是否存在全新隔离源数据** |
 
 ## 当前精度结论
 

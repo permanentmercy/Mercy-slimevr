@@ -202,17 +202,118 @@ ONNX Runtime 使用单帧张量 \(x\in\mathbb{R}^{1\times1\times124}\)，输入�
 \end{enumerate}
 完整本机验证状态见 \texttt{public/phase-12-prehardware-validation/results.md}。13 项指定 Kotlin 测试通过，S2 回放逐帧推理和延迟结果通过其局部门槛；Phase 12 整体验收尚未通过。
 
-\section{安全设计、验证缺口与下一步}
+\section{端到端软硬件流程清单与执行方案}
+\label{sec:end_to_end_plan}
 
-网络门控只表示训练分布中的候选残差可信度，不是传感器真实度量或安全证明。上线前需要将低门控处理、异常输入旁路、角度/速率限幅、Reset 状态同步和可观测日志放在可审查的运行时路径中。短时 Swing 修正与长时偏航修正应分别报告，不能把平均姿态误差当成 30 分钟端点收益。
+\subsection{系统链路总览}
+项目有两条在服务端汇合的实时观测链，以及一条离线训练/验证链：
+\begin{enumerate}
+  \item \textbf{下肢惯性链：}四颗下肢 IMU（左/右大腿、左/右小腿）采集角速度和加速度；固件中的姿态融合（当前设计为 VQF）生成 tracker 姿态，经无线接收与 SlimeVR tracker 数据路径进入 Server。芯片具备原始陀螺仪并不代表 Server 已收到原始陀螺仪，必须沿固件、包结构、DataFeed 和 Tracker 更新路径逐段确认。
+  \item \textbf{上身参考链：}HMD 及可用的 VD 上身虚拟 tracker 经 SteamVR/Feeder 进入同一个 Server。VD 输出按带质量、时延和丢失风险的辅助参考处理，不把胸部姿态当作下肢绝对偏航真值。
+  \item \textbf{在线推理链：}Server tracker 更新 \(\to\) 时戳/坐标核验 \(\to\) 124 维特征 \(\to\) P6 ONNX 与 P9 状态估计 \(\to\) Phase 11 正交合成 \(\to\) 骨架求解输入 \(\to\) OpenVR 或 OSC/VMC 输出。
+  \item \textbf{离线研发链：}AMASS 与（硬件到手后的）同步实测记录 \(\to\) 数据清洗和独立 manifest \(\to\) P6 训练、P9 参数标定 \(\to\) ONNX 导出/回放 \(\to\) 独立真值评测。训练真值和评测标签不得进入在线特征。
+\end{enumerate}
+
+本项目原型硬件规划包含 6 个 IMU 节点，但当前 124 维模型契约只消费四个下肢 IMU；其余身体参考由 HMD/VD tracker 通道提供。执行前必须冻结实际 tracker 位置映射，避免把硬件节点数误当成模型输入通道数。
+
+\subsection{逐项流程清单}
+以下步骤按前置依赖排序。每项列出当前状态、执行动作与退出条件；方括号状态用于后续逐项更新。
 
 \begin{enumerate}
-  \item \textbf{修正观测链路：}明确 SlimeVR 服务端可用的角速度、加速度、时间戳和质量字段；使训练与运行时特征的单位、坐标系、因果差分方式一致。
-  \item \textbf{重新验证 P9：}修复静止姿势保持的独立门禁，验证静态姿势不会被冲洗；以新隔离序列分别测量四路漂移方向、端点误差、最差会话和置信区间。
-  \item \textbf{确认融合增量：}使用未被训练、选模或 Phase 11/12 打开的新 source/subject 隔离集，将真实 P9 估计状态作为 P6 输入条件；报告 P9-only、P6-only、P9+P6 的配对端点和短时姿态结果。
-  \item \textbf{补齐服务集成：}把 P9 状态机与正交合成器实现为服务端可测模块；将最终姿态安全写入骨架求解输入；补上 Session 生命周期关闭、Tracker 映射、时间同步和完整 \texttt{VRServer.tick()} 回放。
-  \item \textbf{实机验证：}硬件可用后采集 IMU/VD/服务端输出，并同步外部光学或其他独立真值。单靠 AMASS 合成数据无法确认真实 AHRS 漂移模型或实际足部滑移改善。
+  \item \textbf{[冻结] 目标、分工与模型容量。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}目标是一次 reset 后至少 30 分钟，四路下肢 tracker 开始到结束的累计偏航误差总量低于 Raw；P9 负责慢偏航，P6 负责短时 Swing。
+    \item \textbf{执行：}冻结 P6 主干为当前 hidden size 96、8 路 LSTM、3 层/8 头空间 Transformer 和 joint-decoupled heads。当前阶段不增加参数量、不扩大网络、不以模型容量作为优先优化方向。改动先针对观测字段、P9 物理门禁、数据质量与融合实现。
+    \item \textbf{退出条件：}所有后续报告分别给出四路/会话端点主指标、短时 Swing 指标、零漂静态安全指标；不以逐帧平均误差代替 30 分钟端点目标。
+  \end{itemize}
+
+  \item \textbf{[待硬件] 硬件身份、安装与机械标定。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}四颗下肢 tracker、HMD、可用 VD 上身 tracker、无线接收器；输出设备清单、固件版本、传感器轴向、tracker 身体位置、安装方向和校准记录。
+    \item \textbf{执行：}逐设备记录 IMU 型号/ID、采样率、板载姿态算法、固件 commit、电池与连接状态；固定绑带并记录传感器到肢段的安装矩阵。确认 SlimeVR 中两大腿、两小腿位置没有左右或上下错绑。
+    \item \textbf{退出条件：}设备身份和轴向可复现；重戴后能通过明确校准恢复；安装滑动可从传感器漂移中单独标记。当前无目标实机，暂不能执行此项。
+  \end{itemize}
+
+  \item \textbf{[待硬件/先审代码] 固件、AHRS 与传输字段核验。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}固件原始 IMU、板载融合姿态、加速度和无线数据包；输出一份逐字段的数据来源表，说明单位、坐标系、时间戳和滤波语义。
+    \item \textbf{执行：}沿传感器驱动 \(\to\) VQF \(\to\) 无线包 \(\to\) Server 协议解析 \(\to\) Tracker 更新逐段追踪角速度、加速度、融合四元数和时间戳。缺少原始角速度时明确标为不可用或由姿态差分派生；不把线加速度冒充角加速度，也不把空字段当零漂观测。
+    \item \textbf{退出条件：}每个模型输入字段都能追溯到有效来源，仿真与线上采用相同定义。硬件到手前可完成协议与源码审计，物理输出核验待实机。
+  \end{itemize}
+
+  \item \textbf{[部分完成] VD/SteamVR/SlimeVR tracker 映射与参考系。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}HMD 和虚拟上身 tracker 的姿态、位置、速度、质量与状态；输出实际设备映射表及统一世界坐标定义。
+    \item \textbf{执行：}确认 VD 哪些上身 tracker 能经 SteamVR/Feeder 到达 Server；逐项核验胸部、左右上臂/肩部的 position enum、坐标变换、有效状态和重定位行为。分别记录 tracker 缺失、遮挡、延迟和空间重置。
+    \item \textbf{退出条件：}数据映射与坐标方向通过可重复姿态测试；VD 有效性和年龄字段反映真实状态。不得由“VD tracker 可用”推导“该 tracker 是零漂绝对真值”。
+  \end{itemize}
+
+  \item \textbf{[部分完成] 时间基准、特征 ABI 与输入金标。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}异步 tracker 更新；输出带单调时间戳、明确派生角速度和缺失标志的 124 维帧。
+    \item \textbf{执行：}当前桥接器按 Server tick 采样，不能据此认定多设备已做硬件时间戳同步；先接入/追踪可用时间戳，计算真实 age，明确定义迟到和重复帧策略。固定 124 维 ABI，Python/Kotlin 共用非对称哨兵 fixture，逐元素对比旋转 6D、单位、有效标志、缺失策略和递归状态。
+    \item \textbf{退出条件：}固定 fixture 的 Python/Kotlin 每维一致；真实输入的时间年龄不再无依据写零；角速度来源在训练、推理和报告中保持同一语义。
+  \end{itemize}
+
+  \item \textbf{[待硬件] 原始数据采集与独立参考建立。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}SlimeVR/VD 服务端观测与独立光学或等效姿态参考；输出不可变原始日志、时钟映射、校准说明及每段数据 manifest。
+    \item \textbf{执行：}保持影子模式、不写入候选修正；采集站立、非中立静态姿势、直线行走、转身、蹲起、抬腿等动作，并采集至少一段 reset 后连续 30 分钟会话。记录断连、丢包、温度、佩戴移动和所有 reset；开始与结束参考须在再次 reset 前取得并同步。
+    \item \textbf{退出条件：}能够由原始记录重放同一输入；开始/结束真值的参考误差和时钟误差有量化范围。没有独立参考时只可验链路，不能验补偿收益。
+  \end{itemize}
+
+  \item \textbf{[进行中/待新数据] 数据预处理、隔离与标签。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}AMASS 合成数据和经许可的实测记录；输出版本化训练/验证/确认 manifest、特征张量与真值标签。
+    \item \textbf{执行：}先按 source/subject/session 分组再切分，禁止重叠窗跨集合。合成器要分开模拟传感器固有零偏、随机游走、姿态融合输出误差、安装误差、VD 噪声/延迟/掉帧；实测段单独保留且不用于调参后的最终确认。标签区分世界 Y 偏航 Twist 与非偏航 Swing。
+    \item \textbf{退出条件：}每个样本可追溯到源序列、扰动参数和生成代码版本；FinalConfirm 未被训练、选模或反复查看。没有新独立数据时，结果标作探索或数据受限。
+  \end{itemize}
+
+  \item \textbf{[需修复门禁] P9 四路慢偏航估计。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}合法的 tracker 时序、静止/步态候选观测；输出每路 \((e_i,b_i,P_i)\) 及锚点接受/拒绝原因。
+    \item \textbf{执行：}先修静态姿势零漂独立测试，确认无漂时不误拉姿态；使用角速度方差、加速度方差和姿态变化共同判断静止，并确认这些量实际参与代码门禁。步态检测增加路径直线度/转向拒绝、速度和周期性条件；对坐姿、盘腿、转身、抬腿和缺失 VD 做拒绝更新测试。随后用 30 分钟 endpoint loss、正负漂移、随机游走和不同静态姿势调状态噪声，不接触确认集。
+    \item \textbf{退出条件：}静态和严格零漂门限自动计算且全会话通过；隔离集上四路 endpoint 的收益置信区间下界大于零且最差会话受限。当前 A1 静态门禁无效，旧 PASS 不接受。
+  \end{itemize}
+
+  \item \textbf{[容量冻结] P6 短时 Swing 模型训练和导出。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}124 维因果帧、干净姿态目标和有效 mask；输出固定架构下的四路 Swing 残差、门控、接触概率及 ONNX。
+    \item \textbf{执行：}维持现有网络参数规模。先验证合成扰动与真实 AHRS 误差的对应关系，再对不同动作、安装角、VD 延迟/缺失做数据增强；校准 gate 对“真实改善概率”的预测并分别检查零漂静态集。触地头只有在标签可复现且下游确实使用时才保留为有效任务。导出后检查模型哈希、ABI、逐帧递归状态和 PyTorch/ONNX 一致性。
+    \item \textbf{退出条件：}新隔离集的短时 Swing 指标有统计收益，零漂/静态集不受损，gate 覆盖率和失效旁路达标；不以训练损失或 proxy F1 代替姿态收益。
+  \end{itemize}
+
+  \item \textbf{[离线已有/服务端待移植] P6/P9 正交融合。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}原始腿部姿态、P9 的四路 \(\hat e_i\)、P6 Swing 残差和门控；输出经世界 Y Twist 投影的候选姿态。
+    \item \textbf{执行：}先在 Python 对随机旋转、边界姿态、纯偏航输入、零门控和局部/世界坐标转换做属性测试；随后在 Kotlin 实现同一公式，以共享 fixture 逐元素比对。接入前分别运行 Raw、P9-only、P6-only、P9+P6 消融。
+    \item \textbf{退出条件：}P6 不引入世界 Y Twist；门控为零严格回到 P9；P9 为零严格退化到 Yaw-Neutral P6；真实 P9 状态下的融合增益由全新隔离集确认。
+  \end{itemize}
+
+  \item \textbf{[影子原型/未完成] ONNX Runtime、状态与求解器写回。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}通过 ABI 验证的 60 Hz 帧和模型；输出 shadow 诊断，再在安全门禁后形成送入骨架求解器的姿态。
+    \item \textbf{执行：}维持默认 shadow-only；完成 Session 生命周期关闭、状态 reset、缺失/异常/超时旁路与完整 \texttt{VRServer.tick()} 回放。将 P9 与融合状态接入服务端后，设计单一、可回滚的 solver-input 写入点；防止反复累乘修正，原始 tracker 姿态始终保留用于对照。候选门控必须按验证过的 SLERP 权重执行。
+    \item \textbf{退出条件：}无效模型或输入时逐帧等价于原生 SlimeVR；reset 后状态无泄漏；全链路延迟、内存上限和写入点均有自动测试。当前 \texttt{applyCorrectionToTrackers()} 未把结果写回，禁止视为可用在线修正。
+  \end{itemize}
+
+  \item \textbf{[待实机验收] SlimeVR 骨架、驱动输出与目标应用。}
+  \begin{itemize}
+    \item \textbf{输入/输出：}服务端骨架求解结果，经现有 OpenVR 驱动或 OSC/VMC 输出至 SteamVR/VRChat；同时保存原生与候选两路记录。
+    \item \textbf{执行：}先检查 Avatar 骨架映射、左右腿方向、重置连续性和姿态边界；影子模式确认日志与实际输出不互相污染。在线开关只有在离线和实机影子门禁全部通过后再单独评审，不在本阶段默认启用。
+    \item \textbf{退出条件：}原生输出可随时回滚；独立真值证明端点偏航改善，且站立/坐姿/动态动作的全姿态误改和最差会话不超预设门限。
+  \end{itemize}
 \end{enumerate}
+
+\subsection{依赖顺序与当前可执行项}
+\begin{enumerate}
+  \item \textbf{现在可执行：}源码级字段映射审计；修复 P9 静止和步态检测门禁；完善静态姿势与零漂测试；统一角速度派生语义；更新 124D 哨兵测试；ONNX ABI、复位、异常旁路、Session 释放和完整服务循环回放；准备真实数据记录格式与隔离 manifest 模板。
+  \item \textbf{硬件到手后先执行：}硬件身份/安装核验 \(\to\) 真实 tracker 映射和时间字段核验 \(\to\) shadow-only 短测 \(\to\) 多动作采集 \(\to\) 同步独立参考的 30 分钟会话。先验证信号来源与记录质量，再用数据决定训练和 P9 参数。
+  \item \textbf{满足数据门禁后执行：}在固定 P6 容量下重建训练集；P9 使用开发集调参；冻结阈值和模型后只运行一次全新确认集；再把通过的 P9 和融合器接入 Kotlin 并重复回放。
+  \item \textbf{上线门禁：}真实输入契约、零漂/静态安全、四路 30 分钟 endpoint 收益、融合增量、异常旁路、Session 生命周期和完整端到端时延均通过后，才评估非影子应用。任一独立真值或数据隔离条件缺失，则保持 shadow-only 并标记未决。
+\end{enumerate}
+
+模型门控只是候选可信度，不构成安全证明。短时 Swing 收益、慢偏航 endpoint 收益、全姿态误修改和脚滑诊断必须分别报告；不得以网络输出看起来平滑或延迟达标替代精度验收。
 
 \section{实现文件索引}
 \begin{itemize}
