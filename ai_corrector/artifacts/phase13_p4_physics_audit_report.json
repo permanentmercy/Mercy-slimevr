@@ -2,7 +2,7 @@
   "phase": "Phase 13",
   "task": "P4",
   "verdict": "PASS",
-  "timestamp": "2026-10-18T05:51:31Z",
+  "timestamp": "2026-10-18T06:32:39Z",
   "scope_and_limitations": {
     "simulation_hypothesis": "Evaluates bias estimation under synthetic gyroscope bias and variance model",
     "observation_link_note": "Direct gyro rate in simulation vs pose difference in current server bridge",
@@ -32,14 +32,14 @@
         },
         "zaru": {
           "mean_D_raw_deg": 16.7317,
-          "mean_D_corr_deg": 15.85,
-          "mean_gain_deg": 0.8817,
-          "ci95_gain_low": 0.5015,
-          "ci95_gain_high": 1.3183,
-          "worst_gain_deg": -0.6657,
-          "win_rate": 0.8667,
-          "mean_total_endpoint_est_deg": 1.056049,
-          "max_total_endpoint_est_deg": 3.662487
+          "mean_D_corr_deg": 5.4907,
+          "mean_gain_deg": 11.241,
+          "ci95_gain_low": 9.7962,
+          "ci95_gain_high": 12.8263,
+          "worst_gain_deg": 2.2501,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 15.193393,
+          "max_total_endpoint_est_deg": 27.97049
         },
         "gait": {
           "mean_D_raw_deg": 16.7317,
@@ -54,14 +54,14 @@
         },
         "full": {
           "mean_D_raw_deg": 16.7317,
-          "mean_D_corr_deg": 8.1453,
-          "mean_gain_deg": 8.5864,
-          "ci95_gain_low": 7.3032,
-          "ci95_gain_high": 9.9921,
-          "worst_gain_deg": 2.9446,
+          "mean_D_corr_deg": 2.671,
+          "mean_gain_deg": 14.0607,
+          "ci95_gain_low": 12.7984,
+          "ci95_gain_high": 15.4966,
+          "worst_gain_deg": 7.7122,
           "win_rate": 1.0,
-          "mean_total_endpoint_est_deg": 8.795152,
-          "max_total_endpoint_est_deg": 17.766985
+          "mean_total_endpoint_est_deg": 15.683559,
+          "max_total_endpoint_est_deg": 29.941879
         }
       }
     },
@@ -81,14 +81,14 @@
         },
         "zaru": {
           "mean_D_raw_deg": 16.5039,
-          "mean_D_corr_deg": 15.5506,
-          "mean_gain_deg": 0.9534,
-          "ci95_gain_low": 0.5706,
-          "ci95_gain_high": 1.3622,
-          "worst_gain_deg": -0.0206,
-          "win_rate": 0.8,
-          "mean_total_endpoint_est_deg": 0.95405,
-          "max_total_endpoint_est_deg": 4.445582
+          "mean_D_corr_deg": 5.3477,
+          "mean_gain_deg": 11.1562,
+          "ci95_gain_low": 9.7887,
+          "ci95_gain_high": 12.3942,
+          "worst_gain_deg": 2.7547,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 15.286467,
+          "max_total_endpoint_est_deg": 22.67929
         },
         "gait": {
           "mean_D_raw_deg": 16.5039,
@@ -103,14 +103,14 @@
         },
         "full": {
           "mean_D_raw_deg": 16.5039,
-          "mean_D_corr_deg": 7.6575,
-          "mean_gain_deg": 8.8464,
-          "ci95_gain_low": 8.0244,
-          "ci95_gain_high": 9.714,
-          "worst_gain_deg": 3.6502,
+          "mean_D_corr_deg": 2.8483,
+          "mean_gain_deg": 13.6557,
+          "ci95_gain_low": 12.513,
+          "ci95_gain_high": 14.7526,
+          "worst_gain_deg": 6.6458,
           "win_rate": 1.0,
-          "mean_total_endpoint_est_deg": 8.961539,
-          "max_total_endpoint_est_deg": 14.997691
+          "mean_total_endpoint_est_deg": 15.87961,
+          "max_total_endpoint_est_deg": 20.749042
         }
       }
     },
@@ -152,14 +152,14 @@
         },
         "full": {
           "mean_D_raw_deg": 0.0,
-          "mean_D_corr_deg": 0.009,
-          "mean_gain_deg": -0.009,
-          "ci95_gain_low": -0.009,
-          "ci95_gain_high": -0.009,
-          "worst_gain_deg": -0.009,
+          "mean_D_corr_deg": 0.0089,
+          "mean_gain_deg": -0.0089,
+          "ci95_gain_low": -0.0089,
+          "ci95_gain_high": -0.0089,
+          "worst_gain_deg": -0.0089,
           "win_rate": 0.0,
-          "mean_total_endpoint_est_deg": 0.008977,
-          "max_total_endpoint_est_deg": 0.008977
+          "mean_total_endpoint_est_deg": 0.008933,
+          "max_total_endpoint_est_deg": 0.008933
         }
       }
     },
@@ -228,14 +228,14 @@
         },
         "zaru": {
           "mean_D_raw_deg": 4.9807,
-          "mean_D_corr_deg": 4.9811,
-          "mean_gain_deg": -0.0003,
-          "ci95_gain_low": -0.1962,
-          "ci95_gain_high": 0.1522,
-          "worst_gain_deg": -0.7442,
-          "win_rate": 0.9,
-          "mean_total_endpoint_est_deg": 0.133487,
-          "max_total_endpoint_est_deg": 0.748121
+          "mean_D_corr_deg": 5.8332,
+          "mean_gain_deg": -0.8525,
+          "ci95_gain_low": -2.8778,
+          "ci95_gain_high": 1.2508,
+          "worst_gain_deg": -5.4213,
+          "win_rate": 0.3,
+          "mean_total_endpoint_est_deg": 7.958962,
+          "max_total_endpoint_est_deg": 11.611379
         },
         "gait": {
           "mean_D_raw_deg": 4.9807,
@@ -250,14 +250,14 @@
         },
         "full": {
           "mean_D_raw_deg": 4.9807,
-          "mean_D_corr_deg": 2.8158,
-          "mean_gain_deg": 2.1649,
-          "ci95_gain_low": 1.383,
-          "ci95_gain_high": 2.9879,
-          "worst_gain_deg": 0.3189,
-          "win_rate": 1.0,
-          "mean_total_endpoint_est_deg": 2.294508,
-          "max_total_endpoint_est_deg": 4.701589
+          "mean_D_corr_deg": 2.7305,
+          "mean_gain_deg": 2.2502,
+          "ci95_gain_low": 0.8055,
+          "ci95_gain_high": 3.7751,
+          "worst_gain_deg": -1.6389,
+          "win_rate": 0.9,
+          "mean_total_endpoint_est_deg": 6.030505,
+          "max_total_endpoint_est_deg": 8.665931
         }
       }
     },
@@ -277,14 +277,14 @@
         },
         "zaru": {
           "mean_D_raw_deg": 16.2099,
-          "mean_D_corr_deg": 16.0468,
-          "mean_gain_deg": 0.1632,
-          "ci95_gain_low": 0.0037,
-          "ci95_gain_high": 0.4385,
-          "worst_gain_deg": -0.0294,
-          "win_rate": 0.5,
-          "mean_total_endpoint_est_deg": 0.164881,
-          "max_total_endpoint_est_deg": 1.365918
+          "mean_D_corr_deg": 0.5732,
+          "mean_gain_deg": 15.6367,
+          "ci95_gain_low": 13.044,
+          "ci95_gain_high": 17.8599,
+          "worst_gain_deg": 6.8419,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 16.329159,
+          "max_total_endpoint_est_deg": 22.633362
         },
         "gait": {
           "mean_D_raw_deg": 16.2099,
@@ -299,14 +299,14 @@
         },
         "full": {
           "mean_D_raw_deg": 16.2099,
-          "mean_D_corr_deg": 16.0468,
-          "mean_gain_deg": 0.1632,
-          "ci95_gain_low": 0.0037,
-          "ci95_gain_high": 0.4385,
-          "worst_gain_deg": -0.0294,
-          "win_rate": 0.5,
-          "mean_total_endpoint_est_deg": 0.164881,
-          "max_total_endpoint_est_deg": 1.365918
+          "mean_D_corr_deg": 0.5732,
+          "mean_gain_deg": 15.6367,
+          "ci95_gain_low": 13.044,
+          "ci95_gain_high": 17.8599,
+          "worst_gain_deg": 6.8419,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 16.329159,
+          "max_total_endpoint_est_deg": 22.633362
         }
       }
     },
@@ -375,14 +375,14 @@
         },
         "zaru": {
           "mean_D_raw_deg": 17.7109,
-          "mean_D_corr_deg": 16.0523,
-          "mean_gain_deg": 1.6586,
-          "ci95_gain_low": 0.8088,
-          "ci95_gain_high": 2.5222,
-          "worst_gain_deg": -0.0112,
-          "win_rate": 0.9,
-          "mean_total_endpoint_est_deg": 1.657654,
-          "max_total_endpoint_est_deg": 3.73274
+          "mean_D_corr_deg": 5.2282,
+          "mean_gain_deg": 12.4827,
+          "ci95_gain_low": 10.9928,
+          "ci95_gain_high": 13.7423,
+          "worst_gain_deg": 7.9633,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 15.08175,
+          "max_total_endpoint_est_deg": 17.877979
         },
         "gait": {
           "mean_D_raw_deg": 17.7109,
@@ -397,14 +397,14 @@
         },
         "full": {
           "mean_D_raw_deg": 17.7109,
-          "mean_D_corr_deg": 16.0523,
-          "mean_gain_deg": 1.6586,
-          "ci95_gain_low": 0.8088,
-          "ci95_gain_high": 2.5222,
-          "worst_gain_deg": -0.0112,
-          "win_rate": 0.9,
-          "mean_total_endpoint_est_deg": 1.657654,
-          "max_total_endpoint_est_deg": 3.73274
+          "mean_D_corr_deg": 5.2282,
+          "mean_gain_deg": 12.4827,
+          "ci95_gain_low": 10.9928,
+          "ci95_gain_high": 13.7423,
+          "worst_gain_deg": 7.9633,
+          "win_rate": 1.0,
+          "mean_total_endpoint_est_deg": 15.08175,
+          "max_total_endpoint_est_deg": 17.877979
         }
       }
     }

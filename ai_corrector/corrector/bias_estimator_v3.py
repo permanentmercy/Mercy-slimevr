@@ -112,9 +112,9 @@ class StationaryZARUDetector:
                         self.still_start_R = None
                         return None
                     
-                    # 5. 自适应时间不确定度死区门限 (防止零漂白噪声发散)
-                    rate_uncertainty = 0.008 / elapsed
-                    deadband_rad_s = max(math.radians(0.6 / 60.0), 1.8 * rate_uncertainty)
+                    # 5. 自适应时间不确定度死区门限 (适配 LSM6DSV 真实低漂移率 0.14°/min)
+                    rate_uncertainty = 0.002 / elapsed
+                    deadband_rad_s = max(math.radians(0.04 / 60.0), 1.8 * rate_uncertainty)
                     
                     if abs(raw_rate) < deadband_rad_s:
                         filtered_rate = 0.0

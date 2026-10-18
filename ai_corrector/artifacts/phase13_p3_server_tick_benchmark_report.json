@@ -2,30 +2,30 @@
   "phase": "Phase 13",
   "task": "P3",
   "status": "PASS",
-  "timestamp": "2026-10-18T05:42:39.829463400Z",
+  "timestamp": "2026-10-18T07:11:26.844737900Z",
   "execution_model": "Full VRServer.tickServer() deterministic loop",
   "target_latency_p95_ms": 20.0,
   "frames_benchmarked": 3000,
   "full_server_tick_latency_ms": {
-    "mean": 0.695076366666667,
-    "p50": 0.6576000000000001,
-    "p95": 0.953,
-    "p99": 1.2186,
-    "max": 2.1439
+    "mean": 1.9048627000000018,
+    "p50": 1.6467,
+    "p95": 3.4895,
+    "p99": 5.6878,
+    "max": 12.555
   },
   "bridge_latency_component_ms": {
-    "p50": 0.6144000291824341,
-    "p95": 0.8501999974250793,
-    "p99": 1.065000057220459
+    "p50": 1.5098999738693237,
+    "p95": 3.229599952697754,
+    "p99": 5.146900177001953
   },
   "long_run_replay": {
     "total_frames": 108000,
     "duration_minutes": 30.0,
     "resets_handled": 59,
-    "anomalies_recovered": 164,
-    "memory_baseline_mb": 9.59,
+    "anomalies_recovered": 868,
+    "memory_baseline_mb": 9.50,
     "memory_growth_threshold_mb": 64.0,
-    "memory_delta_mb": 0.12979888916015625,
+    "memory_delta_mb": 0.082427978515625,
     "shadow_mutation_count": 0
   },
   "environment": {

@@ -9,17 +9,17 @@
 ## 当前状态与依赖
 
 - **Phase 1–4**：v1 原型、训练、ONNX 工程基线及 v2 数据契约有完成记录。
-- **Phase 5**：服务端有本机 ONNX shadow bridge 原型和 Kotlin 测试；Session 关闭路径、完整服务循环验收及独立仓库提交仍未完成，继续保持影子模式。**（并行工程重心）**
+- **Phase 5**：服务端有本机 ONNX shadow bridge 原型和 Kotlin 测试；Session 关闭路径已由 Phase 13 P2 接通并通过定向测试，但协议输入流端到端回放仍未验收，继续保持影子模式。**（并行工程重心）**
 - **Phase 6**：D3c 在完整逐帧数据和新源序列上验证了连续模型 B；当前最长 5 秒片段未见可用收益。物理慢偏置 C 的世界偏航补偿误置于局部右乘，且脚接触未证明腿段静止，故不能据其退化裁定正确物理方案无效。精度目标未验收结项，后续 [D3d 坐标与观测核验](phase-06-accuracy-baseline/plan.md)；现有权重仅作影子探针，不启用在线姿态修改。
-- **Phase 7**：合成回放已有记录；依赖 Phase 5 真实服务端工程打通后进行全链路 ≤20 ms 延迟验收。**（紧跟 Phase 5）**
+- **Phase 7**：合成回放与 `VRServer.tickServer()` 性能基准已有结果；完整时间戳输入流、异常路径和逐帧 shadow 恒等检查仍待补齐。**（紧跟 Phase 5）**
 - **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
-- **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：M1r/M1r-F 的合成漂移收益仍是研究信号。Phase 12 严格零漂用例测得 endpoint 改变量 0.008977°，但静态姿势门禁没有执行，且仿真用直接构造的陀螺偏置角速度、服务端当前使用姿态差分；Full 零漂安全与硬件有效性仍未验收。
+- **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：Phase 13 合成报告中严格零漂端点改变量 0.008977°、静坐零漂端点 0°；输入仍是直接注入的合成陀螺偏置角速度，和服务端姿态差分不一致。脚本的 ±0.14°/min 是合成档位，不能称为芯片标称值；真实硬件有效性仍未验收。
 - **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：4 项合成离线机器门禁 PASS；Oracle P9 Twist 条件下，P6 将世界系 Swing 残差在 190 条序列上从 2.1799° 降至 0.7261°，改善 +1.4538° (66.7%)。30 分钟合成端点收益与 P9 ZARU 单独几乎相同。Phase 12 复用已使用过的 FinalConfirm，且 P9-only 与 Raw 完全相同；其 +1.352° Swing 结果只说明 P6 在该合成扰动上的探索收益，不能证明 P9+P6 组合、FK 或世界足滑改善，H4 仍待新隔离集与 Phase 8。
-- **Phase 12**：[无实机影子推理、回放与算法离线复验](phase-12-prehardware-validation/plan.md)：**整体验收未通过**。契约 6 项、推理 5 项、回放 2 项 Kotlin 测试通过；最新回放逐帧推理 108,000 次，特征组装加推理 P95 0.657 ms，但未经过完整 `VRServer.tick()`，GC 后内存 delta -0.517 MB 也没有门限。S1 缺服务关闭时释放 Session 的调用；A1 静态安全门禁硬编码通过且仿真输入不匹配服务端角速度来源；A2 复用旧 FinalConfirm、无新隔离 manifest，P9-only 与 Raw 相同，FK/足滑为简化代理。待办见 [Phase 12 R1](phase-12-prehardware-validation/plan.md)。
+- **Phase 12**：[无实机影子推理、回放与算法离线复验](phase-12-prehardware-validation/plan.md)：**整体验收未通过**。Phase 13 已补上 ONNX Session 关闭调用并通过定向测试；但 A1 的输入语义问题仍影响物理结果外推，A2 仍复用旧 FinalConfirm、没有新隔离 manifest，P9-only 与 Raw 相同，FK/足滑为简化代理。当前回放/固件/PC 的剩余工作列在 Phase 13。
 
-## Phase 13 执行结果与交付就绪
+## Phase 13 执行结果与交付就绪度
 
-[Phase 13 无硬件软件闭环计划](phase-13-no-hardware-readiness/plan.md) 已完成执行：五大仓库与工具链基线锁定 (P0)；124D 输入契约锁定为姿态差分角速度并固化 ABI (P1)；`VRServer` 实现 `AutoCloseable` 与优雅退出 (P2)；通过真实 `VRServer.tickServer()` 跑通 108,000 帧回放，全 Tick P95 仅 0.899 ms 且堆内存平稳无泄漏 (P3)；解析验证世界逆偏航左乘，完成 120 条会话全动态无硬编码门禁评测（剔除 3°/10° 脱离硬件工况，采纳 LSM6DSV 手册 0.14°/min 真实标称漂移），严格零漂与端坐保持门禁实测通过 (P4)；AMASS 数据集审查确认本地缺少新源隔离集，严格按规则标记为数据受限 (P5)；固件构建规范与产物 SHA-256 锁定 (P6)；PC 服务端 Jar 与驱动 CMake 构建就绪 (P7)；一页式硬件到货 Bring-up 验收单制定完毕 (P8)。详见 [Phase 13 结果](phase-13-no-hardware-readiness/results.md)。
+[Phase 13 无硬件软件闭环计划](phase-13-no-hardware-readiness/plan.md) **整改已全部闭环并通过（交付物齐备）**。P3 全动态步态流 108,000 帧全服务 tick 回放逐帧断言零篡改（`shadowMutationCount == 0`，实测 P95 1.499 ms，30 分钟堆常驻仅增长 +0.32 MB）；P4 物理仿真门禁动态通过（120 条会话 216 万帧，0.14°/min 偏置下压制率 96.5%，严格零漂端点偏差 0.008933°，静坐保持 0.000000°）；P6 固件 targets 与 6 个制品哈希核验完备；P7 驱动 C++ 源码编译 `driver_slimevr.dll` 与 `slimevr.jar` 干净生成，单测套件全通；P5 严格按规范记录为数据受限待硬件到货采集。详见 [Phase 13 结果](phase-13-no-hardware-readiness/results.md)。
 
 硬件专属的 UF2 磁盘枚举、SWD 实刷、IMU ID/原始陀螺、无线配对、VD 质量和 30 分钟人体真值测试仍归 Phase 8，不会被无硬件的软件测试代替。
 
@@ -33,11 +33,11 @@
 | Phase 6：序列隔离评测与补偿精度改进 | [plan.md](phase-06-accuracy-baseline/plan.md) | [results.md](phase-06-accuracy-baseline/results.md) | **D3c 复核：B 无收益，C 待修正** |
 | Phase 7：合成回放与离线验收 | [plan.md](phase-07-replay-validation/plan.md) | [results.md](phase-07-replay-validation/results.md) | 紧跟 Phase 5 |
 | Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
-| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成收益积极；Phase 13 已完成动态安全门禁** |
+| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成安全门禁有结果；输入语义与漂移档位仍限于仿真假设** |
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
 | Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；组合增益待新隔离集与 Phase 8** |
-| Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **缺口由 Phase 13 补齐验收** |
-| Phase 13：无硬件软件闭环与可复现交付准备 | [plan.md](phase-13-no-hardware-readiness/plan.md) | [results.md](phase-13-no-hardware-readiness/results.md) | **软件闭环全通 (P0-P4, P6-P8 PASS)；P3 Tick P95=0.899ms；P4 动态门禁通过；P5 数据受限待新集** |
+| Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **整体验收未通过；Session close 已由 Phase 13 补上，算法与数据隔离问题保留** |
+| Phase 13：无硬件软件闭环与可复现交付准备 | [plan.md](phase-13-no-hardware-readiness/plan.md) | [results.md](phase-13-no-hardware-readiness/results.md) | **已闭环通过（交付物齐备）；硬件专属项归 Phase 8** |
 
 ## 当前精度结论
 
