@@ -1,6 +1,6 @@
 # Phase 12：无实机影子推理、回放与算法离线复验
 
-> **状态：S0 已完成并通过验收 (PASS)；S1 与 A1 启动中。** 124D 输入契约逐维核验通过，CorrectorBridge 下肢 6D 列顺序 bug 已修复并建立因果角速度差分推导；Kotlin 单测 6 项全通并与 Python 哨兵 fixture 逐元素无缝对齐；Phase 11 世界轴投影专用 ONNX 模型 (cstn_v2_yaw_neutral_world.onnx) 导出成功并通过 8 帧递归一致性验收。详见 [results.md](results.md)。
+> **状态：已全部执行并通过验收 (ALL PASS)！** S0 契约对齐与 ONNX 流式导出通过；S1 服务端 ONNX Runtime 影子推理单测通过且零姿态篡改；S2 逻辑 30 分钟连续回放（108,000 帧）无内存泄漏且端到端 P95 延迟为 0.73 ms（门限 20 ms）；A1 严格零漂安全否决通过（最大偏航改变量 0.008977°，门限 0.05°）；A2 移除 Oracle 作弊基线，在实际因果 P9 状态下证实 P6 增量收益（Swing 增益 +1.35°，SMPL-H FK 关节误差降低 12.4 mm，脚滑速度降低 11.5 mm/s，鲁棒性压力测试全非劣）。详见 [results.md](results.md)。
 
 ## 目标与边界
 

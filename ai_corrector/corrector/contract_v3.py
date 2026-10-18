@@ -8,6 +8,7 @@ Phase 9: 四路下肢偏航状态模型（v3 时序数据契约与适配器）
 """
 
 from dataclasses import dataclass, field
+import math
 import numpy as np
 from typing import Dict, List, Optional, Tuple
 
@@ -92,16 +93,21 @@ class V2ToV3Adapter:
     """
     @staticmethod
     def rot6d_to_matrix(r6: np.ndarray) -> np.ndarray:
-        """从 6D 旋转表示还原 3x3 旋转矩阵（按列拼接 Gram-Schmidt 正交化）"""
-        x_raw = r6[:3]
-        y_raw = r6[3:6]
-        x_norm = np.linalg.norm(x_raw)
-        x = x_raw / max(x_norm, 1e-8)
-        z = np.cross(x, y_raw)
-        z_norm = np.linalg.norm(z)
-        z = z / max(z_norm, 1e-8)
-        y = np.cross(z, x)
-        return np.column_stack([x, y, z])
+        """从 6D 旋转表示还原 3x3 旋转矩阵（按列拼接 Gram-Schmidt 正交化，高性能无小对象版）"""
+        x0, x1, x2, y0, y1, y2 = float(r6[0]), float(r6[1]), float(r6[2]), float(r6[3]), float(r6[4]), float(r6[5])
+        nx = math.sqrt(x0 * x0 + x1 * x1 + x2 * x2)
+        inv_x = 1.0 / (nx if nx > 1e-8 else 1e-8)
+        x0, x1, x2 = x0 * inv_x, x1 * inv_x, x2 * inv_x
+        z0 = x1 * y2 - x2 * y1
+        z1 = x2 * y0 - x0 * y2
+        z2 = x0 * y1 - x1 * y0
+        nz = math.sqrt(z0 * z0 + z1 * z1 + z2 * z2)
+        inv_z = 1.0 / (nz if nz > 1e-8 else 1e-8)
+        z0, z1, z2 = z0 * inv_z, z1 * inv_z, z2 * inv_z
+        y0 = z1 * x2 - z2 * x1
+        y1 = z2 * x0 - z0 * x2
+        y2 = z0 * x1 - z1 * x0
+        return np.array([[x0, y0, z0], [x1, y1, z1], [x2, y2, z2]], dtype=np.float32)
 
     @classmethod
     def convert_124d_to_frame(cls,

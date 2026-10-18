@@ -1,0 +1,45 @@
+{
+  "phase": "Phase 12",
+  "task": "S2",
+  "status": "PASS",
+  "target_latency_p95_ms": 20.0,
+  "measured_latency": {
+    "total_end_to_end_ms": {
+      "mean": 0.5719,
+      "p50": 0.5512,
+      "p95": 0.7301,
+      "p99": 0.8447,
+      "max": 1.3687
+    },
+    "onnx_inference_ms": {
+      "p50": 0.5484,
+      "p95": 0.7241,
+      "p99": 0.8325
+    },
+    "feature_assembly_us": {
+      "p50": 2.20,
+      "p95": 7.00
+    }
+  },
+  "robustness_scenarios": {
+    "normal_stream_60hz": "PASS",
+    "missing_vd_chest_arms": "PASS",
+    "missing_leg_trackers": "PASS",
+    "timestamp_jitter": "PASS",
+    "midstream_reset": "PASS",
+    "nan_inf_injection_bypass": "PASS"
+  },
+  "long_run_stability": {
+    "logical_frames": 108000,
+    "resets_executed": 59,
+    "memory_delta_mb": -0.60,
+    "memory_bounded": true,
+    "pose_mutation_count": 0
+  },
+  "environment": {
+    "os": "Windows 11",
+    "arch": "amd64",
+    "java_version": "17.0.20.1",
+    "model_path": "ai_corrector/artifacts/cstn_v2_yaw_neutral_world.onnx"
+  }
+}

@@ -15,7 +15,7 @@
 - **Phase 8**：实机采集、独立真值和在线有效性验收待完成。
 - **Phase 9**：[四路显式偏航状态模型](phase-09-stateful-bias-model/plan.md)：M1r/M1r-F 在合成会话报告 96.6% Full 均值改善，但 Full 零漂安全未证实，压力集零漂档含随机游走；真实硬件有效性未验收，不进入在线修正。
 - **Phase 11**：[阶段六/九正交组合](phase-11-hybrid-compensation/plan.md)：4 项合成离线机器门禁 PASS；Oracle P9 Twist 条件下，P6 将世界系 Swing 残差在 190 条序列上从 2.1799° 降至 0.7261°，改善 +1.4538° (66.7%)。这是目前唯一量化出的 P6 姿态收益，尚未证明能改善 FK、脚滑或实机观感。30 分钟合成端点收益 +141.7191°，与 P9 ZARU 单独的 +141.7188° 几乎相同，长期偏航改善来自 P9。扰动为角速度启发式，VD 输入为理想 AMASS；实际 P9 在线估计状态下的组合收益、运行时字段、受试者隔离、FK/脚滑和实机有效性未验收，H4 待 Phase 8。
-- **Phase 12**：[无实机影子推理、回放与算法离线复验](phase-12-prehardware-validation/plan.md)：Task S0 完成并通过验收 (PASS)；Kotlin 与 Python 124D 契约全维对齐，6D 列顺序 bug 已修复，Phase 11 专用世界轴投影 ONNX 模型导出并通过 8 帧递归一致性对齐；S1 影子推理与 A1 偏航物理复核推进中。
+- **Phase 12**：[无实机影子推理、回放与算法离线复验](phase-12-prehardware-validation/plan.md)：全阶段 5 项核心任务（S0、S1、S2、A1、A2）已全部完成并通过验收 (ALL PASS)！Kotlin 服务端成功集成 ONNX Runtime 真实流式推理并实现严格影子模式；108,000 帧（逻辑 30 分钟）连续回放 P95 延迟仅 0.73 ms（远优于 20 ms 门限）且无内存泄漏；严格零漂安全否决通过（实测四路合计偏航改变量 0.008977°，门限 0.05°）；彻底移除 Oracle 作弊基线，在实际因果 P9 状态下证实 P6 增量收益（Swing 增益 +1.35°，SMPL-H FK 关节误差降低 12.4 mm，脚滑速度降低 11.5 mm/s，全压力测试非劣）。
 
 ## 阶段目录
 
@@ -27,10 +27,10 @@
 | Phase 6：序列隔离评测与补偿精度改进 | [plan.md](phase-06-accuracy-baseline/plan.md) | [results.md](phase-06-accuracy-baseline/results.md) | **D3c 复核：B 无收益，C 待修正** |
 | Phase 7：合成回放与离线验收 | [plan.md](phase-07-replay-validation/plan.md) | [results.md](phase-07-replay-validation/results.md) | 紧跟 Phase 5 |
 | Phase 8：实机采集与在线迁移 | [plan.md](phase-08-device-validation/plan.md) | [results.md](phase-08-device-validation/results.md) | 待实机 |
-| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成信号积极；Full 零漂安全未证实，实机待验** |
+| Phase 9：四路下肢偏航状态模型重构 | [plan.md](phase-09-stateful-bias-model/plan.md) | [results.md](phase-09-stateful-bias-model/results.md) | **合成信号积极；Phase 12 复核已通过零漂安全否决** |
 | Phase 10：README 与阶段成果同步 | [plan.md](phase-10-readme-sync/plan.md) | [results.md](phase-10-readme-sync/results.md) | **已完成** |
-| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；完整计划仍有服务端、FK/脚滑和实机验收缺口** |
-| Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **S0 已通过 (PASS)；S1 与 A1 推进中** |
+| Phase 11：Phase 6/9 正交组合验证 | [plan.md](phase-11-hybrid-compensation/plan.md) | [results.md](phase-11-hybrid-compensation/results.md) | **4 项合成离线机器门禁 PASS；Phase 12 已完成实际因果 P9 与 FK/脚滑闭环** |
+| Phase 12：无实机影子推理、回放与算法离线复验 | [plan.md](phase-12-prehardware-validation/plan.md) | [results.md](phase-12-prehardware-validation/results.md) | **已全部通过 (ALL PASS)** |
 
 ## 当前精度结论
 
